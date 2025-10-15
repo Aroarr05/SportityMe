@@ -1,0 +1,12 @@
+<div class="loading-spinner" [class.overlay]="overlay">
+  <div class="text-center">
+    <div class="spinner-border" 
+         [class.spinner-border-sm]="size === 'sm'"
+         [class.text-primary]="!color"
+         [class.text-{{color}}]="color"
+         role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p *ngIf="message" class="mt-2 mb-0">{{ message }}</p>
+  </div>
+</div>

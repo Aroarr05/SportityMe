@@ -1,0 +1,91 @@
+SPORTIFY-ME-FRONTEND/
+├── angular
+├── .vscode
+├── node_modules
+├── public
+├── services
+├── src/
+│   ├── app/
+│   │   ├── auth/
+│   │   │   ├── components/
+│   │   │   ├── guards/
+│   │   │   │   ├── auth.guard.ts
+│   │   │   │   └── no-auth.guard.ts
+│   │   │   ├── services/
+│   │   │   │   └── auth.service.ts
+│   │   │   ├── auth.module.ts
+│   │   │   └── auth.routes.ts
+│   │   ├── core/
+│   │   │   ├── guards/
+│   │   │   │   └── auth.guard.ts
+│   │   │   ├── interceptors/
+│   │   │   │   ├── auth-interceptor.ts
+│   │   │   │   ├── error-interceptor.ts
+│   │   │   │   └── loading-interceptor.ts
+│   │   │   └── core.module.ts
+│   │   ├── modules/
+│   │   │   ├── desafios/
+│   │   │   │   ├── components/
+│   │   │   │   │   ├── crear-desafio/
+│   │   │   │   │   ├── detalle-desafio/
+│   │   │   │   │   └── lista-desafios/
+│   │   │   │   ├── dto/
+│   │   │   │   │   └── crear-desafio.dto.ts
+│   │   │   │   ├── services/
+│   │   │   │   │   └── desafios.services.ts
+│   │   │   │   ├── desafios-routing.module.ts
+│   │   │   │   └── desafios.module.ts
+│   │   │   ├── progressos/
+│   │   │   │   ├── components/
+│   │   │   │   │   ├── mis-progressos/
+│   │   │   │   │   └── registrar-progreso/
+│   │   │   │   ├── services/
+│   │   │   │   │   └── progressos.service.ts
+│   │   │   │   └── progressos.module.ts
+│   │   │   ├── rankings/
+│   │   │   │   ├── components/
+│   │   │   │   │   └── ranking-global/
+│   │   │   │   │       ├── ranking-global.component.html
+│   │   │   │   │       ├── ranking-global.component.scss
+│   │   │   │   │       └── ranking-global.component.ts
+│   │   │   │   ├── services/
+│   │   │   │   │   └── rankings.service.ts
+│   │   │   │   └── rankings.module.ts
+│   │   │   └── shared/
+│   │   │       ├── components/
+│   │   │       │   ├── error-alert/
+│   │   │       │   ├── footer/
+│   │   │       │   ├── layout/
+│   │   │       │   ├── loading-spinner/
+│   │   │       │   └── navbar/
+│   │   │       ├── models/
+│   │   │       │   ├── comentario.models
+│   │   │       │   ├── desafio.models
+│   │   │       │   ├── index.ts
+│   │   │       │   ├── paged-response.models
+│   │   │       │   ├── progress.models
+│   │   │       │   ├── ranking.models
+│   │   │       │   └── usuario.models
+│   │   │       └── shared.module.ts
+│   │   ├── app.config.server.ts
+│   │   ├── app.config.ts
+│   │   ├── app.routes.server.ts
+│   │   ├── app.routes.ts
+│   │   ├── app.scss
+│   │   ├── app.spec.ts
+│   │   └── app.ts
+│   ├── environments/
+│   ├── index.html
+│   ├── main.server.ts
+│   ├── main.ts
+│   ├── server.ts
+│   └── styles.scss
+├── .editorconfig
+├── .gitignore
+├── angular.json
+├── package-lock.json
+├── package.json
+├── README.md
+├── tsconfig.app.json
+├── tsconfig.json
+└── tsconfig.spec.json
