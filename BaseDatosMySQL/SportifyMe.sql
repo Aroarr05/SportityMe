@@ -1,10 +1,7 @@
-
 -- DROP DATABASE IF EXISTS SportifyMe;
-
 
 CREATE DATABASE SportifyMe;
 USE SportifyMe;
-
 
 CREATE TABLE usuarios (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -19,7 +16,8 @@ CREATE TABLE usuarios (
     peso DECIMAL(5,2),
     altura INT,
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
-    ultimo_login DATETIME
+    ultimo_login DATETIME,
+    es_admin BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE desafios (
@@ -36,6 +34,9 @@ CREATE TABLE desafios (
     imagen_url VARCHAR(255),
     dificultad ENUM('PRINCIPIANTE', 'INTERMEDIO', 'AVANZADO'),
     max_participantes INT,
+    estado ENUM('ACTIVO', 'INACTIVO', 'ELIMINADO') DEFAULT 'ACTIVO',
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (creador_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
 
@@ -94,13 +95,13 @@ CREATE TABLE usuario_logros (
     UNIQUE KEY (usuario_id, logro_id)
 );
 
-CREATE TABLE notificaciones (
+CREATE TABLE acciones_admin (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    usuario_id BIGINT NOT NULL,
-    tipo ENUM('LOGRO', 'COMENTARIO', 'PROGRESO', 'DESAFIO', 'SISTEMA') NOT NULL,
-    mensaje TEXT NOT NULL,
-    enlace VARCHAR(255),
-    leida BOOLEAN DEFAULT FALSE,
-    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+    admin_id BIGINT NOT NULL,
+    tipo_accion ENUM('CREAR_DESAFIO', 'EDITAR_DESAFIO', 'ELIMINAR_DESAFIO', 'EDITAR_USUARIO', 'ELIMINAR_USUARIO') NOT NULL,
+    entidad_afectada VARCHAR(100) NOT NULL,
+    id_entidad_afectada BIGINT,
+    descripcion TEXT,
+    fecha_accion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (admin_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
