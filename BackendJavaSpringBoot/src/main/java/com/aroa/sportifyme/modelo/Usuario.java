@@ -26,10 +26,9 @@ public class Usuario {
     @Column(nullable = false, length = 100)
     private String nombre;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "ENUM('usuario', 'admin', 'moderador')")
-    @Builder.Default
-    private RolUsuario rol = RolUsuario.usuario;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "rol_id", nullable = false)
+    private Rol rol;
 
     @Column(nullable = false, unique = true, length = 100)
     private String email;
@@ -50,7 +49,7 @@ public class Usuario {
     private LocalDate fechaNacimiento;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "ENUM('masculino', 'femenino', 'otro', 'no_especificado')")
+    @Column(columnDefinition = "ENUM('MASCULINO', 'FEMENINO', 'OTRO', 'NO_ESPECIFICADO')")
     private Genero genero;
 
     @Column(precision = 5, scale = 2)
@@ -64,6 +63,10 @@ public class Usuario {
 
     @Column(name = "ultimo_login")
     private LocalDateTime ultimoLogin;
+
+    @Column(name = "activo")
+    @Builder.Default
+    private Boolean activo = true;
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
@@ -81,25 +84,28 @@ public class Usuario {
     @Builder.Default
     private List<Comentario> comentarios = new ArrayList<>();
 
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<Notificacion> notificaciones = new ArrayList<>();
+    private List<AccionAdmin> accionesAdmin = new ArrayList<>();
 
-    public enum RolUsuario {
-        usuario,
-        admin,
-        moderador
-    }
+    @OneToMany(mappedBy = "creador", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Desafio> desafiosCreados = new ArrayList<>();
 
     public enum Genero {
-        masculino,
-        femenino,
-        otro,
-        no_especificado
+        MASCULINO,
+        FEMENINO,
+        OTRO,
+        NO_ESPECIFICADO
     }
 
     @PrePersist
     protected void onCreate() {
-        fechaRegistro = LocalDateTime.now();
+        if (fechaRegistro == null) {
+            fechaRegistro = LocalDateTime.now();
+        }
+        if (activo == null) {
+            activo = true;
+        }
     }
 }

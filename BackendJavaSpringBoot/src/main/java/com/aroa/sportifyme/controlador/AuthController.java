@@ -1,6 +1,7 @@
 package com.aroa.sportifyme.controlador;
 
 import com.aroa.sportifyme.modelo.Usuario;
+import com.aroa.sportifyme.modelo.Rol;
 import com.aroa.sportifyme.seguridad.dto.UsuarioDTO;
 import com.aroa.sportifyme.servicio.UsuarioServicio;
 import jakarta.validation.Valid;
@@ -24,11 +25,16 @@ public class AuthController {
         try {
             System.out.println("Recibiendo registro para: " + registroDTO.getEmail());
             
+    
+            Rol rolUsuario = new Rol();
+            rolUsuario.setId(2L); 
+            rolUsuario.setNombre("USUARIO");
+            
             Usuario usuario = Usuario.builder()
                     .nombre(registroDTO.getNombre())
                     .email(registroDTO.getEmail())
                     .contraseña(registroDTO.getContraseña()) 
-                    .rol(Usuario.RolUsuario.usuario)
+                    .rol(rolUsuario) 
                     .build();
             
             System.out.println("👤 Usuario creado, procediendo a registrar...");
@@ -43,7 +49,7 @@ public class AuthController {
             userResponse.put("nombre", usuarioRegistrado.getNombre());
             userResponse.put("email", usuarioRegistrado.getEmail());
             userResponse.put("avatarUrl", usuarioRegistrado.getAvatarUrl());
-            userResponse.put("rol", usuarioRegistrado.getRol().name());
+            userResponse.put("rol", usuarioRegistrado.getRol().getNombre()); 
             userResponse.put("fechaRegistro", usuarioRegistrado.getFechaRegistro());
             
             response.put("user", userResponse);
@@ -66,19 +72,31 @@ public class AuthController {
     public ResponseEntity<?> loginUsuario(@Valid @RequestBody LoginRequest loginRequest) {
         try {
             System.out.println("Intentando login para: " + loginRequest.getEmail());
+        
+            var usuarioOpt = usuarioServicio.buscarPorEmail(loginRequest.getEmail());
+            
+            if (usuarioOpt.isEmpty()) {
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error", "Credenciales inválidas");
+                errorResponse.put("message", "Usuario no encontrado");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+            }
+            
+            Usuario usuario = usuarioOpt.get();
             
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Login exitoso");
             
             Map<String, Object> userResponse = new HashMap<>();
-            userResponse.put("id", 1);
-            userResponse.put("nombre", "Usuario Demo");
-            userResponse.put("email", loginRequest.getEmail());
-            userResponse.put("rol", "usuario");
-            userResponse.put("fechaRegistro", "2024-01-01T00:00:00");
+            userResponse.put("id", usuario.getId());
+            userResponse.put("nombre", usuario.getNombre());
+            userResponse.put("email", usuario.getEmail());
+            userResponse.put("rol", usuario.getRol().getNombre());
+            userResponse.put("fechaRegistro", usuario.getFechaRegistro());
+            userResponse.put("avatarUrl", usuario.getAvatarUrl());
             
             response.put("user", userResponse);
-            response.put("token", "jwt-token-simulado-login");
+            response.put("token", "jwt-token-simulado-" + usuario.getId());
             
             return ResponseEntity.ok(response);
             

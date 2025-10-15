@@ -166,7 +166,11 @@ public class DesafioServicio {
     }
 
     private boolean tienePermisosParaModificar(Desafio desafio, Usuario usuario) {
-        return desafio.getCreador().equals(usuario) ||
-                usuario.getRol() == Usuario.RolUsuario.admin;
+        boolean esCreador = desafio.getCreador().equals(usuario);
+        boolean esAdmin = usuario.getRol() != null && 
+                         usuario.getRol().getNombre() != null && 
+                         usuario.getRol().getNombre().equals("ADMIN");
+        
+        return esCreador || esAdmin;
     }
 }

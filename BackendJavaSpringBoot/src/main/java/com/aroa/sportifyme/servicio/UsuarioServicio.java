@@ -4,8 +4,12 @@ import com.aroa.sportifyme.exception.*;
 import com.aroa.sportifyme.modelo.*;
 import com.aroa.sportifyme.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.*;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,10 +28,16 @@ public class UsuarioServicio implements UserDetailsService {
         Usuario usuario = buscarPorEmail(email)
                 .orElseThrow(() -> new UsuarioNoEncontradoException(email));
 
+        String rolNombre = usuario.getRol() != null ? usuario.getRol().getNombre() : "USUARIO";
+        
+        List<GrantedAuthority> authorities = Collections.singletonList(
+            new SimpleGrantedAuthority("ROLE_" + rolNombre)
+        );
+
         return new User(
                 usuario.getEmail(),
                 usuario.getContraseña(),
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + usuario.getRol().name()))
+                authorities
         );
     }
 

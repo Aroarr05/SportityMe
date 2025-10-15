@@ -105,8 +105,12 @@ public class ComentarioServicio {
     }
 
     private void validarPermisosEliminacion(Comentario comentario, Usuario usuario) {
-        if (!comentario.getUsuario().equals(usuario) &&
-                !usuario.getRol().equals(Usuario.RolUsuario.admin)) {
+        boolean esPropietario = comentario.getUsuario().equals(usuario);
+        boolean esAdmin = usuario.getRol() != null && 
+                         usuario.getRol().getNombre() != null && 
+                         usuario.getRol().getNombre().equals("ADMIN");
+        
+        if (!esPropietario && !esAdmin) {
             throw new AccesoNoAutorizadoException("eliminar", "comentario", comentario.getId());
         }
     }

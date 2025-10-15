@@ -17,7 +17,6 @@ public class ParticipacionServicio {
     private final ParticipacionRepository participacionRepository;
     private final UsuarioServicio usuarioServicio;
     private final DesafioServicio desafioServicio;
-  
 
     @Transactional
     public Participacion unirseADesafio(Long desafioId, String emailUsuario) {
@@ -45,7 +44,6 @@ public class ParticipacionServicio {
         validarFechaDesafio(participacion.getDesafio());
 
         participacionRepository.delete(participacion);
-        notificarAbandonoDesafio(participacion.getDesafio(), usuario);
     }
 
     @Transactional(readOnly = true)
@@ -59,7 +57,7 @@ public class ParticipacionServicio {
                                 participacion.getDesafio().getId()
                         );
                     } else {
-                        return new ParticipacionNoEncontradaException(null, null); // O un mensaje genérico
+                        return new ParticipacionNoEncontradaException(null, null);
                     }
                 });
     }
@@ -84,7 +82,6 @@ public class ParticipacionServicio {
         return participacionRepository.countByDesafioId(desafioId);
     }
 
-    // Métodos de validación
     private void validarParticipacion(Usuario usuario, Desafio desafio) {
         if (usuarioParticipaEnDesafio(usuario.getId(), desafio.getId())) {
             throw new ParticipacionExistenteException(usuario.getId(), desafio.getId());
@@ -101,8 +98,12 @@ public class ParticipacionServicio {
     }
 
     private void validarPermisosAbandono(Participacion participacion, Usuario usuario) {
-        if (!participacion.getUsuario().equals(usuario) &&
-                !usuario.getRol().equals(Usuario.RolUsuario.admin)) {
+        boolean esPropietario = participacion.getUsuario().equals(usuario);
+        boolean esAdmin = usuario.getRol() != null && 
+                         usuario.getRol().getNombre() != null && 
+                         usuario.getRol().getNombre().equals("ADMIN");
+        
+        if (!esPropietario && !esAdmin) {
             throw new AccesoNoAutorizadoException(
                     "abandonar",
                     "participación",
@@ -117,10 +118,5 @@ public class ParticipacionServicio {
         }
     }
     
-    private void notificarAbandonoDesafio(Desafio desafio, Usuario usuario) {
-        if (!desafio.getCreador().equals(usuario)) {
-            String mensaje = String.format("%s abandonó tu desafío '%s'",
-                    usuario.getNombre(), desafio.getTitulo());
-        }
-    }
+   
 }
