@@ -15,7 +15,7 @@ public class LogroServicio {
     private final LogroRepository logroRepository;
     private final UsuarioLogroRepository usuarioLogroRepository;
     private final UsuarioServicio usuarioServicio;
-    private final NotificacionServicio notificacionServicio;
+   
 
     @Transactional
     public Logro crearLogro(Logro logro) {
@@ -52,12 +52,7 @@ public class LogroServicio {
 
             usuarioLogroRepository.save(usuarioLogro);
 
-            notificacionServicio.crearNotificacion(
-                    usuarioId,
-                    "LOGRO",
-                    "¡Felicidades! Has obtenido el logro: " + logro.getNombre(),
-                    "/logros/" + logro.getId()
-            );
+        
         }
     }
 

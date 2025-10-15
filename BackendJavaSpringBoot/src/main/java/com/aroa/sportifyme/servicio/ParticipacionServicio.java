@@ -17,7 +17,7 @@ public class ParticipacionServicio {
     private final ParticipacionRepository participacionRepository;
     private final UsuarioServicio usuarioServicio;
     private final DesafioServicio desafioServicio;
-    private final NotificacionServicio notificacionServicio;
+  
 
     @Transactional
     public Participacion unirseADesafio(Long desafioId, String emailUsuario) {
@@ -121,12 +121,6 @@ public class ParticipacionServicio {
         if (!desafio.getCreador().equals(usuario)) {
             String mensaje = String.format("%s abandonó tu desafío '%s'",
                     usuario.getNombre(), desafio.getTitulo());
-            notificacionServicio.crearNotificacion(
-                    desafio.getCreador().getId(),
-                    "PARTICIPACION",
-                    mensaje,
-                    "/desafios/" + desafio.getId()
-            );
         }
     }
 }

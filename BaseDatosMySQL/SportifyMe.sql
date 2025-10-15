@@ -3,11 +3,22 @@
 CREATE DATABASE SportifyMe;
 USE SportifyMe;
 
+CREATE TABLE roles (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) UNIQUE NOT NULL,
+    descripcion TEXT
+);
+
+INSERT INTO roles (nombre, descripcion) VALUES 
+('ADMIN', 'Administrador completo del sistema'),
+('USUARIO', 'Usuario estándar de la aplicación');
+
 CREATE TABLE usuarios (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     contraseña VARCHAR(255) NOT NULL,
+    rol_id BIGINT NOT NULL DEFAULT 2, 
     avatar_url VARCHAR(255),
     biografia TEXT,
     ubicacion VARCHAR(100),
@@ -17,7 +28,8 @@ CREATE TABLE usuarios (
     altura INT,
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     ultimo_login DATETIME,
-    es_admin BOOLEAN DEFAULT FALSE
+    activo BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (rol_id) REFERENCES roles(id)
 );
 
 CREATE TABLE desafios (
@@ -105,3 +117,4 @@ CREATE TABLE acciones_admin (
     fecha_accion DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (admin_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
+
