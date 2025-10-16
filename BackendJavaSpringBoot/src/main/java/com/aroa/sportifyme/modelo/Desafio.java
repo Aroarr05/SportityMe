@@ -1,26 +1,24 @@
 package com.aroa.sportifyme.modelo;
 
+import lombok.Data;
 import jakarta.persistence.*;
-import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Entity
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "desafios")
 public class Desafio {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String titulo;
 
+    @Column(columnDefinition = "TEXT")
     private String descripcion;
 
     @Enumerated(EnumType.STRING)
@@ -30,7 +28,7 @@ public class Desafio {
     @Column(precision = 10, scale = 2)
     private BigDecimal objetivo;
 
-    @Column(name = "unidad_objetivo")
+    @Column(name = "unidad_objetivo", length = 20)
     private String unidadObjetivo;
 
     @Column(name = "fecha_inicio", nullable = false)
@@ -44,10 +42,9 @@ public class Desafio {
     private Usuario creador;
 
     @Column(name = "es_publico")
-    @Builder.Default 
     private Boolean esPublico = true;
 
-    @Column(name = "imagen_url")
+    @Column(length = 255)
     private String imagenUrl;
 
     @Enumerated(EnumType.STRING)
@@ -56,32 +53,44 @@ public class Desafio {
     @Column(name = "max_participantes")
     private Integer maxParticipantes;
 
-    @OneToMany(mappedBy = "desafio", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @Builder.Default  
-    private Set<Participacion> participaciones = new HashSet<>();
+    @Enumerated(EnumType.STRING)
+    private Estado estado = Estado.ACTIVO;
 
-    public Set<Usuario> getParticipantes() {
-        Set<Usuario> participantes = new HashSet<>();
-        for (Participacion participacion : this.participaciones) {
-            participantes.add(participacion.getUsuario());
-        }
-        return participantes;
-    }
+    @Column(name = "fecha_creacion")
+    private LocalDateTime fechaCreacion = LocalDateTime.now();
 
-    public void agregarParticipante(Usuario usuario) {
-        Participacion participacion = Participacion.builder()
-                .usuario(usuario)
-                .desafio(this)
-                .fechaUnion(LocalDateTime.now())
-                .build();
-        this.participaciones.add(participacion);
-    }
+    @Column(name = "fecha_actualizacion")
+    private LocalDateTime fechaActualizacion = LocalDateTime.now();
 
+    @ManyToMany
+    @JoinTable(
+        name = "participaciones",
+        joinColumns = @JoinColumn(name = "desafio_id"),
+        inverseJoinColumns = @JoinColumn(name = "usuario_id")
+    )
+    private List<Usuario> participantes = new ArrayList<>();
+
+    // Enums
     public enum TipoActividad {
-        correr, ciclismo, nadar, gimnasio, senderismo, yoga, otro
+        correr, ciclismo, natacion, gimnasio, otros
     }
 
     public enum Dificultad {
-        principiante, intermedio, avanzado
+        PRINCIPIANTE, INTERMEDIO, AVANZADO
+    }
+
+    public enum Estado {
+        ACTIVO, INACTIVO, ELIMINADO
+    }
+
+    public void agregarParticipante(Usuario usuario) {
+        if (!this.participantes.contains(usuario)) {
+            this.participantes.add(usuario);
+        }
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.fechaActualizacion = LocalDateTime.now();
     }
 }

@@ -1,49 +1,35 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { DesafiosService } from '../../services/desafios.service';
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, catchError, throwError, tap } from 'rxjs';
 import { Desafio } from '../../../../shared/models';
-import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
-import { ErrorAlertComponent } from '../../../../shared/components/error-alert/error-alert.component';
 
-@Component({
-  standalone: true,
-  selector: 'app-lista-desafios',
-  templateUrl: './lista-desafios.component.html',
-  styleUrls: ['./lista-desafios.component.scss'],
-  imports: [
-    CommonModule,
-    RouterModule,
-    LoadingSpinnerComponent,
-    ErrorAlertComponent
-  ]
+@Injectable({
+  providedIn: 'root'
 })
+export class DesafiosService {
+  private apiUrl = 'http://localhost:8080/api/desafios';
 
-export class ListaDesafiosComponent implements OnInit {
-  desafios: Desafio[] = [];
-  loading = true;
-  error: string | null = null;
+  constructor(private http: HttpClient) { }
 
-  constructor(private desafiosService: DesafiosService) { }
-
-  ngOnInit(): void {
-    this.cargarDesafios();
+  obtenerDesafios(): Observable<Desafio[]> {
+    return this.http.get<Desafio[]>(this.apiUrl).pipe(
+      tap(data => console.log('Respuesta cruda del servidor:', data)),
+      catchError(this.handleError)
+    );
   }
 
-  cargarDesafios(): void {
-    this.loading = true;
-    this.error = null;
+  private handleError(error: HttpErrorResponse) {
+    console.error('Error en servicio Desafios:', error);
     
-    this.desafiosService.obtenerDesafios().subscribe({
-      next: (desafios) => {
-        this.desafios = desafios;
-        this.loading = false;
-      },
-      error: (err) => {
-        this.error = 'Error al cargar los desafíos. Por favor, inténtalo de nuevo más tarde.';
-        this.loading = false;
-        console.error(err);
+    let errorMessage = 'Error desconocido';
+    if (error.error instanceof ErrorEvent) {
+      errorMessage = `Error: ${error.error.message}`;
+    } else {
+      errorMessage = `Error ${error.status}: ${error.message}`;
+      if (error.error && error.error.error) {
+        errorMessage += ` - ${error.error.error}`;
       }
-    });
+    }
+    return throwError(() => new Error(errorMessage));
   }
 }

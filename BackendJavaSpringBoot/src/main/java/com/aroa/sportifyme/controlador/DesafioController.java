@@ -6,6 +6,7 @@ import com.aroa.sportifyme.seguridad.dto.DesafioDTO;
 import com.aroa.sportifyme.servicio.DesafioServicio;
 import com.aroa.sportifyme.servicio.UsuarioServicio;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/desafios")
 @RequiredArgsConstructor
@@ -25,15 +27,21 @@ public class DesafioController {
     private final UsuarioServicio usuarioServicio;
 
     @GetMapping
-    public ResponseEntity<List<DesafioDTO>> listarTodosLosDesafios() {
+    public ResponseEntity<?> listarTodosLosDesafios() {
         try {
+            log.info("Solicitando lista de desafíos");
             List<Desafio> desafios = desafioServicio.listarTodos();
+            log.info("Encontrados {} desafíos", desafios.size());
+            
             List<DesafioDTO> desafiosDTO = desafios.stream()
                     .map(DesafioDTO::fromEntity)
                     .collect(Collectors.toList());
+            
             return ResponseEntity.ok(desafiosDTO);
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
+            log.error("Error al listar desafíos: ", e);
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("error", "Error interno del servidor: " + e.getMessage()));
         }
     }
 
@@ -44,6 +52,7 @@ public class DesafioController {
             DesafioDTO desafioDTO = DesafioDTO.fromEntity(desafio);
             return ResponseEntity.ok(desafioDTO);
         } catch (Exception e) {
+            log.error("Error al obtener desafío con id {}: ", id, e);
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
@@ -54,6 +63,7 @@ public class DesafioController {
             List<Usuario> participantes = desafioServicio.obtenerParticipantesDesafio(desafioId);
             return ResponseEntity.ok(participantes);
         } catch (Exception e) {
+            log.error("Error al obtener participantes del desafío {}: ", desafioId, e);
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
@@ -67,6 +77,7 @@ public class DesafioController {
             desafioServicio.unirseADesafio(desafioId, usuarioId);
             return ResponseEntity.ok().body(Map.of("message", "Te has unido al desafío exitosamente"));
         } catch (Exception e) {
+            log.error("Error al unirse al desafío {}: ", desafioId, e);
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
