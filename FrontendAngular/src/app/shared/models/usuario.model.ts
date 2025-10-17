@@ -2,26 +2,28 @@ export interface Usuario {
   id: number;
   nombre: string;
   email: string;
-  contraseña?: string;              
-  fechaNacimiento?: string;         
-  fechaRegistro: string;            
-  avatarUrl?: string;               
-  peso?: number;
-  altura?: number;
+  contraseña: string; 
+  rol_id: number;      
+  avatar_url?: string;
   biografia?: string;
   ubicacion?: string;
-  genero?: 'masculino' | 'femenino' | 'otro' | 'no_especificado'; 
-  ultimoLogin?: string;             
-  rol?: 'usuario' | 'admin' | 'moderador'; 
-  
-  deportesFavoritos?: string[];
-  totalDesafiosCompletados?: number;
-  mejorPosicionRanking?: number;
-  tiempoTotalEntrenamiento?: number;
+  fecha_nacimiento?: string;  
+  genero?: 'MASCULINO' | 'FEMENINO' | 'OTRO' | 'NO_ESPECIFICADO'; 
+  peso?: number;
+  altura?: number;
+  fecha_registro: string;
+  ultimo_login?: string;
+  activo: boolean;  
 }
 
 export enum Rol {
-  USUARIO = 'usuario',
-  ADMIN = 'admin', 
-  MODERADOR = 'moderador'
+  ADMIN = 'ADMIN',
+  USUARIO = 'USUARIO'
+}
+
+export enum Genero {
+  MASCULINO = 'MASCULINO',
+  FEMENINO = 'FEMENINO', 
+  OTRO = 'OTRO',
+  NO_ESPECIFICADO = 'NO_ESPECIFICADO'
 }
