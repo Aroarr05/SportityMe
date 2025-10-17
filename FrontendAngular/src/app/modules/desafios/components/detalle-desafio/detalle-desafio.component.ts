@@ -19,6 +19,7 @@ import { ErrorAlertComponent } from '../../../../shared/components/error-alert/e
     ErrorAlertComponent
   ]
 })
+
 export class DetalleDesafioComponent implements OnInit, OnDestroy {
   desafio: any = null;
   participantes: any[] = [];
