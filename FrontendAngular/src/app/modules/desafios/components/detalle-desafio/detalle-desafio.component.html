@@ -1,234 +1,329 @@
-<div class="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 py-8">
-  <div class="container mx-auto px-4 max-w-4xl">
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
     
+    <!-- Loading -->
     <app-loading-spinner *ngIf="loading"></app-loading-spinner>
 
+    <!-- Error Alert -->
     <app-error-alert 
       *ngIf="error && !loading" 
-      [message]="error"
+      [message]="error" 
       (dismiss)="error = null"
-    >
-      <button 
-        (click)="recargarDatos()"
-        class="mt-3 bg-slate-700 hover:bg-slate-800 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg"
-      >
-       Reintentar
-      </button>
+      (retry)="recargarDatos()">
     </app-error-alert>
 
-    <div *ngIf="desafio && !loading" class="bg-white rounded-2xl shadow-xl overflow-hidden border-0">
+    <!-- Contenido Principal -->
+    <div *ngIf="desafio && !loading" class="bg-white rounded-2xl shadow-lg overflow-hidden">
       
-      <div class="bg-gradient-to-r from-slate-800 to-slate-700 p-8 text-white relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-600/10"></div>
-        <div class="relative z-10">
-          <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-            <div class="flex-1">
-              <div class="flex items-center gap-4 mb-3">
-                <div class="p-3 bg-white/10 backdrop-blur-sm rounded-2xl">
-                  <span class="text-2xl">{{ getIconoTipoActividad() }}</span>
-                </div>
-                <div>
-                  <h1 class="text-3xl font-bold tracking-tight">{{ desafio.titulo }}</h1>
-                  <p class="text-slate-300 text-lg mt-1">
-                    Creado por <span class="font-semibold text-white">{{ getNombreCreador() }}</span> 
-                    el {{ (desafio.fecha_inicio || desafio.fechaInicio) | date:'mediumDate' }}
-                  </p>
-                </div>
-              </div>
+      <!-- Header con Imagen y Info Básica -->
+      <div class="relative">
+        <!-- Imagen del Desafío -->
+        <div class="h-64 bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+          <div class="text-center text-white">
+            <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
+              <i [class]="getIconoTipoActividad() + ' text-3xl text-white'"></i>
             </div>
-            
-            <div class="flex flex-col items-end gap-3">
-              <span class="inline-flex items-center px-4 py-2.5 bg-white/10 backdrop-blur-sm rounded-full text-sm font-medium border border-white/20">
-                {{ desafio.tipo_actividad || desafio.tipoActividad }}
-              </span>
-              <span *ngIf="esDesafioExpirado()" 
-                    class="inline-flex items-center px-4 py-2.5 bg-red-500/20 backdrop-blur-sm rounded-full text-sm font-medium border border-red-400/30">
-                Expirado
-              </span>
-            </div>
+            <h1 class="text-3xl font-bold">{{ desafio.titulo }}</h1>
+            <p class="text-blue-100 mt-2">Creado por {{ getNombreCreador() }}</p>
           </div>
+        </div>
+
+        <!-- Badges Superpuestos -->
+        <div class="absolute -bottom-6 left-6 right-6 flex justify-between items-center">
+          <div class="flex space-x-3">
+            <span [class]="'px-4 py-2 rounded-full text-sm font-semibold ' + getIconoClase(desafio.tipo_actividad)">
+              <i [class]="getIconoTipoActividad() + ' mr-2'"></i>
+              {{ desafio.tipo_actividad | titlecase }}
+            </span>
+            <span [class]="'px-4 py-2 rounded-full text-sm font-semibold ' + getClaseDificultad()">
+              {{ desafio.dificultad | titlecase }}
+            </span>
+          </div>
+          <span class="px-4 py-2 bg-white rounded-full shadow-md text-sm font-semibold text-gray-700">
+            <i class="fas fa-users mr-2 text-blue-500"></i>
+            {{ getTotalParticipantes() }}/{{ desafio.max_participantes }}
+          </span>
         </div>
       </div>
 
-      <div class="p-8 space-y-8">
-        <div class="border-b border-gray-100 pb-6">
-          <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-3">
-            Descripción
-          </h2>
-          <p class="text-gray-700 leading-relaxed text-lg pl-11">
-            {{ desafio.descripcion || 'Este desafío no tiene descripción.' }}
-          </p>
-        </div>
-
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 border border-blue-200 shadow-sm hover:shadow-md transition-shadow duration-300">
-            <h3 class="font-semibold text-blue-900 mb-3 flex items-center gap-3">
-              Objetivo
-            </h3>
-            <p class="text-2xl font-bold text-blue-800">
-              {{ desafio.objetivo }} 
-              <span class="text-base font-normal text-blue-700/80">
-                {{ desafio.unidad_objetivo || desafio.unidadObjetivo }}
-              </span>
-            </p>
-          </div>
-
-          <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-5 border border-orange-200 shadow-sm hover:shadow-md transition-shadow duration-300" 
-               [class]="esDesafioExpirado() ? 'from-red-50 to-red-100 border-red-200' : 'from-orange-50 to-orange-100 border-orange-200'">
-            <h3 class="font-semibold mb-3 flex items-center gap-3"
-                [class]="esDesafioExpirado() ? 'text-red-900' : 'text-orange-900'">
-              Fecha Límite
-            </h3>
-            <p class="text-lg font-semibold" 
-               [class]="esDesafioExpirado() ? 'text-red-700' : 'text-orange-700'">
-              {{ (desafio.fecha_fin || desafio.fechaFin) | date:'medium' }}
-            </p>
-            <p *ngIf="esDesafioExpirado()" class="text-red-600 text-sm font-medium mt-2 flex items-center gap-1">
-              <span></span> Período finalizado
-            </p>
-          </div>
-
-          <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-5 border border-emerald-200 shadow-sm hover:shadow-md transition-shadow duration-300">
-            <h3 class="font-semibold text-emerald-900 mb-3 flex items-center gap-3">
-              Dificultad
-            </h3>
-            <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold shadow-sm" 
-                  [class]="getClaseDificultad()">
-              {{ desafio.dificultad || 'No especificada' }}
-            </span>
-          </div>
-        </div>
-
-        <div class="grid md:grid-cols-2 gap-8">
-          <div class="bg-gray-50 rounded-xl p-5">
-            <h3 class="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-3">
-              <div class="p-1.5 bg-gray-100 rounded-lg">
-                <span class="text-gray-700"></span>
-              </div>
-              Límite de Participantes
-            </h3>
-            <p class="text-gray-700 font-medium">
-              {{ desafio.max_participantes || desafio.maxParticipantes || 'Ilimitado' }} participantes
-            </p>
-          </div>
-
-          <div class="bg-gray-50 rounded-xl p-5">
-            <h3 class="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-3">
-              <div class="p-1.5 bg-gray-100 rounded-lg">
-                <span class="text-gray-700"></span>
-              </div>
-              Estado
-            </h3>
-            <div class="flex items-center gap-3">
-              <span class="w-3 h-3 rounded-full shadow-sm" 
-                    [class]="!esDesafioExpirado() && !esDesafioCompleto() ? 'bg-emerald-500' : 
-                             esDesafioCompleto() ? 'bg-amber-500' : 'bg-red-500'">
-              </span>
-              <span class="text-gray-700 font-medium">
-                <span *ngIf="!esDesafioExpirado() && !esDesafioCompleto()">🟢 Activo</span>
-                <span *ngIf="esDesafioCompleto()">🟡 Completo</span>
-                <span *ngIf="esDesafioExpirado()">🔴 Expirado</span>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div class="border-t border-gray-100 pt-6">
-          <h2 class="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-3">
-            <div class="p-2 bg-purple-50 rounded-lg">
-              <span class="text-purple-600"></span>
-            </div>
-            Participantes ({{ getTotalParticipantes() }})
-          </h2>
+      <!-- Contenido -->
+      <div class="pt-12 pb-8 px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          <div *ngIf="participantes.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div *ngFor="let participante of participantes" 
-                 class="flex items-center gap-4 bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300 group">
-              <div class="relative">
-                <img [src]="participante.avatarUrl || 'https://i.pravatar.cc/150?img=0'" 
-                     [alt]="participante.nombre"
-                     class="w-12 h-12 rounded-xl object-cover border-2 border-gray-300 group-hover:border-blue-400 transition-colors duration-300">
-                <div *ngIf="participante.id === usuarioActualId" 
-                     class="absolute -top-1 -right-1 bg-blue-500 text-white rounded-full p-1 shadow-sm">
-                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-                    <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
-                  </svg>
+          <!-- Columna Principal -->
+          <div class="lg:col-span-2 space-y-6">
+            
+            <!-- Descripción -->
+            <div class="bg-gray-50 rounded-xl p-6">
+              <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-info-circle text-blue-500 mr-3"></i>
+                Descripción del Desafío
+              </h2>
+              <p class="text-gray-600 leading-relaxed">{{ desafio.descripcion }}</p>
+            </div>
+
+            <!-- Objetivo y Metas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="bg-blue-50 rounded-xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="font-semibold text-blue-800">Objetivo</h3>
+                  <i class="fas fa-bullseye text-blue-500 text-xl"></i>
+                </div>
+                <div class="text-3xl font-bold text-blue-700">
+                  {{ desafio.objetivo }}
+                  <span class="text-sm font-normal text-blue-600 ml-1">{{ desafio.unidad_objetivo }}</span>
+                </div>
+                <p class="text-blue-600 text-sm mt-2">Meta a alcanzar</p>
+              </div>
+
+              <div class="bg-green-50 rounded-xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="font-semibold text-green-800">Participantes</h3>
+                  <i class="fas fa-user-check text-green-500 text-xl"></i>
+                </div>
+                <div class="flex items-center justify-between">
+                  <div class="text-3xl font-bold text-green-700">
+                    {{ getTotalParticipantes() }}
+                    <span class="text-sm font-normal text-green-600">/{{ desafio.max_participantes }}</span>
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <div class="w-16 h-2 bg-green-200 rounded-full overflow-hidden">
+                      <div 
+                        class="h-full bg-green-500 transition-all duration-500"
+                        [style.width.%]="(getTotalParticipantes() / desafio.max_participantes) * 100">
+                      </div>
+                    </div>
+                    <span class="text-sm text-green-600 font-medium">
+                      {{ ((getTotalParticipantes() / desafio.max_participantes) * 100) | number:'1.0-0' }}%
+                    </span>
+                  </div>
+                </div>
+                <p class="text-green-600 text-sm mt-2">{{ desafio.max_participantes - getTotalParticipantes() }} cupos disponibles</p>
+              </div>
+            </div>
+
+            <!-- Fechas y Tiempo -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="bg-orange-50 rounded-xl p-6">
+                <div class="flex items-center mb-3">
+                  <i class="fas fa-play-circle text-orange-500 mr-3 text-lg"></i>
+                  <h3 class="font-semibold text-orange-800">Fecha de Inicio</h3>
+                </div>
+                <p class="text-lg font-medium text-orange-700 mb-1">
+                  {{ desafio.fecha_inicio | date:'fullDate' }}
+                </p>
+                <p class="text-orange-600 text-sm">
+                  {{ desafio.fecha_inicio | date:'shortTime' }}
+                </p>
+              </div>
+
+              <div class="bg-red-50 rounded-xl p-6">
+                <div class="flex items-center mb-3">
+                  <i class="fas fa-flag-checkered text-red-500 mr-3 text-lg"></i>
+                  <h3 class="font-semibold text-red-800">Fecha de Fin</h3>
+                </div>
+                <p class="text-lg font-medium text-red-700 mb-1">
+                  {{ desafio.fecha_fin | date:'fullDate' }}
+                </p>
+                <p class="text-red-600 text-sm">
+                  {{ desafio.fecha_fin | date:'shortTime' }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Progreso del Tiempo -->
+            <div class="bg-purple-50 rounded-xl p-6">
+              <h3 class="font-semibold text-purple-800 mb-4 flex items-center">
+                <i class="fas fa-clock text-purple-500 mr-3"></i>
+                Progreso del Tiempo
+              </h3>
+              <div class="space-y-3">
+                <div class="flex justify-between items-center text-sm">
+                  <span class="text-purple-600">Inicio</span>
+                  <span class="text-purple-600">Fin</span>
+                </div>
+                <div class="w-full bg-purple-200 rounded-full h-3">
+                  <div 
+                    class="bg-purple-500 h-3 rounded-full transition-all duration-1000 ease-out"
+                    [style.width.%]="calcularProgresoTiempo()">
+                  </div>
+                </div>
+                <div class="flex justify-between items-center text-sm">
+                  <span class="text-purple-700 font-medium">{{ calcularDiasTranscurridos() }} días transcurridos</span>
+                  <span class="text-purple-700 font-medium">{{ calcularDiasRestantes() }} días restantes</span>
                 </div>
               </div>
-              <div>
-                <p class="font-semibold text-gray-900 flex items-center gap-2">
-                  {{ participante.nombre }}
-                </p>
-                <p class="text-sm text-gray-500">Participante</p>
+            </div>
+          </div>
+
+          <!-- Sidebar -->
+          <div class="space-y-6">
+            
+            <!-- Botón de Unirse -->
+            <button
+              (click)="unirseADesafio()"
+              [class]="'w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 disabled:transform-none disabled:hover:scale-100 ' + getClaseBotonUnirse()"
+              [disabled]="yaEsParticipante() || esDesafioExpirado() || esDesafioCompleto() || unirseLoading">
+              <div class="flex items-center justify-center">
+                <i class="fas fa-plus-circle mr-3" *ngIf="!unirseLoading"></i>
+                <i class="fas fa-spinner fa-spin mr-3" *ngIf="unirseLoading"></i>
+                {{ getTextoBoton() }}
+              </div>
+            </button>
+
+            <!-- Estado del Desafío -->
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+              <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-chart-bar text-purple-500 mr-3"></i>
+                Estado del Desafío
+              </h3>
+              <div class="space-y-3">
+                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span class="text-gray-600">Progreso:</span>
+                  <span class="font-semibold px-3 py-1 rounded-full text-sm" 
+                    [class]="esDesafioExpirado() ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'">
+                    {{ esDesafioExpirado() ? 'Expirado' : 'Activo' }}
+                  </span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span class="text-gray-600">Cupos:</span>
+                  <span class="font-semibold px-3 py-1 rounded-full text-sm"
+                    [class]="esDesafioCompleto() ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'">
+                    {{ esDesafioCompleto() ? 'Completo' : 'Disponible' }}
+                  </span>
+                </div>
+                <div class="flex justify-between items-center py-2">
+                  <span class="text-gray-600">Tu participación:</span>
+                  <span class="font-semibold px-3 py-1 rounded-full text-sm"
+                    [class]="yaEsParticipante() ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'">
+                    {{ yaEsParticipante() ? 'Inscrito' : 'No inscrito' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Información Adicional -->
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+              <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-cog text-gray-500 mr-3"></i>
+                Información
+              </h3>
+              <div class="space-y-3 text-sm">
+                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span class="text-gray-600">Visibilidad:</span>
+                  <span class="font-semibold" [class]="desafio.es_publico ? 'text-green-600' : 'text-blue-600'">
+                    <i class="fas" [class]="desafio.es_publico ? 'fa-globe-americas' : 'fa-lock'"></i>
+                    {{ desafio.es_publico ? ' Público' : ' Privado' }}
+                  </span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span class="text-gray-600">Creado:</span>
+                  <span class="font-semibold text-gray-700">
+                    {{ desafio.fecha_creacion | date:'mediumDate' }}
+                  </span>
+                </div>
+                <div class="flex justify-between items-center py-2">
+                  <span class="text-gray-600">ID:</span>
+                  <span class="font-mono text-gray-700 bg-gray-100 px-2 py-1 rounded">#{{ desafio.id }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Acciones Rápidas -->
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+              <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-bolt text-yellow-500 mr-3"></i>
+                Acciones Rápidas
+              </h3>
+              <div class="grid grid-cols-2 gap-3">
+                <button 
+                  class="flex items-center justify-center px-4 py-3 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors duration-200 font-medium text-sm"
+                  [routerLink]="['/desafios']">
+                  <i class="fas fa-arrow-left mr-2"></i>
+                  Volver
+                </button>
+                <button 
+                  class="flex items-center justify-center px-4 py-3 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors duration-200 font-medium text-sm"
+                  (click)="recargarDatos()">
+                  <i class="fas fa-redo mr-2"></i>
+                  Actualizar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lista de Participantes -->
+        <div class="mt-8 bg-gray-50 rounded-xl p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold text-gray-800 flex items-center">
+              <i class="fas fa-users text-green-500 mr-3"></i>
+              Participantes del Desafío
+              <span class="ml-3 bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
+                {{ getTotalParticipantes() }}
+              </span>
+            </h2>
+            <div class="text-sm text-gray-500">
+              {{ participantes.length }} de {{ desafio.max_participantes }} participantes
+            </div>
+          </div>
+          
+          <div *ngIf="participantes.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div 
+              *ngFor="let participante of participantes; let i = index" 
+              class="bg-white rounded-lg p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 hover:border-green-200">
+              <div class="flex items-center space-x-4">
+                <div class="relative">
+                  <div class="w-12 h-12 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-lg">
+                    {{ participante.nombre?.charAt(0) || 'U' }}
+                  </div>
+                  <div *ngIf="participante.id === desafio?.creador_id" 
+                    class="absolute -top-1 -right-1 w-5 h-5 bg-yellow-400 rounded-full flex items-center justify-center">
+                    <i class="fas fa-crown text-xs text-white"></i>
+                  </div>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h4 class="font-semibold text-gray-800 truncate">
+                    {{ participante.nombre || 'Usuario ' + participante.id }}
+                    <span *ngIf="participante.id === desafio?.creador_id" class="text-yellow-600 text-xs ml-1">(Creador)</span>
+                  </h4>
+                  <p class="text-sm text-gray-500">Participante #{{ i + 1 }}</p>
+                </div>
+                <div *ngIf="participante.id === usuarioActualId" class="ml-auto">
+                  <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold">
+                    Tú
+                  </span>
+                </div>
               </div>
             </div>
           </div>
 
-          <div *ngIf="participantes.length === 0" 
-               class="text-center py-12 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-dashed border-gray-300">
-            <div class="text-5xl mb-4 opacity-60"></div>
-            <p class="text-gray-600 text-lg font-semibold mb-2">Aún no hay participantes</p>
-            <p class="text-gray-500">¡Sé el primero en unirte a este desafío!</p>
-          </div>
-        </div>
-
-        <div class="flex justify-center pt-8 border-t border-gray-100">
-          <button
-            (click)="unirseADesafio()"
-            [disabled]="unirseLoading || esDesafioExpirado() || yaEsParticipante() || esDesafioCompleto()"
-            class="px-10 py-4 text-lg font-semibold rounded-xl transition-all duration-300 flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105 disabled:hover:scale-100"
-            [class]="getClaseBotonUnirse()"
-          >
-            <span *ngIf="!unirseLoading" class="flex items-center gap-2">
-              {{ getTextoBoton() }}
-            </span>
-            <span *ngIf="unirseLoading" class="flex items-center gap-2">
-              <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              Uniéndose...
-            </span>
-          </button>
-        </div>
-
-        <div *ngIf="yaEsParticipante()" 
-             class="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-xl p-5">
-          <div class="flex items-center gap-4">
-            <div class="p-2 bg-emerald-100 rounded-lg">
-              <span class="text-emerald-700 text-xl"></span>
+          <div *ngIf="participantes.length === 0" class="text-center py-12">
+            <div class="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+              <i class="fas fa-users text-gray-300 text-3xl"></i>
             </div>
-            <div>
-              <h4 class="font-semibold text-emerald-900 text-lg">¡Ya estás participando!</h4>
-              <p class="text-emerald-700">Mucha suerte en este desafío. ¡A dar lo mejor!</p>
-            </div>
-          </div>
-        </div>
-
-        <div *ngIf="esDesafioCompleto() && !yaEsParticipante()" 
-             class="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl p-5">
-          <div class="flex items-center gap-4">
-            <div class="p-2 bg-amber-100 rounded-lg">
-              <span class="text-amber-700 text-xl"></span>
-            </div>
-            <div>
-              <h4 class="font-semibold text-amber-900 text-lg">Cupo completo</h4>
-              <p class="text-amber-700">Este desafío ha alcanzado el máximo de participantes.</p>
-            </div>
-          </div>
-        </div>
-
-        <div *ngIf="esDesafioExpirado() && !yaEsParticipante()" 
-             class="bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 rounded-xl p-5">
-          <div class="flex items-center gap-4">
-            <div class="p-2 bg-red-100 rounded-lg">
-              <span class="text-red-700 text-xl"></span>
-            </div>
-            <div>
-              <h4 class="font-semibold text-red-900 text-lg">Desafío expirado</h4>
-              <p class="text-red-700">El período de inscripción para este desafío ha finalizado.</p>
-            </div>
+            <p class="text-gray-500 text-lg font-medium mb-2">Aún no hay participantes</p>
+            <p class="text-gray-400 text-sm">Sé el primero en unirte a este desafío</p>
+            <button 
+              (click)="unirseADesafio()"
+              class="mt-4 px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200 font-medium"
+              [disabled]="esDesafioExpirado() || esDesafioCompleto()">
+              <i class="fas fa-plus mr-2"></i>
+              Unirse ahora
+            </button>
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Botón Volver -->
+    <div class="mt-8 text-center">
+      <button 
+        routerLink="/desafios"
+        class="inline-flex items-center px-6 py-3 border border-gray-300 bg-white text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-300 font-semibold hover:shadow-md">
+        <i class="fas fa-arrow-left mr-3"></i>
+        Volver a la lista de desafíos
+      </button>
     </div>
   </div>
 </div>

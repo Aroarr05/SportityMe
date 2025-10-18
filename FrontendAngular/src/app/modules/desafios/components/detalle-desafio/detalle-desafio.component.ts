@@ -6,6 +6,7 @@ import { DesafiosService } from '../../services/desafios.service';
 import { AuthService } from '../../../../auth/services/auth.service';
 import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
 import { ErrorAlertComponent } from '../../../../shared/components/error-alert/error-alert.component';
+import { Desafio } from '../../../../shared/models';
 
 @Component({
   standalone: true,
@@ -21,8 +22,9 @@ import { ErrorAlertComponent } from '../../../../shared/components/error-alert/e
 })
 
 export class DetalleDesafioComponent implements OnInit, OnDestroy {
-  desafio: any = null;
+  desafio: Desafio | null = null;
   participantes: any[] = [];
+  creadorNombre: string = 'Usuario';
   loading = false;
   unirseLoading = false;
   error: string | null = null;
@@ -58,8 +60,9 @@ export class DetalleDesafioComponent implements OnInit, OnDestroy {
     this.error = null;
     
     const sub = this.desafiosService.obtenerDesafioPorId(this.desafioId).subscribe({
-      next: (desafio: any) => {
+      next: (desafio: Desafio) => {
         this.desafio = desafio;
+        this.obtenerNombreCreador(desafio);
         this.loading = false;
         console.log('Desafío cargado:', desafio);
       },
@@ -94,11 +97,44 @@ export class DetalleDesafioComponent implements OnInit, OnDestroy {
     console.log('Usuario actual ID:', this.usuarioActualId);
   }
 
+  obtenerNombreCreador(desafio: Desafio): void {
+
+    if ((desafio as any).creador && (desafio as any).creador.nombre) {
+      this.creadorNombre = (desafio as any).creador.nombre;
+      return;
+    }
+
+    const creadorEnParticipantes = this.participantes.find(p => p.id === desafio.creador_id);
+    if (creadorEnParticipantes && creadorEnParticipantes.nombre) {
+      this.creadorNombre = creadorEnParticipantes.nombre;
+      return;
+    }
+
+    setTimeout(() => {
+      const creador = this.participantes.find(p => p.id === desafio.creador_id);
+      if (creador && creador.nombre) {
+        this.creadorNombre = creador.nombre;
+      } else {
+        this.creadorNombre = `Usuario ${desafio.creador_id}`;
+      }
+    }, 1000);
+
+
+    this.creadorNombre = `Usuario ${desafio.creador_id}`;
+  }
+
+
   getNombreCreador(): string {
     if (!this.desafio) return 'Usuario';
     
-    if (this.desafio.creador && this.desafio.creador.nombre) {
-      return this.desafio.creador.nombre;
+    
+    if ((this.desafio as any).creador && (this.desafio as any).creador.nombre) {
+      return (this.desafio as any).creador.nombre;
+    }
+
+    const creador = this.participantes.find(p => p.id === this.desafio?.creador_id);
+    if (creador && creador.nombre) {
+      return creador.nombre;
     }
 
     if (this.desafio.creador_id) {
@@ -108,18 +144,15 @@ export class DetalleDesafioComponent implements OnInit, OnDestroy {
     return 'Usuario';
   }
 
+
   esDesafioExpirado(): boolean {
-    if (!this.desafio?.fecha_fin && !this.desafio?.fechaFin) return false;
-    
-    const fechaFin = this.desafio.fecha_fin || this.desafio.fechaFin;
-    return new Date(fechaFin) < new Date();
+    if (!this.desafio?.fecha_fin) return false;
+    return new Date(this.desafio.fecha_fin) < new Date();
   }
 
   esDesafioCompleto(): boolean {
-    if (!this.desafio?.max_participantes && !this.desafio?.maxParticipantes) return false;
-    
-    const maxParticipantes = this.desafio.max_participantes || this.desafio.maxParticipantes;
-    return this.participantes.length >= maxParticipantes;
+    if (!this.desafio?.max_participantes) return false;
+    return this.participantes.length >= this.desafio.max_participantes;
   }
 
   yaEsParticipante(): boolean {
@@ -162,17 +195,34 @@ export class DetalleDesafioComponent implements OnInit, OnDestroy {
     return 'Unirse al desafío';
   }
 
-  getIconoTipoActividad(): string {
-    const tipo = (this.desafio?.tipo_actividad || this.desafio?.tipoActividad || '').toLowerCase();
-    switch(tipo) {
-      case 'correr': return '';
-      case 'ciclismo': return '';
-      case 'nadar': return '';
-      case 'gimnasio': return '';
-      case 'yoga': return '';
-      case 'senderismo': return '';
-      default: return '';
+  getIconoClase(tipo: string): string {
+    switch (tipo) {
+      case 'correr': return 'bg-orange-100 text-orange-600';
+      case 'ciclismo': return 'bg-yellow-100 text-yellow-600';
+      case 'natacion': return 'bg-blue-100 text-blue-600';
+      case 'gimnasio': return 'bg-red-100 text-red-600';
+      case 'senderismo': return 'bg-green-100 text-green-600';
+      case 'yoga': return 'bg-purple-100 text-purple-600';
+      default: return 'bg-gray-100 text-gray-500';
     }
+  }
+
+  private getIconoFromTipoActividad(tipoActividad: string): string {
+    const iconos: {[key: string]: string} = {
+      'correr': 'fa-running',
+      'ciclismo': 'fa-bicycle',
+      'natacion': 'fa-swimmer',
+      'gimnasio': 'fa-dumbbell',
+      'senderismo': 'fa-hiking',
+      'yoga': 'fa-spa',
+      'otros': 'fa-star'
+    };
+    return iconos[tipoActividad] || 'fa-star';
+  }
+
+  getIconoTipoActividad(): string {
+    const tipo = this.desafio?.tipo_actividad || '';
+    return this.getIconoFromTipoActividad(tipo);
   }
 
   unirseADesafio(): void {
@@ -189,7 +239,6 @@ export class DetalleDesafioComponent implements OnInit, OnDestroy {
         console.log('Unido al desafío:', response);
         
         this.cargarParticipantes();
-        
         this.error = null;
       },
       error: (err: any) => {
@@ -212,4 +261,43 @@ export class DetalleDesafioComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
+
+  // Agrega estos métodos a tu componente
+
+calcularProgresoTiempo(): number {
+  if (!this.desafio) return 0;
+  
+  const fechaInicio = new Date(this.desafio.fecha_inicio);
+  const fechaFin = new Date(this.desafio.fecha_fin);
+  const ahora = new Date();
+  
+  const totalTiempo = fechaFin.getTime() - fechaInicio.getTime();
+  const tiempoTranscurrido = ahora.getTime() - fechaInicio.getTime();
+  
+  if (totalTiempo <= 0) return 100;
+  if (tiempoTranscurrido <= 0) return 0;
+  if (tiempoTranscurrido >= totalTiempo) return 100;
+  
+  return (tiempoTranscurrido / totalTiempo) * 100;
+}
+
+calcularDiasTranscurridos(): number {
+  if (!this.desafio) return 0;
+  
+  const fechaInicio = new Date(this.desafio.fecha_inicio);
+  const ahora = new Date();
+  
+  const diferencia = ahora.getTime() - fechaInicio.getTime();
+  return Math.max(0, Math.floor(diferencia / (1000 * 60 * 60 * 24)));
+}
+
+calcularDiasRestantes(): number {
+  if (!this.desafio) return 0;
+  
+  const fechaFin = new Date(this.desafio.fecha_fin);
+  const ahora = new Date();
+  
+  const diferencia = fechaFin.getTime() - ahora.getTime();
+  return Math.max(0, Math.floor(diferencia / (1000 * 60 * 60 * 24)));
+}
 }

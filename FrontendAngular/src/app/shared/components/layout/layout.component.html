@@ -1,66 +1,123 @@
-<div class="h-screen flex flex-col">
-  <header class="bg-white border-b border-gray-200">
-    <div class="flex justify-between items-center px-6 py-3">
-      <h1 class="text-lg font-bold text-gray-800">{{ tituloPagina }}</h1>
-    
+<div class="h-screen flex flex-col bg-gradient-to-br from-purple-50 to-indigo-50">
+  <header class="bg-white shadow-sm border-b border-purple-100">
+    <div class="flex justify-between items-center px-6 py-4">
+      <div class="flex items-center space-x-3">
+        <div class="h-8 w-8 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg flex items-center justify-center">
+          <i class="fas fa-code text-white text-sm"></i>
+        </div>
+        <h1 class="text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+          {{ tituloPagina }}
+        </h1>
+      </div>
+      
       <div *ngIf="!isLoggedIn; else usuarioLogueado">
         <button 
           (click)="irALogin()"
-          class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+          class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-2.5 rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 font-medium shadow-md hover:shadow-lg flex items-center space-x-2"
         >
-          Iniciar Sesión
+          <i class="fas fa-sign-in-alt"></i>
+          <span>Iniciar Sesión</span>
         </button>
       </div>
       
       <ng-template #usuarioLogueado>
-        <button 
-          (click)="cerrarSesion()"
-          class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors text-sm font-medium"
-        >
-          Cerrar Sesión
-        </button>
+        <div class="flex items-center space-x-4">
+          <div class="text-right">
+            <p class="text-sm font-medium text-gray-800">Bienvenido</p>
+        
+          </div>
+          <button 
+            (click)="cerrarSesion()"
+            class="bg-gradient-to-r from-red-500 to-pink-600 text-white px-6 py-2.5 rounded-lg hover:from-red-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 font-medium shadow-md hover:shadow-lg flex items-center space-x-2"
+          >
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Cerrar Sesión</span>
+          </button>
+        </div>
       </ng-template>
     </div>
   </header>
 
   <div class="flex-1 flex min-h-0">
-
-    <aside class="w-56 bg-white border-r border-gray-200 flex-shrink-0 overflow-y-auto py-4">
+    <aside class="w-64 bg-white shadow-inner border-r border-purple-100 flex-shrink-0 overflow-y-auto py-6">
       <nav>
-        <ul class="space-y-1 px-3">
+        <ul class="space-y-2 px-4">
           <li>
             <a 
               routerLink="/desafios" 
-              routerLinkActive="bg-blue-50 text-blue-600 border-r-2 border-blue-600"
-              class="flex items-center px-3 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors no-underline rounded-md"
+              routerLinkActive="bg-purple-50 text-purple-600 border-r-2 border-purple-600 shadow-sm"
+              class="flex items-center px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-all duration-200 no-underline rounded-lg group"
             >
+              <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mr-3 group-hover:bg-purple-100 transition-colors">
+                <i class="fas fa-trophy text-gray-500 group-hover:text-purple-600"></i>
+              </div>
               <span class="font-medium">Desafíos</span>
             </a>
           </li>
           <li>
             <a 
               routerLink="/rankings" 
-              routerLinkActive="bg-blue-50 text-blue-600 border-r-2 border-blue-600"
-              class="flex items-center px-3 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors no-underline rounded-md"
+              routerLinkActive="bg-purple-50 text-purple-600 border-r-2 border-purple-600 shadow-sm"
+              class="flex items-center px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-all duration-200 no-underline rounded-lg group"
             >
+              <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mr-3 group-hover:bg-purple-100 transition-colors">
+                <i class="fas fa-chart-line text-gray-500 group-hover:text-purple-600"></i>
+              </div>
               <span class="font-medium">Ranking</span>
             </a>
           </li>
           <li>
             <a 
               routerLink="/progresos" 
-              routerLinkActive="bg-blue-50 text-blue-600 border-r-2 border-blue-600"
-              class="flex items-center px-3 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors no-underline rounded-md"
+              routerLinkActive="bg-purple-50 text-purple-600 border-r-2 border-purple-600 shadow-sm"
+              class="flex items-center px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-all duration-200 no-underline rounded-lg group"
             >
+              <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mr-3 group-hover:bg-purple-100 transition-colors">
+                <i class="fas fa-chart-bar text-gray-500 group-hover:text-purple-600"></i>
+              </div>
               <span class="font-medium">Mi Progreso</span>
             </a>
           </li>
+          <li>
+            <a 
+              routerLink="/perfil" 
+              routerLinkActive="bg-purple-50 text-purple-600 border-r-2 border-purple-600 shadow-sm"
+              class="flex items-center px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-all duration-200 no-underline rounded-lg group"
+            >
+              <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mr-3 group-hover:bg-purple-100 transition-colors">
+                <i class="fas fa-user text-gray-500 group-hover:text-purple-600"></i>
+              </div>
+              <span class="font-medium">Mi Perfil</span>
+            </a>
+          </li>
         </ul>
+        
+        <ng-container *ngIf="isLoggedIn">
+          <div class="mt-8 px-4">
+            <div class="bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl p-4 text-white">
+              <div class="flex items-center space-x-3 mb-2">
+                <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                  <i class="fas fa-star"></i>
+                </div>
+                <div>
+                  <p class="text-sm font-semibold">Tu Nivel</p>
+                  <p class="text-lg font-bold">Experto</p>
+                </div>
+              </div>
+              <div class="w-full bg-white bg-opacity-20 rounded-full h-2">
+                <div class="bg-white h-2 rounded-full w-3/4"></div>
+              </div>
+              <p class="text-xs mt-2 text-purple-100">75% completado</p>
+            </div>
+          </div>
+        </ng-container>
       </nav>
     </aside>
     
-    <main class="flex-1 overflow-auto bg-gray-50 p-6">
-      <router-outlet></router-outlet>
+    <main class="flex-1 overflow-auto bg-gradient-to-br from-white to-purple-50/30 p-8">
+      <div class="max-w-7xl mx-auto">
+        <router-outlet></router-outlet>
+      </div>
     </main>
   </div>
 </div>
