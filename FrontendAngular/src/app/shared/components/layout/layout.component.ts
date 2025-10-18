@@ -16,6 +16,7 @@ import { AuthService } from '../../../auth/services/auth.service';
 })
 export class LayoutComponent implements OnInit {
   tituloPagina = 'SportifyMe';
+  isLoggedIn = false;
 
   constructor(
     private router: Router,
@@ -28,6 +29,10 @@ export class LayoutComponent implements OnInit {
       .subscribe(() => {
         this.actualizarTitulo();
       });
+
+    this.authService.isLoggedIn$.subscribe(loggedIn => {
+      this.isLoggedIn = loggedIn;
+    });
 
     this.actualizarTitulo();
   }
@@ -53,5 +58,16 @@ export class LayoutComponent implements OnInit {
     else {
       this.tituloPagina = titulos[rutaActual] || 'SportifyMe';
     }
+  }
+
+ 
+  irALogin(): void {
+    this.router.navigate(['/auth/login']);
+  }
+
+
+  cerrarSesion(): void {
+    this.authService.logout();
+    this.router.navigate(['/auth/login']);
   }
 }

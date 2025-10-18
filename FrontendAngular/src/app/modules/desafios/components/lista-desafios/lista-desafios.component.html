@@ -12,46 +12,43 @@
 
   <div *ngIf="!loading && !error" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
     <div *ngFor="let desafio of desafios"
-      class="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all p-6 flex flex-col items-center text-center relative">
+      class="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all p-6 flex flex-col" style="min-height: 380px;">
 
-      <div class="mb-4">
-        <div class="p-4 rounded-full shadow-inner bg-gray-100 flex items-center justify-center">
-          <!-- Siempre muestra un icono, use el de la BD o el calculado -->
-          <i [ngClass]="['fa-solid', desafio.icono || 'fa-star']" class="text-3xl text-indigo-600"></i>
+      <div class="flex flex-col items-center mb-4">
+        <div class="w-16 h-16 rounded-full shadow-inner bg-gray-100 flex items-center justify-center mb-2">
+          <i [ngClass]="['fa-solid', desafio.icono || 'fa-star']" class="text-2xl text-indigo-600"></i>
         </div>
-      </div>
-
-      <h2 class="text-lg font-semibold text-gray-800 mb-1">{{ desafio.titulo }}</h2>
-      <p class="text-sm text-gray-500 mb-4">{{ desafio.descripcion }}</p>
-
-      <div class="flex flex-wrap justify-center gap-2">
         <span [class]="'px-3 py-1 rounded-full text-xs font-medium ' + getIconoClase(desafio.tipo_actividad)">
           {{ desafio.tipo_actividad }}
         </span>
-        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
-          {{ desafio.dificultad }}
-        </span>
-        <span *ngIf="!desafio.es_publico"
-          class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
-          Privado
-        </span>
       </div>
 
-      <!-- Información de progreso -->
-      <div class="w-full mt-4">
-        <div class="flex justify-between text-xs text-gray-500 mb-1">
-          <span>Progreso: {{ desafio.progreso }}%</span>
-          <span>{{ desafio.dias_restantes }} días restantes</span>
-        </div>
-        <div class="w-full bg-gray-200 rounded-full h-2">
-          <div class="bg-indigo-600 h-2 rounded-full" [style.width.%]="desafio.progreso"></div>
+      <div class="flex-grow">
+        <h2 class="text-lg font-semibold text-gray-800 mb-2 text-center" style="min-height: 3rem; display: flex; align-items: center; justify-content: center;">
+          {{ desafio.titulo }}
+        </h2>
+
+        <p class="text-sm text-gray-500 mb-4 text-center" style="min-height: 4rem; display: flex; align-items: center;">
+          {{ desafio.descripcion }}
+        </p>
+
+        <div class="flex flex-wrap justify-center gap-2 mb-4">
+          <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+            {{ desafio.dificultad }}
+          </span>
+          <span *ngIf="!desafio.es_publico"
+            class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+            Privado
+          </span>
         </div>
       </div>
 
-      <a [routerLink]="['/desafios', desafio.id]"
-        class="mt-5 inline-block w-full bg-indigo-600 text-white text-sm font-medium py-2 rounded-xl hover:bg-indigo-700 transition-colors text-center">
-        Ver detalles
-      </a>
+      <div class="mt-auto">
+        <a [routerLink]="['/desafios', desafio.id]"
+          class="w-full bg-indigo-600 text-white text-sm font-medium py-2 rounded-xl hover:bg-indigo-700 transition-colors text-center block">
+          Ver detalles
+        </a>
+      </div>
     </div>
   </div>
 </div>
