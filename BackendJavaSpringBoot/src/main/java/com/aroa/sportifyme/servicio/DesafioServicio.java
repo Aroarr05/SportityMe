@@ -22,7 +22,7 @@ public class DesafioServicio {
     @Transactional
     public Desafio crearDesafio(String titulo, String descripcion, Desafio.TipoActividad tipoActividad,
                                Double objetivo, String unidadObjetivo, LocalDateTime fechaInicio,
-                               LocalDateTime fechaFin, Boolean esPublico, Desafio.Dificultad dificultad,
+                               LocalDateTime fechaFin, Boolean esPublico, String icono, Desafio.Dificultad dificultad,
                                Integer maxParticipantes, Long creadorId) {
         Usuario creador = usuarioServicio.buscarPorId(creadorId)
                 .orElseThrow(() -> new UsuarioNoEncontradoException(creadorId));
@@ -38,6 +38,7 @@ public class DesafioServicio {
         desafio.setFechaInicio(fechaInicio);
         desafio.setFechaFin(fechaFin);
         desafio.setEsPublico(esPublico != null ? esPublico : true);
+        desafio.setIcono(icono); 
         desafio.setDificultad(dificultad);
         desafio.setMaxParticipantes(maxParticipantes);
         desafio.setCreador(creador);
@@ -79,7 +80,7 @@ public class DesafioServicio {
     @Transactional
     public Desafio actualizarDesafio(Long id, String titulo, String descripcion, Desafio.TipoActividad tipoActividad,
                                     Double objetivo, String unidadObjetivo, LocalDateTime fechaInicio,
-                                    LocalDateTime fechaFin, Boolean esPublico, Desafio.Dificultad dificultad,
+                                    LocalDateTime fechaFin, Boolean esPublico, String icono, Desafio.Dificultad dificultad,
                                     Integer maxParticipantes, Long usuarioId) {
         Desafio desafioExistente = buscarPorId(id);
         Usuario usuario = usuarioServicio.buscarPorId(usuarioId)
@@ -99,6 +100,7 @@ public class DesafioServicio {
         desafioExistente.setFechaInicio(fechaInicio);
         desafioExistente.setFechaFin(fechaFin);
         desafioExistente.setEsPublico(esPublico);
+        desafioExistente.setIcono(icono); 
         desafioExistente.setDificultad(dificultad);
         desafioExistente.setMaxParticipantes(maxParticipantes);
         desafioExistente.setFechaActualizacion(LocalDateTime.now());

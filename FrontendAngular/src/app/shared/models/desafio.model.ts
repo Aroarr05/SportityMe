@@ -11,7 +11,7 @@ export interface Desafio {
   es_publico: boolean;                     
   dificultad: string;              
   max_participantes: number;           
-  imagen_url?: string;                       
+  icono?: string;                        
   estado?: string;           
   fecha_creacion?: string;   
   fecha_actualizacion?: string; 

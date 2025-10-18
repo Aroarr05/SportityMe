@@ -1,66 +1,57 @@
 <div class="container mx-auto px-4 py-8">
   <div class="flex justify-between items-center mb-8">
     <h1 class="text-3xl font-bold text-gray-800">Desafíos Disponibles</h1>
-    <a 
-      routerLink="/desafios/crear" 
-      class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-    >
+    <a routerLink="/desafios/crear"
+      class="px-4 py-2 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 transition-colors">
       Crear Nuevo Desafío
     </a>
   </div>
 
   <app-loading-spinner *ngIf="loading"></app-loading-spinner>
-  <app-error-alert *ngIf="error" [message]="error"></app-error-alert>
+  <app-error-alert *ngIf="error" [message]="error" (reintentar)="reintentar()"></app-error-alert>
 
-  <div *ngIf="!loading && !error" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-    <div 
-      *ngFor="let desafio of desafios" 
-      class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
-    >
-      <div class="p-6">
-        <h2 class="text-xl font-semibold text-gray-800 mb-2">{{ desafio.titulo }}</h2>
-        <p class="text-gray-600 mb-4">{{ desafio.descripcion }}</p>
-        
-        <div class="flex flex-wrap gap-2 mb-3">
-          <span class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-            {{ desafio.tipo_actividad }}
-          </span>
-          <span class="inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-            {{ desafio.dificultad }}
-          </span>
-          <span *ngIf="!desafio.es_publico" class="inline-block px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
-            Privado
-          </span>
-        </div>
-        
-        <p class="text-gray-700 mb-2">
-          <strong>Objetivo:</strong> {{ desafio.objetivo }} {{ desafio.unidad_objetivo }}
-        </p>
-        <p class="text-gray-700 mb-2">
-          <strong>Fecha inicio:</strong> {{ desafio.fecha_inicio | date:'mediumDate' }}
-        </p>
-        <p class="text-gray-700 mb-4">
-          <strong>Fecha fin:</strong> {{ desafio.fecha_fin | date:'mediumDate' }}
-        </p>
-        
-        <div class="flex justify-between items-center">
-          <span class="text-sm text-gray-500">
-            Creado por: ID {{ desafio.creador_id }}
-          </span>
-          <span class="text-sm text-gray-500">
-            {{ desafio.max_participantes }} participantes máx.
-          </span>
-        </div>
-        
-        <div class="mt-4 flex justify-end">
-          <a 
-            [routerLink]="['/desafios', desafio.id]" 
-            class="text-blue-600 hover:text-blue-800 font-medium"
-          >
-            Ver detalles
-          </a>
+  <div *ngIf="!loading && !error" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div *ngFor="let desafio of desafios"
+      class="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all p-6 flex flex-col items-center text-center relative">
+
+      <div class="mb-4">
+        <div class="p-4 rounded-full shadow-inner bg-gray-100 flex items-center justify-center">
+          <!-- Siempre muestra un icono, use el de la BD o el calculado -->
+          <i [ngClass]="['fa-solid', desafio.icono || 'fa-star']" class="text-3xl text-indigo-600"></i>
         </div>
       </div>
+
+      <h2 class="text-lg font-semibold text-gray-800 mb-1">{{ desafio.titulo }}</h2>
+      <p class="text-sm text-gray-500 mb-4">{{ desafio.descripcion }}</p>
+
+      <div class="flex flex-wrap justify-center gap-2">
+        <span [class]="'px-3 py-1 rounded-full text-xs font-medium ' + getIconoClase(desafio.tipo_actividad)">
+          {{ desafio.tipo_actividad }}
+        </span>
+        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+          {{ desafio.dificultad }}
+        </span>
+        <span *ngIf="!desafio.es_publico"
+          class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+          Privado
+        </span>
+      </div>
+
+      <!-- Información de progreso -->
+      <div class="w-full mt-4">
+        <div class="flex justify-between text-xs text-gray-500 mb-1">
+          <span>Progreso: {{ desafio.progreso }}%</span>
+          <span>{{ desafio.dias_restantes }} días restantes</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2">
+          <div class="bg-indigo-600 h-2 rounded-full" [style.width.%]="desafio.progreso"></div>
+        </div>
+      </div>
+
+      <a [routerLink]="['/desafios', desafio.id]"
+        class="mt-5 inline-block w-full bg-indigo-600 text-white text-sm font-medium py-2 rounded-xl hover:bg-indigo-700 transition-colors text-center">
+        Ver detalles
+      </a>
     </div>
   </div>
 </div>

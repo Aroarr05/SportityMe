@@ -43,9 +43,9 @@ public class Desafio {
 
     @Column(name = "es_publico")
     private Boolean esPublico = true;
-
-    @Column(length = 255)
-    private String imagenUrl;
+    
+    @Column(length = 50)
+    private String icono;
 
     @Enumerated(EnumType.STRING)
     private Dificultad dificultad;

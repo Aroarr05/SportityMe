@@ -17,9 +17,9 @@ public class DesafioDTO {
     private LocalDateTime fechaFin;
     private Long creadorId;
     private Boolean esPublico;
+    private String icono; 
     private String dificultad; 
     private Integer maxParticipantes;
-    private String imagenUrl;
     private String estado;
 
     public static DesafioDTO fromEntity(Desafio desafio) {
@@ -32,7 +32,6 @@ public class DesafioDTO {
         dto.setTitulo(desafio.getTitulo());
         dto.setDescripcion(desafio.getDescripcion());
         
-  
         if (desafio.getTipoActividad() != null) {
             dto.setTipoActividad(desafio.getTipoActividad().name());
         }
@@ -43,16 +42,14 @@ public class DesafioDTO {
         dto.setFechaFin(desafio.getFechaFin());
         dto.setCreadorId(desafio.getCreador() != null ? desafio.getCreador().getId() : null);
         dto.setEsPublico(desafio.getEsPublico());
+        dto.setIcono(desafio.getIcono());
         
- 
         if (desafio.getDificultad() != null) {
             dto.setDificultad(desafio.getDificultad().name());
         }
         
         dto.setMaxParticipantes(desafio.getMaxParticipantes());
-        dto.setImagenUrl(desafio.getImagenUrl());
         
-      
         if (desafio.getEstado() != null) {
             dto.setEstado(desafio.getEstado().name());
         }

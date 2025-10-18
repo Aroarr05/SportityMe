@@ -3,8 +3,6 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { AuthService } from '../../../auth/services/auth.service';
-import { NavbarComponent } from '../navbar/navbar.component';
-import { FooterComponent } from '../footer/footer.component';
 
 @Component({
   standalone: true,
@@ -12,13 +10,10 @@ import { FooterComponent } from '../footer/footer.component';
   templateUrl: './layout.component.html',
   styleUrls: ['./layout.component.scss'],
   imports: [
-    CommonModule, 
-    RouterModule,
-    NavbarComponent,
-    FooterComponent 
+    CommonModule,
+    RouterModule
   ]
 })
-
 export class LayoutComponent implements OnInit {
   tituloPagina = 'SportifyMe';
 
