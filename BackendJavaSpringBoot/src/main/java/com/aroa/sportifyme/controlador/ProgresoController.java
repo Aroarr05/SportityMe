@@ -1,6 +1,5 @@
 package com.aroa.sportifyme.controlador;
 
-import com.aroa.sportifyme.seguridad.dto.RankingDTO;
 import com.aroa.sportifyme.exception.BusinessException;
 import com.aroa.sportifyme.modelo.Progreso;
 import com.aroa.sportifyme.seguridad.dto.ProgresoDTO;
@@ -51,11 +50,6 @@ public class ProgresoController {
         return ResponseEntity.ok(progresos);
     }
 
-    @GetMapping("/ranking/{desafioId}")
-    public ResponseEntity<List<RankingDTO>> obtenerRankingDesafio(@PathVariable Long desafioId) {
-        List<RankingDTO> ranking = progresoServicio.generarRankingDesafio(desafioId);
-        return ResponseEntity.ok(ranking);
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<Progreso> buscarProgresoPorId(@PathVariable Long id) {

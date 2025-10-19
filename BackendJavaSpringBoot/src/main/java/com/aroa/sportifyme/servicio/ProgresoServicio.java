@@ -1,7 +1,6 @@
 package com.aroa.sportifyme.servicio;
 
 
-import com.aroa.sportifyme.seguridad.dto.RankingDTO;
 import com.aroa.sportifyme.modelo.*;
 import com.aroa.sportifyme.repository.ProgresoRepository;
 import com.aroa.sportifyme.seguridad.dto.ProgresoDTO;
@@ -11,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -56,17 +54,7 @@ public class ProgresoServicio {
         return progresoRepository.findByDesafioIdWithUsuarioAndDesafio(desafioId);
     }
 
-    @Transactional(readOnly = true)
-    public List<RankingDTO> generarRankingDesafio(Long desafioId) {
-        return progresoRepository.findRankingByDesafioId(desafioId).stream()
-                .map(progreso -> new RankingDTO(
-                        progreso.getUsuario().getId(),
-                        progreso.getUsuario().getNombre(),
-                        progreso.getValorActual(),
-                        progreso.getUsuario().getAvatarUrl()
-                ))
-                .collect(Collectors.toList());
-    }
+ 
 
     @Transactional(readOnly = true)
     public Optional<Progreso> buscarProgresoPorId(Long id) {

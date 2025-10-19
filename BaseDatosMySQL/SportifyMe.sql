@@ -43,7 +43,7 @@ CREATE TABLE desafios (
     fecha_fin DATETIME NOT NULL,
     creador_id BIGINT NOT NULL,
     es_publico BOOLEAN DEFAULT TRUE,
-    imagen_url VARCHAR(255),
+    icono VARCHAR(50) DEFAULT NULL,
     dificultad ENUM('PRINCIPIANTE', 'INTERMEDIO', 'AVANZADO'),
     max_participantes INT,
     estado ENUM('ACTIVO', 'INACTIVO', 'ELIMINADO') DEFAULT 'ACTIVO',
@@ -117,4 +117,34 @@ CREATE TABLE acciones_admin (
     fecha_accion DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (admin_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
+
+DELIMITER //
+CREATE TRIGGER set_icono_desafio
+BEFORE INSERT ON desafios
+FOR EACH ROW
+BEGIN
+    IF NEW.icono IS NULL THEN
+        SET NEW.icono = CASE NEW.tipo_actividad
+            WHEN 'correr' THEN 'fa-running'
+            WHEN 'ciclismo' THEN 'fa-bicycle'
+            WHEN 'natacion' THEN 'fa-swimmer'
+            WHEN 'gimnasio' THEN 'fa-dumbbell'
+            WHEN 'otros' THEN 'fa-star'
+        END;
+    END IF;
+END//
+DELIMITER ;
+
+CREATE TABLE desafios_completados (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id BIGINT NOT NULL,
+    desafio_id BIGINT NOT NULL,
+    fecha_completado DATETIME DEFAULT CURRENT_TIMESTAMP,
+    completado BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (desafio_id) REFERENCES desafios(id) ON DELETE CASCADE,
+    UNIQUE KEY (usuario_id, desafio_id)
+);
+
+
 

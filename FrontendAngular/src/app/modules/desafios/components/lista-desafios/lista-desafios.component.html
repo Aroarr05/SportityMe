@@ -1,54 +1,68 @@
-<div class="container mx-auto px-4 py-8">
-  <div class="flex justify-between items-center mb-8">
-    <h1 class="text-3xl font-bold text-gray-800">Desafíos Disponibles</h1>
-    <a routerLink="/desafios/crear"
-      class="px-4 py-2 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 transition-colors">
-      Crear Nuevo Desafío
-    </a>
-  </div>
-
-  <app-loading-spinner *ngIf="loading"></app-loading-spinner>
-  <app-error-alert *ngIf="error" [message]="error" (reintentar)="reintentar()"></app-error-alert>
-
-  <div *ngIf="!loading && !error" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-    <div *ngFor="let desafio of desafios"
-      class="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all p-6 flex flex-col" style="min-height: 380px;">
-
-      <div class="flex flex-col items-center mb-4">
-        <div class="w-16 h-16 rounded-full shadow-inner bg-gray-100 flex items-center justify-center mb-2">
-          <i [ngClass]="['fa-solid', desafio.icono || 'fa-star']" class="text-2xl text-indigo-600"></i>
+<div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-12 gap-4">
+      <div class="flex items-center space-x-4">
+        <div
+          class="h-12 w-12 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+          <i class="fas fa-trophy text-white text-xl"></i>
         </div>
-        <span [class]="'px-3 py-1 rounded-full text-xs font-medium ' + getIconoClase(desafio.tipo_actividad)">
-          {{ desafio.tipo_actividad }}
-        </span>
-      </div>
-
-      <div class="flex-grow">
-        <h2 class="text-lg font-semibold text-gray-800 mb-2 text-center" style="min-height: 3rem; display: flex; align-items: center; justify-content: center;">
-          {{ desafio.titulo }}
-        </h2>
-
-        <p class="text-sm text-gray-500 mb-4 text-center" style="min-height: 4rem; display: flex; align-items: center;">
-          {{ desafio.descripcion }}
-        </p>
-
-        <div class="flex flex-wrap justify-center gap-2 mb-4">
-          <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
-            {{ desafio.dificultad }}
-          </span>
-          <span *ngIf="!desafio.es_publico"
-            class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
-            Privado
-          </span>
+        <div>
+          <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+            Desafíos Disponibles
+          </h1>
+          <p class="text-gray-600 mt-1">Domina tus habilidades con estos desafíos</p>
         </div>
       </div>
 
-      <div class="mt-auto">
-        <a [routerLink]="['/desafios', desafio.id]"
-          class="w-full bg-indigo-600 text-white text-sm font-medium py-2 rounded-xl hover:bg-indigo-700 transition-colors text-center block">
-          Ver detalles
-        </a>
+      <a routerLink="/desafios/crear"
+        class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-3 rounded-xl shadow-lg hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 font-semibold flex items-center space-x-2 group mt-4 sm:mt-0">
+        <i class="fas fa-plus-circle group-hover:rotate-90 transition-transform duration-300"></i>
+        <span>Crear Nuevo Desafío</span>
+      </a>
+    </div>
+
+    <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+    <app-error-alert *ngIf="error" [message]="error" (reintentar)="reintentar()"></app-error-alert>
+
+    <div *ngIf="!loading && !error" class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div *ngFor="let desafio of desafios"
+        class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 p-6 flex flex-col border border-gray-100 group h-full"
+        style="min-height: 420px;">
+        <div class="flex flex-col items-center mb-6">
+          <div
+            class="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300 shadow-inner">
+            <i [ngClass]="['fa-solid', desafio.icono || 'fa-star']"
+              class="text-3xl bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent"></i>
+          </div>
+          <h6
+            class="text-xl font-bold text-gray-800 text-center leading-tight group-hover:text-purple-700 transition-colors duration-200 line-clamp-2">
+            {{ desafio.titulo }}
+          </h6>
+        </div>
+
+        <div class="mt-2">
+          <a [routerLink]="['/desafios', desafio.id]"
+            class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 font-semibold text-center block shadow-md hover:shadow-lg group/btn">
+            <span class="flex items-center justify-center space-x-2">
+              <span>Ver Detalles</span>
+            </span>
+          </a>
+        </div>
       </div>
     </div>
+  </div>
+
+  <div *ngIf="!loading && !error && desafios.length === 0" class="text-center py-16">
+    <div
+      class="w-32 h-32 bg-gradient-to-r from-purple-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
+      <i class="fas fa-trophy text-4xl text-purple-400"></i>
+    </div>
+    <h3 class="text-2xl font-bold text-gray-700 mb-2">No hay desafíos disponibles</h3>
+    <p class="text-gray-600 mb-6">Sé el primero en crear un desafío emocionante</p>
+    <a routerLink="/desafios/crear"
+      class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-8 py-3 rounded-xl shadow-lg hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 font-semibold inline-flex items-center space-x-2">
+      <i class="fas fa-plus-circle"></i>
+      <span>Crear Primer Desafío</span>
+    </a>
   </div>
 </div>

@@ -44,4 +44,8 @@ export class DesafiosService {
   obtenerDesafiosActivos(): Observable<Desafio[]> {
     return this.http.get<Desafio[]>(`${this.apiUrl}/activos`);
   }
+ 
+  abandonarDesafio(desafioId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${desafioId}/participar`);
+  }
 }

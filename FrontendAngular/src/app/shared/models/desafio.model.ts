@@ -20,7 +20,7 @@ export interface Desafio {
 export interface CrearDesafioDto {
   titulo: string;  
   descripcion: string;
-  tipo_actividad: TipoActividad;  
+  tipo_actividad: string;  
   objetivo: number;  
   unidad_objetivo: string;  
   fecha_inicio: string;     
@@ -29,7 +29,7 @@ export interface CrearDesafioDto {
   es_publico: boolean;      
   dificultad: string;  
   max_participantes: number;  
-  imagen_url?: string;       
+  icono?: string;       
 }
 
 export enum TipoActividad {

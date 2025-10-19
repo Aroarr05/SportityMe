@@ -18,6 +18,7 @@ import { ErrorAlertComponent } from '../../../../shared/components/error-alert/e
     ErrorAlertComponent
   ]
 })
+
 export class ListaDesafiosComponent implements OnInit {
   desafios: (Desafio & { progreso: number; dias_restantes: number })[] = [];
   loading = true;
@@ -52,7 +53,7 @@ export class ListaDesafiosComponent implements OnInit {
     if (!datos || !Array.isArray(datos)) return [];
 
     return datos.map(item => {
-      // Calcular icono si no viene del servidor
+  
       const icono = item.icono || this.getIconoFromTipoActividad(
         item.tipoActividad || item.tipo_actividad
       );
@@ -99,18 +100,6 @@ export class ListaDesafiosComponent implements OnInit {
     const dias_restantes = Math.max(0, totalDias - diasTranscurridos);
 
     return { ...desafio, progreso, dias_restantes };
-  }
-
-  getIconoClase(tipo: string): string {
-    switch (tipo) {
-      case 'correr': return 'bg-orange-100 text-orange-600';
-      case 'ciclismo': return 'bg-yellow-100 text-yellow-600';
-      case 'natacion': return 'bg-blue-100 text-blue-600';
-      case 'gimnasio': return 'bg-red-100 text-red-600';
-      case 'senderismo': return 'bg-green-100 text-green-600';
-      case 'yoga': return 'bg-purple-100 text-purple-600';
-      default: return 'bg-gray-100 text-gray-500';
-    }
   }
 
   unirseADesafio(desafioId: number): void {
