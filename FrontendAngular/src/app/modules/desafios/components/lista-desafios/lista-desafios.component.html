@@ -26,23 +26,28 @@
 
     <div *ngIf="!loading && !error" class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       <div *ngFor="let desafio of desafios"
-        class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 p-6 flex flex-col border border-gray-100 group h-full"
-        style="min-height: 420px;">
-        <div class="flex flex-col items-center mb-6">
+        class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 p-6 flex flex-col border border-gray-100 group relative"
+        style="min-height: 280px;">
+        
+        <!-- Icono mitad dentro mitad fuera -->
+        <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 z-10">
           <div
-            class="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300 shadow-inner">
+            class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center shadow-lg">
             <i [ngClass]="['fa-solid', desafio.icono || 'fa-star']"
-              class="text-3xl bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent"></i>
+              class="text-2xl bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent"></i>
           </div>
+        </div>
+
+        <div class="mt-8 flex flex-col items-center">
           <h6
-            class="text-xl font-bold text-gray-800 text-center leading-tight group-hover:text-purple-700 transition-colors duration-200 line-clamp-2">
+            class="text-lg font-bold text-gray-800 text-center leading-tight group-hover:text-purple-700 transition-colors duration-200 line-clamp-2 mb-4">
             {{ desafio.titulo }}
           </h6>
         </div>
 
-        <div class="mt-2">
+        <div class="mt-auto">
           <a [routerLink]="['/desafios', desafio.id]"
-            class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 font-semibold text-center block shadow-md hover:shadow-lg group/btn">
+            class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 font-semibold text-center block shadow-md hover:shadow-lg group/btn">
             <span class="flex items-center justify-center space-x-2">
               <span>Ver Detalles</span>
             </span>
