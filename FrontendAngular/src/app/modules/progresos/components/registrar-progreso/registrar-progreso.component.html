@@ -1,104 +1,146 @@
 <div class="container mt-4">
   <div class="row justify-content-center">
-    <div class="col-md-6">
+    <div class="col-md-8">
       <div class="card">
-        <div class="card-header bg-success text-white">
-          <h3 class="text-center">Registrar Progreso</h3>
+        <div class="card-header">
+          <h4 class="mb-0">
+            <i class="fas fa-plus-circle text-primary me-2"></i>
+            Registrar Nuevo Progreso
+          </h4>
         </div>
+
         <div class="card-body">
-          <form (ngSubmit)="onSubmit()" #progresoForm="ngForm">
+          <div *ngIf="enviado" class="alert alert-success text-center">
+            <i class="fas fa-check-circle me-2"></i>
+            ¡Progreso registrado correctamente! Redirigiendo...
+          </div>
+
+          <div *ngIf="error && !enviado" class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            {{ error }}
+          </div>
+
+          <div *ngIf="cargandoDesafios" class="text-center py-3">
+            <div class="spinner-border spinner-border-sm" role="status">
+              <span class="visually-hidden">Cargando desafíos...</span>
+            </div>
+            <span class="ms-2">Cargando desafíos...</span>
+          </div>
+
+          <form *ngIf="!enviado && !cargandoDesafios" (ngSubmit)="registrarProgreso()" #progresoForm="ngForm">
             
             <div class="mb-3">
               <label class="form-label">Desafío</label>
-              <input type="text" class="form-control" [value]="desafio?.titulo" disabled>
-            </div>
-            
-            <div class="mb-3">
-              <label for="valor" class="form-label">Progreso</label>
-              <input 
-                type="number" 
-                class="form-control" 
-                id="valor" 
-                [(ngModel)]="progreso.valor" 
-                name="valor" 
-                step="0.01" 
-                min="0.01"
-                required
-                #valorInput="ngModel"
-              >
-              @if (valorInput.invalid && valorInput.touched) {
-                <div class="text-danger">
-                  El valor es requerido y debe ser mayor a 0
-                </div>
-              }
-              <div class="form-text">Ej: 5.2 (km), 30.5 (minutos), etc.</div>
-            </div>
-            
-            <div class="mb-3">
-              <label for="unidad" class="form-label">Unidad de Medida</label>
-              <select 
-                class="form-select" 
-                id="unidad" 
-                [(ngModel)]="progreso.unidad" 
-                name="unidad" 
-                required
-                #unidadInput="ngModel"
-              >
-                <option *ngFor="let unidad of unidadesMedida" [value]="unidad">
-                  {{ getUnidadTexto(unidad) }}
+              <select class="form-select" 
+                      [(ngModel)]="progresoDto.desafioId" 
+                      name="desafioId"
+                      (change)="onDesafioChange()"
+                      required>
+                <option value="">Seleccionar desafío</option>
+                <option *ngFor="let desafio of desafios" [value]="desafio.id">
+                  {{ getDesafioTitulo(desafio) }}
                 </option>
               </select>
-              @if (unidadInput.invalid && unidadInput.touched) {
-                <div class="text-danger">
-                  La unidad es requerida
-                </div>
-              }
+              <div class="form-text" *ngIf="desafioSeleccionado">
+                Tipo: {{ desafioSeleccionado.tipo_actividad }} | 
+                Dificultad: {{ desafioSeleccionado.dificultad }} |
+                Fecha límite: {{ desafioSeleccionado.fecha_fin | date:'dd/MM/yyyy' }}
+              </div>
             </div>
-            
+
+            <div *ngIf="desafioSeleccionado" class="alert alert-info mb-3">
+              <strong>Objetivo del desafío:</strong> 
+              {{ desafioSeleccionado.objetivo }} {{ desafioSeleccionado.unidad_objetivo }}
+            </div>
+
             <div class="mb-3">
-              <label for="fecha" class="form-label">Fecha</label>
-              <input 
-                type="date" 
-                class="form-control" 
-                id="fecha" 
-                [(ngModel)]="fechaRegistro" 
-                name="fecha" 
-                required
-                #fechaInput="ngModel"
-              >
-              @if (fechaInput.invalid && fechaInput.touched) {
-                <div class="text-danger">
-                  La fecha es requerida
+              <label class="form-label">Tu Progreso Actual</label>
+              <div class="input-group">
+                <input type="number" 
+                       class="form-control" 
+                       [(ngModel)]="progresoDto.valorActual" 
+                       name="valorActual"
+                       step="0.01"
+                       min="0.01"
+                       placeholder="0.00"
+                       required>
+                <span class="input-group-text">
+                  {{ progresoDto.unidad || 'unidad' }}
+                </span>
+              </div>
+              <div class="form-text">
+                Ingresa cuánto has avanzado hacia el objetivo
+              </div>
+            </div>
+
+            <div *ngIf="desafioSeleccionado && progresoDto.valorActual > 0" class="mb-3">
+              <label class="form-label">Progreso hacia el objetivo:</label>
+              <div class="progress" style="height: 25px;">
+                <div class="progress-bar" 
+                     [class.bg-success]="porcentajeCompletado >= 100"
+                     [class.bg-warning]="porcentajeCompletado < 100 && porcentajeCompletado >= 50"
+                     [class.bg-info]="porcentajeCompletado < 50"
+                     role="progressbar" 
+                     [style.width]="porcentajeCompletado + '%'"
+                     [attr.aria-valuenow]="porcentajeCompletado" 
+                     aria-valuemin="0" 
+                     aria-valuemax="100">
+                  {{ porcentajeCompletado | number:'1.0-0' }}%
                 </div>
-              }
+              </div>
+              <small class="text-muted">
+                {{ progresoDto.valorActual }} / {{ desafioSeleccionado.objetivo }} {{ desafioSeleccionado.unidad_objetivo }}
+              </small>
             </div>
-            
+
             <div class="mb-3">
-              <label for="comentario" class="form-label">Comentario (opcional)</label>
-              <textarea 
-                class="form-control" 
-                id="comentario" 
-                [(ngModel)]="comentario" 
-                name="comentario" 
-                rows="3"
-                maxlength="500"
-              ></textarea>
-              <div class="form-text">{{ comentario.length }}/500 caracteres</div>
+              <label class="form-label">Comentario (opcional)</label>
+              <textarea class="form-control" 
+                        [(ngModel)]="progresoDto.comentario" 
+                        name="comentario"
+                        rows="3"
+                        placeholder="¿Cómo te fue en este entrenamiento? ¿Alguna observación?"></textarea>
             </div>
-            
-            <div class="d-grid gap-2">
-              <button 
-                type="submit" 
-                class="btn btn-success"
-                [disabled]="progresoForm.invalid"
-              >
-                Registrar Progreso
+
+            <div class="mb-3">
+              <label class="form-label">Dispositivo de Registro</label>
+              <select class="form-select" 
+                      [(ngModel)]="progresoDto.dispositivo" 
+                      name="dispositivo">
+                <option value="web">Navegador Web</option>
+                <option value="movil">Aplicación Móvil</option>
+                <option value="wearable">Dispositivo Wearable</option>
+                <option value="manual">Registro Manual</option>
+              </select>
+            </div>
+
+            <div class="d-flex gap-2">
+              <button type="submit" 
+                      class="btn btn-primary flex-fill"
+                      [disabled]="!progresoForm.form.valid || cargando">
+                <i class="fas fa-save me-2"></i>
+                {{ cargando ? 'Registrando...' : 'Registrar Progreso' }}
               </button>
-              <button type="button" class="btn btn-outline-secondary" (click)="cancelar()">
+              
+              <button type="button" 
+                      class="btn btn-outline-secondary"
+                      (click)="cancelar()"
+                      [disabled]="cargando">
+                <i class="fas fa-times me-2"></i>
                 Cancelar
               </button>
             </div>
           </form>
+
+          <div *ngIf="!cargandoDesafios && desafios.length === 0 && !enviado" class="text-center py-4 text-muted">
+            <i class="fas fa-flag fa-3x mb-3"></i>
+            <h5>No hay desafíos activos</h5>
+            <p>Únete a algún desafío para poder registrar tu progreso</p>
+            <button class="btn btn-primary" routerLink="/desafios">
+              <i class="fas fa-search me-2"></i>
+              Explorar Desafíos
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -24,7 +24,24 @@ export class ProgresosService {
     return this.http.post<Progreso>(this.apiUrl, progresoDto);
   }
 
+
   obtenerProgresosDesafio(desafioId: number): Observable<Progreso[]> {
     return this.http.get<Progreso[]>(`${this.apiUrl}/desafio/${desafioId}`);
+  }
+
+  obtenerProgresoActualDesafio(desafioId: number): Observable<number> {
+    return this.http.get<number>(`${this.apiUrl}/desafio/${desafioId}/actual`);
+  }
+
+  obtenerMiHistorial(): Observable<Progreso[]> {
+    return this.http.get<Progreso[]>(`${this.apiUrl}/mi-historial`);
+  }
+
+  eliminarProgreso(progresoId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${progresoId}`);
+  }
+
+  actualizarProgreso(progresoId: number, progresoDto: CrearProgresoDto): Observable<Progreso> {
+    return this.http.put<Progreso>(`${this.apiUrl}/${progresoId}`, progresoDto);
   }
 }

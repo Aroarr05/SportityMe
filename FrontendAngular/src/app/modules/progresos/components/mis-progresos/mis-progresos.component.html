@@ -1,97 +1,151 @@
-<div class="container mx-auto px-4 py-8">
-  <h2 class="text-2xl font-bold text-gray-800 mb-6">Mis Progresos</h2>
-
-  <div *ngIf="loading" class="flex justify-center items-center p-8">
-    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-  </div>
-  <div *ngIf="error && !loading" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-    <p>{{ error }}</p>
-    <button (click)="recargar()" class="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
-      Reintentar
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>
+      <i class="fas fa-chart-line text-primary me-2"></i>
+      Mis Progresos
+    </h2>
+    <button class="btn btn-primary" (click)="navegarARegistrar()">
+      <i class="fas fa-plus me-2"></i>
+      Nuevo Progreso
     </button>
   </div>
 
-  <div *ngIf="!loading && !error">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <h3 class="text-lg font-semibold text-gray-800 mb-3">Desafíos Activos</h3>
-        <p class="text-3xl font-bold text-blue-600">{{ resumen?.desafiosActivos || 0 }}</p>
-      </div>
-
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <h3 class="text-lg font-semibold text-gray-800 mb-3">Desafíos Completados</h3>
-        <p class="text-3xl font-bold text-green-600">{{ resumen?.desafiosCompletados || 0 }}</p>
-      </div>
-
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <h3 class="text-lg font-semibold text-gray-800 mb-3">Total Progresos</h3>
-        <p class="text-3xl font-bold text-purple-600">{{ resumen?.totalProgresos || 0 }}</p>
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h3 class="text-primary">{{ estadisticas.totalRegistros }}</h3>
+          <p class="text-muted mb-0">Registros Totales</p>
+        </div>
       </div>
     </div>
-
-    <div *ngIf="progresosPorDesafio.length === 0" class="text-center py-8">
-      <p class="text-gray-500 text-lg">No tienes progresos registrados todavía.</p>
-      <a routerLink="/desafios" class="text-blue-600 hover:text-blue-800 mt-2 inline-block">
-        ¡Empieza un desafío ahora!
-      </a>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h3 class="text-success">{{ estadisticas.desafiosActivos }}</h3>
+          <p class="text-muted mb-0">Desafíos Activos</p>
+        </div>
+      </div>
     </div>
-
-    <div *ngFor="let item of progresosPorDesafio" class="bg-white rounded-lg shadow-md mb-6 overflow-hidden">
-      <div class="bg-blue-600 text-white px-6 py-4">
-        <h3 class="text-xl font-semibold">{{ item.desafio.nombre }}</h3>
-        <p class="text-blue-100 mt-1">{{ item.desafio.objetivo }}</p>
-      </div>
-
-      <div class="px-6 py-4 border-b">
-        <div class="flex justify-between items-center mb-2">
-          <span class="text-sm font-medium text-gray-700">Progreso</span>
-          <span class="text-sm font-medium text-gray-700">{{ item.porcentajeCompletado }}% completado</span>
-        </div>
-        <div class="w-full bg-gray-200 rounded-full h-2.5">
-          <div 
-            class="bg-green-600 h-2.5 rounded-full transition-all duration-300" 
-            [style.width]="item.porcentajeCompletado + '%'"
-          ></div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h3 class="text-info">{{ estadisticas.progresoPromedio }}%</h3>
+          <p class="text-muted mb-0">Progreso Promedio</p>
         </div>
       </div>
-      
-      <div class="px-6 py-4">
-        <h4 class="text-lg font-semibold text-gray-800 mb-3">Registros de Progreso</h4>
-        
-        <div *ngIf="item.progresos.length === 0" class="text-center py-4">
-          <p class="text-gray-500">No hay registros de progreso para este desafío.</p>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h3 class="text-warning">{{ estadisticas.ultimoRegistro || '-' }}</h3>
+          <p class="text-muted mb-0">Último Registro</p>
         </div>
+      </div>
+    </div>
+  </div>
 
-        <div *ngIf="item.progresos.length > 0" class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Fecha
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Progreso
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Comentario
-                </th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr *ngFor="let progreso of item.progresos">
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ progreso.fecha | date:'mediumDate' }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  <span class="font-semibold">{{ progreso.valor }}</span>
-                  <span class="text-gray-500 ml-1">{{ progreso.unidad }}</span>
-                </td>
-                <td class="px-6 py-4 text-sm text-gray-900">
-                  {{ progreso.comentario || '-' }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+  <div *ngIf="cargando" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando progresos...</span>
+    </div>
+    <p class="mt-2 text-muted">Cargando tus progresos...</p>
+  </div>
+
+  <div *ngIf="error && !cargando" class="alert alert-danger text-center">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    {{ error }}
+  </div>
+
+  <div *ngIf="!cargando && !error && desafiosUnicos.length > 0" class="card mb-4">
+    <div class="card-header">
+      <h5 class="mb-0">Resumen por Desafío</h5>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div *ngFor="let progreso of desafiosUnicos" class="col-md-6 mb-3">
+          <div class="card h-100">
+            <div class="card-body">
+              <h6 class="card-title text-primary">{{ obtenerNombreDesafio(progreso) }}</h6>
+              <p class="card-text">
+                <small class="text-muted">Objetivo: {{ obtenerObjetivoDesafio(progreso) }}</small>
+              </p>
+              <div class="progress mb-2" style="height: 20px;">
+                <div class="progress-bar" 
+                     [class.bg-success]="obtenerPorcentaje(progreso) >= 100"
+                     [class.bg-warning]="obtenerPorcentaje(progreso) < 100"
+                     role="progressbar" 
+                     [style.width]="obtenerPorcentaje(progreso) + '%'">
+                  {{ obtenerPorcentaje(progreso) }}%
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted">
+                  Último: {{ formatearFecha(progreso.fechaRegistro) }}
+                </small>
+                <span *ngIf="estaCompletado(progreso)" class="badge bg-success">
+                  Completado
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!cargando && !error" class="card">
+    <div class="card-header">
+      <h5 class="mb-0">Historial Completo de Progresos</h5>
+    </div>
+    
+    <div class="card-body">
+      <div *ngIf="progresos.length === 0" class="text-center py-5 text-muted">
+        <i class="fas fa-running fa-3x mb-3"></i>
+        <h5>No hay progresos registrados</h5>
+        <p>Comienza registrando tu primer progreso</p>
+        <button class="btn btn-primary" (click)="navegarARegistrar()">
+          <i class="fas fa-plus me-2"></i>
+          Registrar Primer Progreso
+        </button>
+      </div>
+
+      <div *ngIf="progresos.length > 0" class="list-group list-group-flush">
+        <div *ngFor="let progreso of progresos" class="list-group-item">
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="flex-grow-1">
+              <h6 class="mb-1 text-primary" 
+                  (click)="verDetalleDesafio(progreso.desafio.id)" 
+                  style="cursor: pointer;">
+                {{ obtenerNombreDesafio(progreso) }}
+              </h6>
+              <p class="mb-1">
+                <strong>{{ progreso.valorActual }} {{ progreso.unidad }}</strong>
+                <span class="badge ms-2"
+                      [class.bg-success]="estaCompletado(progreso)"
+                      [class.bg-primary]="!estaCompletado(progreso)">
+                  {{ obtenerPorcentaje(progreso) }}% completado
+                </span>
+              </p>
+              <p class="mb-1 text-muted small" *ngIf="progreso.comentario">
+                <em>"{{ progreso.comentario }}"</em>
+              </p>
+              <small class="text-muted">
+                <i class="fas fa-clock me-1"></i>
+                {{ formatearFecha(progreso.fechaRegistro) }}
+                <span class="ms-2" *ngIf="progreso.dispositivo">
+                  <i class="fas fa-mobile-alt me-1"></i>
+                  {{ progreso.dispositivo }}
+                </span>
+              </small>
+            </div>
+            <div class="text-end">
+              <span *ngIf="estaCompletado(progreso)" class="badge bg-success">
+                <i class="fas fa-check me-1"></i>
+                Completado
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

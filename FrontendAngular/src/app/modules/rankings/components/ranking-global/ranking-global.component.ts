@@ -1,103 +1,96 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
+import { Observable } from 'rxjs'; 
 import { RankingsService } from '../../services/rankings.service';
-import { RankingDesafio, Ranking } from '../../../../shared/models';
+import { Ranking, FiltroRanking } from '../../../../shared/models';
 
 @Component({
+  selector: 'app-ranking',
   standalone: true,
-  selector: 'app-ranking-global',
+  imports: [CommonModule, FormsModule],
   templateUrl: './ranking-global.component.html',
-  styleUrls: ['./ranking-global.component.scss'],
-  imports: [CommonModule, FormsModule, RouterModule]
+  styleUrls: ['./ranking-global.component.scss']
 })
-export class RankingGlobalComponent implements OnInit {
-  loading = false;
-  error: string | null = null;
+
+export class RankingComponent implements OnInit {
   ranking: Ranking[] = [];
-  nombreDesafio: string = '';
-  desafioId: number = 1;
+  cargando: boolean = false;
+  error: string = '';
+  
+  filtros: FiltroRanking = {
+    tipo: 'global',
+    limit: 50
+  };
 
-  constructor(private rankingsService: RankingsService) {}
+  tiposRanking = [
+    { value: 'global', label: 'Ranking Global' },
+    { value: 'desafio', label: 'Por Desafío' }
+  ];
 
-  ngOnInit(): void {
-    this.cargarRankingDesafio();
+  limites = [10, 25, 50, 100];
+
+  constructor(
+    private rankingsService: RankingsService,
+    private route: ActivatedRoute
+  ) {}
+
+  ngOnInit() {
+    const desafioId = this.route.snapshot.paramMap.get('desafioId');
+    if (desafioId) {
+      this.filtros.tipo = 'desafio';
+      this.filtros.desafioId = +desafioId;
+    }
+    
+    this.cargarRanking();
   }
 
-  cargarRankingDesafio(): void {
-    this.loading = true;
-    this.error = null;
+  cargarRanking() {
+    this.cargando = true;
+    this.error = '';
+
+    let request: Observable<Ranking[]>;
     
-    this.rankingsService.obtenerRankingDesafio(this.desafioId).subscribe({
-      next: (rankingDesafio: RankingDesafio) => {
-        this.ranking = rankingDesafio.ranking || [];
-        this.nombreDesafio = rankingDesafio.nombreDesafio || `Desafío ${this.desafioId}`;
-        this.loading = false;
-        console.log('✅ Ranking cargado:', rankingDesafio);
+    if (this.filtros.tipo === 'global') {
+      request = this.rankingsService.obtenerRankingGlobal();
+    } else if (this.filtros.tipo === 'desafio' && this.filtros.desafioId) {
+      request = this.rankingsService.obtenerRankingDesafio(this.filtros.desafioId);
+    } else {
+      request = this.rankingsService.obtenerRankingConFiltros(this.filtros);
+    }
+
+    request.subscribe({
+      next: (data: Ranking[]) => { 
+        this.ranking = data;
+        this.cargando = false;
       },
-      error: (err: any) => {
-        this.loading = false;
-        
-        if (err.status === 403) {
-          this.error = 'El ranking no está disponible para acceso público.';
-        } else if (err.status === 404) {
-          this.error = 'No se encontró ranking para este desafío.';
-          this.ranking = [];
-        } else {
-          this.error = 'Error al cargar el ranking. Intenta nuevamente.';
-          console.error('❌ Error:', err);
-        }
+      error: (error: any) => { 
+        this.error = 'Error al cargar el ranking';
+        this.cargando = false;
+        console.error('Error:', error);
       }
     });
   }
 
-  cambiarDesafio(nuevoId: number): void {
-    this.desafioId = nuevoId;
-    this.cargarRankingDesafio();
+  aplicarFiltros() {
+    this.cargarRanking();
   }
 
-  getCardClass(index: number): string {
-    if (index === 0) return 'bg-gradient-to-r from-yellow-50 to-yellow-100 border-yellow-200';
-    if (index === 1) return 'bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200';
-    if (index === 2) return 'bg-gradient-to-r from-orange-50 to-orange-100 border-orange-200';
-    return 'bg-white hover:bg-gray-50';
+  limpiarFiltros() {
+    this.filtros = {
+      tipo: 'global',
+      limit: 50
+    };
+    this.cargarRanking();
   }
 
-  getAvatarColor(index: number): string {
-    if (index === 0) return 'bg-yellow-500';
-    if (index === 1) return 'bg-gray-500';
-    if (index === 2) return 'bg-orange-500';
-    const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-pink-500', 'bg-indigo-500'];
-    return colors[index % colors.length];
-  }
-
-  getProgressBarColor(index: number): string {
-    if (index === 0) return 'bg-yellow-500';
-    if (index === 1) return 'bg-gray-500';
-    if (index === 2) return 'bg-orange-500';
-    return 'bg-blue-500';
-  }
-
-  getMedal(index: number): string {
-    if (index === 0) return '🥇';
-    if (index === 1) return '🥈';
-    if (index === 2) return '🥉';
-    return '';
-  }
-
-  getPuntuacionMedia(): number {
-    if (this.ranking.length === 0) return 0;
-    const total = this.ranking.reduce((sum, item) => sum + (item.puntuacion || 0), 0);
-    return Math.round(total / this.ranking.length);
-  }
-
-  getMaxDesafios(): number {
-    if (this.ranking.length === 0) return 0;
-    return Math.max(...this.ranking.map(item => item.desafiosCompletados || 0));
-  }
-
-  reintentar(): void {
-    this.cargarRankingDesafio();
+  obtenerClasePosicion(posicion: number): string {
+    switch (posicion) {
+      case 1: return 'primero';
+      case 2: return 'segundo';
+      case 3: return 'tercero';
+      default: return '';
+    }
   }
 }

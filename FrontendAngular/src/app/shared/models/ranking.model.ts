@@ -1,21 +1,19 @@
 export interface Ranking {
-  usuarioId: number; 
-  nombre: string;  
-  avatarUrl?: string; 
-  totalDesafiosCompletados: number; 
-  progresoActual?: number; 
   posicion: number;
-}
-
-export interface RankingDesafio {
-  desafioId: number;
-  nombreDesafio: string;
-  ranking: Ranking[];
+  usuario: {
+    id: number;
+    nombre: string;
+    email: string;
+    avatarUrl?: string;
+  };
+  puntuacion: number;
+  desafiosCompletados: number;
+  progresoTotal: number;
 }
 
 export interface FiltroRanking {
-  tipo?: 'global' | 'desafio'; 
-  desafioId?: number; 
+  tipo?: 'global' | 'desafio';
+  desafioId?: number;
   fechaInicio?: Date;
   fechaFin?: Date;
   limit?: number;

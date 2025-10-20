@@ -1,4 +1,3 @@
-
 package com.aroa.sportifyme.servicio;
 
 import com.aroa.sportifyme.seguridad.dto.RankingDTO;
@@ -22,27 +21,31 @@ public class RankingService {
     private final UsuarioRepository usuarioRepository;
 
     public List<RankingDTO> obtenerRankingGlobal() {
-        
-        return usuarioRepository.findAll().stream()
-                .map(usuario -> {
-                    Integer totalCompletados = desafiosCompletadosRepository
-                            .countByUsuarioIdAndCompletadoTrue(usuario.getId());
-                    
-                    return new RankingDTO(
-                            usuario.getId(),
-                            usuario.getNombre(),
-                            usuario.getAvatarUrl(),
-                            totalCompletados
-                    );
-                })
-                .sorted((r1, r2) -> r2.getTotalDesafiosCompletados().compareTo(r1.getTotalDesafiosCompletados()))
-                .collect(Collectors.toList());
+       
+        try {
+            return rankingRepository.findGlobalRanking();
+        } catch (Exception e) {
+           
+            return usuarioRepository.findAll().stream()
+                    .map(usuario -> {
+                        Integer totalCompletados = desafiosCompletadosRepository
+                                .countByUsuarioIdAndCompletadoTrue(usuario.getId());
+                        
+                        return new RankingDTO(
+                                usuario.getId(),
+                                usuario.getNombre(),
+                                usuario.getAvatarUrl(),
+                                totalCompletados.longValue() 
+                        );
+                    })
+                    .sorted((r1, r2) -> r2.getTotalDesafiosCompletados().compareTo(r1.getTotalDesafiosCompletados()))
+                    .collect(Collectors.toList());
+        }
     }
 
     public List<RankingDTO> obtenerRankingPorDesafio(Long desafioId) {
         List<RankingDTO> ranking = rankingRepository.findRankingByDesafioId(desafioId);
         
-    
         for (int i = 0; i < ranking.size(); i++) {
             ranking.get(i).setPosicion(i + 1);
         }
@@ -56,10 +59,5 @@ public class RankingService {
 
     public boolean esUsuarioParticipante(Long desafioId, Long usuarioId) {
         return rankingRepository.esParticipante(desafioId, usuarioId);
-    }
-    
-  
-    public void marcarDesafioCompletado(Long usuarioId, Long desafioId) {
-    
     }
 }

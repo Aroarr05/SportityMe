@@ -1,4 +1,3 @@
-// RankingDTO.java
 package com.aroa.sportifyme.seguridad.dto;
 
 import lombok.AllArgsConstructor;
@@ -13,11 +12,11 @@ public class RankingDTO {
     private Long usuarioId;
     private String nombre;
     private String avatarUrl;
-    private Integer totalDesafiosCompletados;
+    private Long totalDesafiosCompletados; 
     private BigDecimal progresoActual;
     private Integer posicion; 
     
-    public RankingDTO(Long usuarioId, String nombre, String avatarUrl, Integer totalDesafiosCompletados) {
+    public RankingDTO(Long usuarioId, String nombre, String avatarUrl, Long totalDesafiosCompletados) {
         this.usuarioId = usuarioId;
         this.nombre = nombre;
         this.avatarUrl = avatarUrl;

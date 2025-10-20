@@ -44,12 +44,34 @@ export const routes: Routes = [
       },
       {
         path: 'progresos',
-        loadComponent: () => import('./modules/progresos/components/mis-progresos/mis-progresos.component').then(m => m.MisProgresosComponent),
-        canActivate: [AuthGuard]
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./modules/progresos/components/mis-progresos/mis-progresos.component').then(m => m.MisProgresosComponent),
+            canActivate: [AuthGuard]
+          },
+          {
+            path: 'registrar',
+            loadComponent: () => import('./modules/progresos/components/registrar-progreso/registrar-progreso.component').then(m => m.RegistrarProgresoComponent),
+            canActivate: [AuthGuard]
+          },
+          {
+            path: 'registrar/:desafioId',
+            loadComponent: () => import('./modules/progresos/components/registrar-progreso/registrar-progreso.component').then(m => m.RegistrarProgresoComponent),
+            canActivate: [AuthGuard]
+          },
+          { path: '', redirectTo: 'mis-progresos', pathMatch: 'full' }
+        ]
       },
       {
         path: 'rankings',
-        loadComponent: () => import('./modules/rankings/components/ranking-global/ranking-global.component').then(m => m.RankingGlobalComponent)
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./modules/rankings/components/ranking-global/ranking-global.component').then(m => m.RankingComponent)
+          },
+          { path: '', redirectTo: 'global', pathMatch: 'full' }
+        ]
       },
       { path: '', redirectTo: 'desafios', pathMatch: 'full' }
     ]
