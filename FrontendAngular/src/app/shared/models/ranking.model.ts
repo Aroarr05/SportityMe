@@ -1,11 +1,10 @@
-import { Usuario } from './usuario.model';
-
 export interface Ranking {
+  usuarioId: number; 
+  nombre: string;  
+  avatarUrl?: string; 
+  totalDesafiosCompletados: number; 
+  progresoActual?: number; 
   posicion: number;
-  usuario: Usuario;
-  puntuacion: number;
-  desafiosCompletados: number;
-  progresoTotal: number;
 }
 
 export interface RankingDesafio {
@@ -15,7 +14,8 @@ export interface RankingDesafio {
 }
 
 export interface FiltroRanking {
-  tipo?: string;
+  tipo?: 'global' | 'desafio'; 
+  desafioId?: number; 
   fechaInicio?: Date;
   fechaFin?: Date;
   limit?: number;

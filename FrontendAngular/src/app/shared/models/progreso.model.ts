@@ -3,27 +3,31 @@ import { Desafio } from './desafio.model';
 
 export interface Progreso {
   id: number;
-  usuario: Usuario | number;
-  desafio: Desafio | number;
-  valor: number;
-  unidad: UnidadMedida;
-  fecha: Date;
+  usuario: Usuario; 
+  desafio: Desafio; 
+  valorActual: number; 
+  unidad: string; 
+  fechaRegistro: Date; 
   comentario?: string;
-  validado?: boolean;
+  dispositivo?: string; 
+ 
+  porcentajeCompletado?: number;
+  completado?: boolean;
 }
 
 export interface CrearProgresoDto {
-  valor: number;
-  unidad: string;
-  usuarioId: number;
   desafioId: number;
+  valorActual: number;
+  unidad: string;
+  comentario?: string;
+  dispositivo?: string;
 }
 
 export enum UnidadMedida {
-  KILOMETROS = 'KILOMETROS',
-  METROS = 'METROS',
-  MINUTOS = 'MINUTOS',
-  HORAS = 'HORAS',
-  REPETICIONES = 'REPETICIONES',
-  KILOGRAMOS = 'KILOGRAMOS'
+  KILOMETROS = 'km',
+  METROS = 'm', 
+  MINUTOS = 'min',
+  HORAS = 'h',
+  REPETICIONES = 'rep',
+  KILOGRAMOS = 'kg'
 }
