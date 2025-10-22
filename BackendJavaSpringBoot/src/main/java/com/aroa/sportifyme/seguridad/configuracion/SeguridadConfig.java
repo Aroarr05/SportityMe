@@ -44,16 +44,20 @@ public class SeguridadConfig {
                 "/actuator/health",    
                 "/error"               
             ).permitAll()
+          
+            .requestMatchers("/api/ranking/**").permitAll()
             
             .requestMatchers(HttpMethod.GET, "/api/desafios/**").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/desafios/**").hasAnyRole("USER", "ADMIN")
             .requestMatchers(HttpMethod.PUT, "/api/desafios/**").hasAnyRole("USER", "ADMIN")
             .requestMatchers(HttpMethod.DELETE, "/api/desafios/**").hasRole("ADMIN")
+            
             .requestMatchers(HttpMethod.GET, "/api/usuarios/**").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/usuarios/**").hasRole("ADMIN")
             .requestMatchers(HttpMethod.PUT, "/api/usuarios/**").hasAnyRole("USER", "ADMIN")
             .requestMatchers(HttpMethod.DELETE, "/api/usuarios/**").hasRole("ADMIN")
-            .requestMatchers(HttpMethod.GET, "/api/progresos/ranking/**").permitAll()
+            
+            // PROGRESOS - SOLO PARA USUARIOS AUTENTICADOS
             .requestMatchers("/api/progresos/**").authenticated()
             .requestMatchers("/api/participaciones/**").authenticated()
 

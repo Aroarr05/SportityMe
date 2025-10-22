@@ -58,4 +58,6 @@ export class LoginComponent implements OnInit {
       });
     }
   }
+  goBack() {
+  this.router.navigate(['/']);}
 }

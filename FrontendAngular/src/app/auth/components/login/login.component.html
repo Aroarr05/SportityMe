@@ -1,4 +1,12 @@
 <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+  <button 
+    (click)="goBack()"
+    class="absolute top-4 left-4 px-4 py-2 bg-white text-purple-600 rounded-lg hover:bg-purple-50 transition-all duration-300 shadow-md hover:shadow-lg flex items-center"
+  >
+    <i class="fas fa-arrow-left mr-2"></i>
+    <span>Volver</span>
+  </button>
+
   <div class="max-w-md w-full space-y-8">
     <div class="bg-white rounded-2xl shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl">
       <div class="bg-gradient-to-r from-purple-600 to-indigo-700 text-white px-6 py-8">
@@ -65,7 +73,6 @@
               <span *ngIf="loginForm.get('contraseña')?.errors?.['required']">La contraseña es requerida</span>
             </div>
           </div>
-
 
           <button 
             type="submit" 
