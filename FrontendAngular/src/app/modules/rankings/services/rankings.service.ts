@@ -1,49 +1,50 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs'; 
-import { environment } from '../../../../environments/environment';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../../../environments/environment'; 
 import { Ranking, FiltroRanking } from '../../../shared/models';
 
 @Injectable({
   providedIn: 'root'
 })
-export class RankingsService {
-  private apiUrl = `${environment.apiUrl}/ranking`;
+export class RankingService {
+  private apiUrl = `${environment.apiUrl}/ranking`; 
 
   constructor(private http: HttpClient) { }
 
-
-  obtenerRankingGlobal(): Observable<Ranking[]> {
-    return this.http.get<Ranking[]>(`${this.apiUrl}/global`);
+  getRankingGlobal(limit?: number): Observable<Ranking[]> {
+    let params = new HttpParams();
+    if (limit) {
+      params = params.set('limit', limit.toString());
+    }
+    return this.http.get<Ranking[]>(`${this.apiUrl}/global`, { params });
   }
 
-  obtenerRankingDesafio(desafioId: number): Observable<Ranking[]> {
-    return this.http.get<Ranking[]>(`${this.apiUrl}/desafio/${desafioId}`);
-  }
+  getRankingFiltrado(filtros: FiltroRanking): Observable<Ranking[]> {
+    let params = new HttpParams()
+      .set('tipo', filtros.tipo)
+      .set('limit', filtros.limit?.toString() || '10');
 
-  obtenerRankingConFiltros(filtros: FiltroRanking): Observable<Ranking[]> {
-    let url = `${this.apiUrl}/filtrado`;
-    const params: string[] = [];
-    
-    if (filtros.tipo) params.push(`tipo=${filtros.tipo}`);
-    if (filtros.desafioId) params.push(`desafioId=${filtros.desafioId}`);
-    if (filtros.fechaInicio) params.push(`fechaInicio=${filtros.fechaInicio.toISOString()}`);
-    if (filtros.fechaFin) params.push(`fechaFin=${filtros.fechaFin.toISOString()}`);
-    if (filtros.limit) params.push(`limit=${filtros.limit}`);
-    
-    if (params.length > 0) {
-      url += '?' + params.join('&');
+    if (filtros.tipo === 'desafio' && filtros.desafioId) {
+      params = params.set('desafioId', filtros.desafioId.toString());
     }
     
-    return this.http.get<Ranking[]>(url);
+    return this.http.get<Ranking[]>(`${this.apiUrl}/filtrado`, { params });
   }
 
-  
-  obtenerEstadisticasDesafio(desafioId: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/desafio/${desafioId}/estadisticas`);
+  getRankingPorDesafio(desafioId: number, limit?: number): Observable<Ranking[]> {
+    let params = new HttpParams();
+    if (limit) {
+      params = params.set('limit', limit.toString());
+    }
+    return this.http.get<Ranking[]>(`${this.apiUrl}/desafio/${desafioId}`, { params });
   }
 
-  obtenerMiPosicion(desafioId: number): Observable<number> {
-    return this.http.get<number>(`${this.apiUrl}/desafio/${desafioId}/mi-posicion`);
+  getTotalParticipantesDesafio(desafioId: number): Observable<{totalParticipantes: number}> {
+    return this.http.get<{totalParticipantes: number}>(`${this.apiUrl}/desafio/${desafioId}/participantes`);
+  }
+
+  esUsuarioParticipante(desafioId: number, usuarioId: number): Observable<{esParticipante: boolean}> {
+    return this.http.get<{esParticipante: boolean}>(`${this.apiUrl}/desafio/${desafioId}/usuario/${usuarioId}/participante`);
   }
 }

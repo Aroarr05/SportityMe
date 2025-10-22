@@ -13,7 +13,7 @@ import java.util.List;
 public interface RankingRepository extends JpaRepository<Progreso, Long> {
    
     @Query("SELECT new com.aroa.sportifyme.seguridad.dto.RankingDTO(" +
-           "u.id, u.nombre, u.avatarUrl, MAX(p.valorActual)) " +
+           "u.id, u.nombre, u.avatarUrl, MAX(p.valorActual)) " + 
            "FROM Progreso p " +
            "JOIN p.usuario u " +
            "WHERE p.desafio.id = :desafioId " +
@@ -22,7 +22,7 @@ public interface RankingRepository extends JpaRepository<Progreso, Long> {
     List<RankingDTO> findRankingByDesafioId(@Param("desafioId") Long desafioId);
     
     @Query("SELECT new com.aroa.sportifyme.seguridad.dto.RankingDTO(" +
-           "u.id, u.nombre, u.avatarUrl, COUNT(DISTINCT p.desafio.id)) " +
+           "u.id, COALESCE(u.nombre, 'Anónimo'), COALESCE(u.avatarUrl, ''), COUNT(DISTINCT p.desafio.id)) " + // Usa el constructor con Long
            "FROM Progreso p " +
            "JOIN p.usuario u " +
            "WHERE p.valorActual >= p.desafio.objetivo " +
@@ -30,7 +30,7 @@ public interface RankingRepository extends JpaRepository<Progreso, Long> {
            "ORDER BY COUNT(DISTINCT p.desafio.id) DESC")
     List<RankingDTO> findGlobalRanking();
     
-    @Query("SELECT COUNT(p) FROM Progreso p WHERE p.desafio.id = :desafioId")
+    @Query("SELECT COUNT(DISTINCT p.usuario.id) FROM Progreso p WHERE p.desafio.id = :desafioId")
     Long countParticipantesByDesafioId(@Param("desafioId") Long desafioId);
     
     @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END " +

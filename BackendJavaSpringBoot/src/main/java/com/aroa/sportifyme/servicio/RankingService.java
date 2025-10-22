@@ -21,31 +21,45 @@ public class RankingService {
     private final UsuarioRepository usuarioRepository;
 
     public List<RankingDTO> obtenerRankingGlobal() {
-       
         try {
             return rankingRepository.findGlobalRanking();
         } catch (Exception e) {
-           
             return usuarioRepository.findAll().stream()
                     .map(usuario -> {
                         Integer totalCompletados = desafiosCompletadosRepository
-                                .countByUsuarioIdAndCompletadoTrue(usuario.getId());
-                        
+                                .countDesafiosCompletadosByUsuario(usuario.getId());
+
+                        String nombre = usuario.getNombre() != null ? usuario.getNombre() : "Anónimo";
+                        String avatarUrl = usuario.getAvatarUrl() != null ? usuario.getAvatarUrl() : ""; 
+                        Long completedChallenges = totalCompletados != null ? totalCompletados.longValue() : 0L;
+
                         return new RankingDTO(
                                 usuario.getId(),
-                                usuario.getNombre(),
-                                usuario.getAvatarUrl(),
-                                totalCompletados.longValue() 
+                                nombre,
+                                avatarUrl,
+                                completedChallenges
                         );
                     })
-                    .sorted((r1, r2) -> r2.getTotalDesafiosCompletados().compareTo(r1.getTotalDesafiosCompletados()))
+                    .sorted((r1, r2) -> r2.getTotalDesafiosCompletados().compareTo(r1.getTotalDesafiosCompletados())) // CORREGIDO
                     .collect(Collectors.toList());
         }
     }
 
+    public List<RankingDTO> obtenerRankingGlobalConLimite(Integer limit) {
+        List<RankingDTO> ranking = obtenerRankingGlobal();
+        for (int i = 0; i < ranking.size(); i++) {
+            ranking.get(i).setPosicion(i + 1);
+        }
+        
+        if (limit != null && limit > 0 && ranking.size() > limit) {
+            return ranking.subList(0, limit);
+        }
+        return ranking;
+    }
+
     public List<RankingDTO> obtenerRankingPorDesafio(Long desafioId) {
         List<RankingDTO> ranking = rankingRepository.findRankingByDesafioId(desafioId);
-        
+
         for (int i = 0; i < ranking.size(); i++) {
             ranking.get(i).setPosicion(i + 1);
         }

@@ -29,4 +29,14 @@ public class RankingDTO {
         this.avatarUrl = avatarUrl;
         this.progresoActual = progresoActual;
     }
+    
+    
+    public BigDecimal getValorOrdenamiento() {
+        if (progresoActual != null) {
+            return progresoActual;
+        } else if (totalDesafiosCompletados != null) {
+            return new BigDecimal(totalDesafiosCompletados);
+        }
+        return BigDecimal.ZERO;
+    }
 }

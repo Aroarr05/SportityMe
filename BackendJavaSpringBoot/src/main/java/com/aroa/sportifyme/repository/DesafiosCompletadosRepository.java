@@ -1,4 +1,3 @@
-
 package com.aroa.sportifyme.repository;
 
 import com.aroa.sportifyme.modelo.DesafiosCompletados;
@@ -13,7 +12,6 @@ import java.util.Optional;
 @Repository
 public interface DesafiosCompletadosRepository extends JpaRepository<DesafiosCompletados, Long> {
     
-
     Integer countByUsuarioIdAndCompletadoTrue(Long usuarioId);
     
     List<DesafiosCompletados> findByDesafioIdAndCompletadoTrue(Long desafioId);
@@ -21,7 +19,6 @@ public interface DesafiosCompletadosRepository extends JpaRepository<DesafiosCom
     @Query("SELECT COUNT(dc) FROM DesafiosCompletados dc WHERE dc.usuario.id = :usuarioId AND dc.completado = true")
     Integer countDesafiosCompletadosByUsuario(@Param("usuarioId") Long usuarioId);
     
-
     @Query("SELECT dc FROM DesafiosCompletados dc WHERE dc.desafio.id = :desafioId AND dc.completado = true ORDER BY dc.fechaCompletado ASC")
     List<DesafiosCompletados> findCompletadosByDesafioOrderByFecha(@Param("desafioId") Long desafioId);
     

@@ -1,152 +1,211 @@
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>
-      <i class="fas fa-trophy text-warning me-2"></i>
-      Ranking Deportivo
-    </h2>
-    <button class="btn btn-outline-primary" (click)="cargarRanking()" [disabled]="cargando">
-      <i class="fas fa-sync-alt" [class.fa-spin]="cargando"></i>
-      Actualizar
-    </button>
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6">
+  <div class="text-center mb-8">
+    <h1 class="text-4xl font-bold text-gray-800 mb-2">🏆 Ranking Deportivo</h1>
+    <p class="text-gray-600">Descubre a los mejores atletas de la comunidad</p>
   </div>
-  <div class="card mb-4">
-    <div class="card-header">
-      <h5 class="mb-0">Filtros</h5>
-    </div>
-    <div class="card-body">
-      <div class="row g-3">
-        <div class="col-md-3">
-          <label class="form-label">Tipo de Ranking</label>
-          <select class="form-select" [(ngModel)]="filtros.tipo" (change)="aplicarFiltros()">
-            <option *ngFor="let tipo of tiposRanking" [value]="tipo.value">
-              {{ tipo.label }}
-            </option>
-          </select>
-        </div>
 
-        <div class="col-md-3" *ngIf="filtros.tipo === 'desafio'">
-          <label class="form-label">ID del Desafío</label>
-          <input type="number" class="form-control" [(ngModel)]="filtros.desafioId" 
-                 placeholder="Ej: 1, 2, 3..." (change)="aplicarFiltros()">
-        </div>
+  <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+  
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+        Tipo de Ranking
+        </label>
+        <select 
+          [value]="tipoSeleccionado" 
+          (change)="cambiarTipo($event)"
+          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm">
+          <option value="global">Global</option>
+          <option value="desafio">Por Desafío</option>
+        </select>
+      </div>
+      <div *ngIf="tipoSeleccionado === 'desafio'">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          🏃‍♂️ Seleccionar Desafío
+        </label>
+        <select 
+          [value]="desafioIdSeleccionado" 
+          (change)="cambiarDesafio($event)"
+          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm">
+          <option value="">Selecciona un desafío</option>
+          <option *ngFor="let desafio of desafios" [value]="desafio.id">
+            {{ desafio.nombre }}
+          </option>
+        </select>
+      </div>
 
-        <div class="col-md-3">
-          <label class="form-label">Límite de resultados</label>
-          <select class="form-select" [(ngModel)]="filtros.limit" (change)="aplicarFiltros()">
-            <option *ngFor="let limite of limites" [value]="limite">
-              {{ limite }}
-            </option>
-          </select>
-        </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Mostrar Top
+        </label>
+        <select 
+          [value]="limitSeleccionado" 
+          (change)="cambiarLimit($event)"
+          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm">
+          <option value="5">Top 5</option>
+          <option value="10">Top 10</option>
+          <option value="20">Top 20</option>
+          <option value="50">Top 50</option>
+        </select>
+      </div>
 
-        <div class="col-md-3 d-flex align-items-end">
-          <button class="btn btn-outline-secondary w-100" (click)="limpiarFiltros()">
-            <i class="fas fa-times me-1"></i>
-            Limpiar
-          </button>
-        </div>
+      <!-- Botón Limpiar -->
+      <div>
+        <button 
+          (click)="limpiarFiltros()"
+          class="w-full px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-xl hover:from-gray-700 hover:to-gray-800 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 shadow-md font-medium">
+          Limpiar Filtros
+        </button>
       </div>
     </div>
   </div>
 
-  <div *ngIf="cargando" class="text-center py-5">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Cargando ranking...</span>
+  <div *ngIf="errorMessage" class="bg-red-50 border border-red-200 rounded-2xl p-4 mb-6">
+    <div class="flex items-center">
+      <span class="text-red-500 text-xl mr-3">⚠️</span>
+      <p class="text-red-700 font-medium">{{ errorMessage }}</p>
     </div>
-    <p class="mt-2 text-muted">Cargando ranking...</p>
   </div>
 
-  <div *ngIf="error && !cargando" class="alert alert-danger text-center">
-    <i class="fas fa-exclamation-triangle me-2"></i>
-    {{ error }}
+  <div *ngIf="loading" class="text-center py-12">
+    <div class="inline-flex items-center justify-center bg-white rounded-2xl shadow-lg px-8 py-6">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-4"></div>
+      <span class="text-gray-700 font-medium text-lg">Cargando ranking...</span>
+    </div>
   </div>
 
-  <div *ngIf="!cargando && !error" class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <h5 class="mb-0">
-        {{ filtros.tipo === 'global' ? 'Ranking Global' : 'Ranking del Desafío ' + filtros.desafioId }}
-      </h5>
-      <span class="badge bg-primary">
-        {{ ranking.length }} participantes
-      </span>
-    </div>
+  <div *ngIf="!loading && !errorMessage" class="space-y-8">
+    
+    <div *ngIf="topUsuarios.length > 0" class="bg-white rounded-2xl shadow-xl p-8">
+      <h2 class="text-2xl font-bold text-gray-800 mb-8 text-center">🏅 Podio de Campeones</h2>
+      <div class="flex justify-center items-end space-x-4 md:space-x-8 max-w-4xl mx-auto">
+        
+        <div *ngIf="topUsuarios[1]" 
+             class="flex flex-col items-center w-1/4 transform hover:scale-105 transition-transform duration-300">
+          <div class="bg-gradient-to-b from-gray-300 to-gray-400 rounded-t-2xl p-4 w-full text-center shadow-lg">
+            <div class="text-4xl mb-2">🥈</div>
+            <div class="w-20 h-20 mx-auto mb-3">
+              <img [src]="topUsuarios[1].avatarUrl || 'assets/default-avatar.png'" 
+                   [alt]="topUsuarios[1].nombre"
+                   class="w-full h-full rounded-full border-4 border-white shadow-md object-cover">
+            </div>
+            <h3 class="font-bold text-gray-800 text-sm truncate">{{ topUsuarios[1].nombre }}</h3>
+            <p class="text-2xl font-bold text-gray-700 mt-2">{{ getValorDisplay(topUsuarios[1]) }}</p>
+            <div class="mt-2 text-xs text-gray-600">#{{ topUsuarios[1].posicionReal }}</div>
+          </div>
+        </div>
 
-    <div class="card-body p-0">
-      <div *ngIf="ranking.length === 0" class="text-center py-5 text-muted">
-        <i class="fas fa-users fa-3x mb-3"></i>
-        <p>No hay datos de ranking disponibles</p>
+        <div *ngIf="topUsuarios[0]" 
+             class="flex flex-col items-center w-1/3 transform hover:scale-110 transition-transform duration-300">
+          <div class="bg-gradient-to-b from-yellow-300 to-yellow-500 rounded-t-2xl p-6 w-full text-center shadow-2xl -mt-8">
+            <div class="text-5xl mb-3">🥇</div>
+            <div class="w-24 h-24 mx-auto mb-4">
+              <img [src]="topUsuarios[0].avatarUrl || 'assets/default-avatar.png'" 
+                   [alt]="topUsuarios[0].nombre"
+                   class="w-full h-full rounded-full border-4 border-white shadow-lg object-cover">
+            </div>
+            <h3 class="font-bold text-gray-800 text-lg truncate">{{ topUsuarios[0].nombre }}</h3>
+            <p class="text-3xl font-bold text-gray-800 mt-3">{{ getValorDisplay(topUsuarios[0]) }}</p>
+            <div class="mt-2 text-sm font-semibold text-gray-700">#{{ topUsuarios[0].posicionReal }}</div>
+          </div>
+        </div>
+
+        <div *ngIf="topUsuarios[2]" 
+             class="flex flex-col items-center w-1/4 transform hover:scale-105 transition-transform duration-300">
+          <div class="bg-gradient-to-b from-amber-600 to-amber-700 rounded-t-2xl p-4 w-full text-center shadow-lg">
+            <div class="text-4xl mb-2">🥉</div>
+            <div class="w-20 h-20 mx-auto mb-3">
+              <img [src]="topUsuarios[2].avatarUrl || 'assets/default-avatar.png'" 
+                   [alt]="topUsuarios[2].nombre"
+                   class="w-full h-full rounded-full border-4 border-white shadow-md object-cover">
+            </div>
+            <h3 class="font-bold text-white text-sm truncate">{{ topUsuarios[2].nombre }}</h3>
+            <p class="text-2xl font-bold text-white mt-2">{{ getValorDisplay(topUsuarios[2]) }}</p>
+            <div class="mt-2 text-xs text-amber-200">#{{ topUsuarios[2].posicionReal }}</div>
+          </div>
+        </div>
       </div>
+    </div>
 
-      <div *ngIf="ranking.length > 0" class="table-responsive">
-        <table class="table table-hover mb-0">
-          <thead class="table-light">
-            <tr>
-              <th scope="col" width="80">Posición</th>
-              <th scope="col">Usuario</th>
-              <th scope="col" *ngIf="filtros.tipo === 'global'">Desafíos Completados</th>
-              <th scope="col" *ngIf="filtros.tipo === 'desafio'">Progreso</th>
-              <th scope="col">Puntuación</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let participante of ranking" 
-                [class]="'ranking-row ' + obtenerClasePosicion(participante.posicion)">
-              <td>
-                <div class="d-flex align-items-center">
-                  <span class="badge position-badge" 
-                        [ngClass]="{
-                          'bg-warning': participante.posicion === 1,
-                          'bg-secondary': participante.posicion === 2,
-                          'bg-danger': participante.posicion === 3,
-                          'bg-dark': participante.posicion > 3
-                        }">
-                    {{ participante.posicion }}
-                  </span>
-                  <div class="medal" *ngIf="participante.posicion <= 3">
-                    <i class="fas fa-medal ms-2" 
-                       [class.text-warning]="participante.posicion === 1"
-                       [class.text-secondary]="participante.posicion === 2"
-                       [class.text-danger]="participante.posicion === 3"></i>
-                  </div>
-                </div>
-              </td>
-              <td>
-                <div class="d-flex align-items-center">
-                  <img [src]="participante.usuario.avatarUrl || 'assets/images/default-avatar.png'" 
-                       class="rounded-circle me-3" 
-                       width="40" 
-                       height="40"
-                       alt="{{ participante.usuario.nombre }}"
-                       onerror="this.src='assets/images/default-avatar.png'">
-                  <div>
-                    <strong class="d-block">{{ participante.usuario.nombre }}</strong>
-                    <small class="text-muted">{{ participante.usuario.email }}</small>
-                  </div>
-                </div>
-              </td>
-              <td *ngIf="filtros.tipo === 'global'">
-                <span class="badge bg-success rounded-pill fs-6">
-                  {{ participante.desafiosCompletados }}
-                </span>
-              </td>
-              <td *ngIf="filtros.tipo === 'desafio'">
-                <div class="progress" style="height: 20px; width: 150px;">
-                  <div class="progress-bar" 
-                       role="progressbar" 
-                       [style.width]="participante.progresoTotal + '%'"
-                       [attr.aria-valuenow]="participante.progresoTotal" 
-                       aria-valuemin="0" 
-                       aria-valuemax="100">
-                    {{ participante.progresoTotal }}%
-                  </div>
-                </div>
-              </td>
-              <td>
-                <strong class="text-primary">{{ participante.puntuacion }}</strong>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+      <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-6">
+        <h2 class="text-2xl font-bold text-white">📊 Ranking Completo</h2>
+        <p class="text-blue-100 mt-1">
+          {{ tipoSeleccionado === 'global' ? 'Desafíos completados' : 'Progreso del desafío' }}
+        </p>
+      </div>
+      
+      <div class="divide-y divide-gray-100">
+        <div *ngFor="let item of rankingData; let i = index" 
+             class="p-6 hover:bg-gray-50 transition-all duration-200 group">
+          <div class="flex items-center space-x-4">
+            <!-- Posición -->
+            <div class="flex-shrink-0">
+              <div [class]="'w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg ' + 
+                           (i < 3 ? 
+                            (i === 0 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 shadow-lg' : 
+                             i === 1 ? 'bg-gradient-to-br from-gray-400 to-gray-600 shadow-lg' : 
+                             'bg-gradient-to-br from-amber-600 to-amber-700 shadow-lg') : 
+                            'bg-gradient-to-br from-blue-500 to-blue-600')">
+                {{ item.posicion || i + 1 }}
+              </div>
+            </div>
+
+            <div class="flex-shrink-0">
+              <div class="w-14 h-14 rounded-full border-4 border-white shadow-md overflow-hidden group-hover:scale-110 transition-transform duration-200">
+                <img [src]="item.avatarUrl || 'assets/default-avatar.png'" 
+                     [alt]="item.nombre"
+                     class="w-full h-full object-cover">
+              </div>
+            </div>
+
+            <div class="flex-grow">
+              <h3 class="font-semibold text-gray-800 text-lg group-hover:text-blue-600 transition-colors duration-200">
+                {{ item.nombre }}
+              </h3>
+              <p class="text-gray-500 text-sm">ID: {{ item.usuarioId }}</p>
+            </div>
+
+            <div class="flex-shrink-0 text-right">
+              <div class="text-2xl font-bold text-gray-800">
+                {{ getValorDisplay(item) }}
+              </div>
+              <div class="text-sm text-gray-500 font-medium">
+                {{ tipoSeleccionado === 'global' ? 'Desafíos' : 'Progreso' }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="estadisticas.totalUsuarios" class="bg-white rounded-2xl shadow-xl p-8">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">📈 Estadísticas del Ranking</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        
+        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 text-center transform hover:scale-105 transition-transform duration-200">
+          <div class="text-3xl mb-3">👥</div>
+          <div class="text-3xl font-bold text-blue-600">{{ estadisticas.totalUsuarios }}</div>
+          <div class="text-blue-800 font-medium mt-2">Total Usuarios</div>
+        </div>
+
+        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 text-center transform hover:scale-105 transition-transform duration-200">
+          <div class="text-3xl mb-3">📊</div>
+          <div class="text-3xl font-bold text-green-600">{{ estadisticas.promedioPuntuacion }}</div>
+          <div class="text-green-800 font-medium mt-2">Promedio</div>
+        </div>
+
+        <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 text-center transform hover:scale-105 transition-transform duration-200">
+          <div class="text-3xl mb-3">🚀</div>
+          <div class="text-3xl font-bold text-purple-600">{{ estadisticas.maxPuntuacion }}</div>
+          <div class="text-purple-800 font-medium mt-2">Máximo</div>
+        </div>
+
+        <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-6 text-center transform hover:scale-105 transition-transform duration-200">
+          <div class="text-3xl mb-3">⭐</div>
+          <div class="text-xl font-bold text-orange-600 truncate">{{ estadisticas.usuarioDestacado }}</div>
+          <div class="text-orange-800 font-medium mt-2">Usuario Destacado</div>
+        </div>
       </div>
     </div>
   </div>
