@@ -14,9 +14,12 @@ import { AuthService } from '../../../auth/services/auth.service';
     RouterModule
   ]
 })
+
 export class LayoutComponent implements OnInit {
   tituloPagina = 'SportifyMe';
   isLoggedIn = false;
+  isAdmin = false;
+  isAdminMenuOpen = false; 
 
   constructor(
     private router: Router,
@@ -32,9 +35,30 @@ export class LayoutComponent implements OnInit {
 
     this.authService.isLoggedIn$.subscribe(loggedIn => {
       this.isLoggedIn = loggedIn;
+      if (loggedIn) {
+        this.checkAdminStatus();
+      }
+    });
+
+    this.authService.currentUser$.subscribe(user => {
+      if (user) {
+        this.checkAdminStatus();
+      }
     });
 
     this.actualizarTitulo();
+  }
+
+  private checkAdminStatus(): void {
+    this.isAdmin = this.authService.isAdmin();
+  }
+
+  toggleAdminMenu(): void {
+    this.isAdminMenuOpen = !this.isAdminMenuOpen;
+  }
+
+  closeAdminMenu(): void {
+    this.isAdminMenuOpen = false;
   }
 
   private actualizarTitulo(): void {
@@ -46,7 +70,9 @@ export class LayoutComponent implements OnInit {
       '/rankings': 'Ranking Global',
       '/progresos': 'Mi Progreso',
       '/auth/login': 'Iniciar Sesión',
-      '/auth/registro': 'Registrarse'
+      '/auth/registro': 'Registrarse',
+      '/admin/usuarios': 'Gestión de Usuarios',
+      '/admin/desafios': 'Gestión de Desafíos'
     };
 
     if (rutaActual.startsWith('/desafios/') && !rutaActual.includes('/crear')) {
@@ -55,19 +81,34 @@ export class LayoutComponent implements OnInit {
     else if (rutaActual.startsWith('/rankings')) {
       this.tituloPagina = 'Ranking Global';
     }
+    else if (rutaActual.startsWith('/admin/usuarios')) {
+      this.tituloPagina = 'Gestión de Usuarios';
+    }
+    else if (rutaActual.startsWith('/admin/desafios')) {
+      this.tituloPagina = 'Gestión de Desafíos';
+    }
     else {
       this.tituloPagina = titulos[rutaActual] || 'SportifyMe';
     }
   }
 
- 
   irALogin(): void {
     this.router.navigate(['/auth/login']);
   }
 
-
   cerrarSesion(): void {
     this.authService.logout();
     this.router.navigate(['/auth/login']);
+  }
+
+
+  irAGestionUsuarios(): void {
+    this.router.navigate(['/admin/usuarios']);
+    this.closeAdminMenu();
+  }
+
+  irAGestionDesafios(): void {
+    this.router.navigate(['/admin/desafios']);
+    this.closeAdminMenu();
   }
 }

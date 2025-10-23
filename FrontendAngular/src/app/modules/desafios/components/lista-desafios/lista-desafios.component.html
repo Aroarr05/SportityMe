@@ -14,7 +14,7 @@
         </div>
       </div>
 
-      <a routerLink="/desafios/crear"
+      <a *ngIf="isLoggedIn" routerLink="/desafios/crear"
         class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-3 rounded-xl shadow-lg hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 font-semibold flex items-center space-x-2 group mt-4 sm:mt-0">
         <i class="fas fa-plus-circle group-hover:rotate-90 transition-transform duration-300"></i>
         <span>Crear Nuevo Desafío</span>
@@ -24,29 +24,29 @@
     <app-loading-spinner *ngIf="loading"></app-loading-spinner>
     <app-error-alert *ngIf="error" [message]="error" (reintentar)="reintentar()"></app-error-alert>
 
-    <div *ngIf="!loading && !error" class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div *ngIf="!loading && !error" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       <div *ngFor="let desafio of desafios"
-        class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 p-6 flex flex-col border border-gray-100 group relative"
-        style="min-height: 280px;">
+        class="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 p-5 flex flex-col border border-gray-100 group relative"
+        style="min-height: 220px;">
       
-        <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 z-10">
+        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
           <div
-            class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center shadow-lg">
+            class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center shadow-md">
             <i [ngClass]="['fa-solid', desafio.icono || 'fa-star']"
-              class="text-2xl bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent"></i>
+              class="text-xl bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent"></i>
           </div>
         </div>
 
-        <div class="mt-8 flex flex-col items-center">
+        <div class="mt-6 flex flex-col items-center">
           <h6
-            class="text-lg font-bold text-gray-800 text-center leading-tight group-hover:text-purple-700 transition-colors duration-200 line-clamp-2 mb-4">
+            class="text-base font-bold text-gray-800 text-center leading-tight group-hover:text-purple-700 transition-colors duration-200 line-clamp-2 mb-3">
             {{ desafio.titulo }}
           </h6>
         </div>
 
-        <div class="mt-auto">
+        <div class="mt-3">
           <a [routerLink]="['/desafios', desafio.id]"
-            class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 font-semibold text-center block shadow-md hover:shadow-lg group/btn">
+            class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2 rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 font-semibold text-center block shadow-sm hover:shadow-md group/btn text-sm">
             <span class="flex items-center justify-center space-x-2">
               <span>Ver Detalles</span>
             </span>
@@ -63,7 +63,7 @@
     </div>
     <h3 class="text-2xl font-bold text-gray-700 mb-2">No hay desafíos disponibles</h3>
     <p class="text-gray-600 mb-6">Sé el primero en crear un desafío emocionante</p>
-    <a routerLink="/desafios/crear"
+    <a *ngIf="isLoggedIn" routerLink="/desafios/crear"
       class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-8 py-3 rounded-xl shadow-lg hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 font-semibold inline-flex items-center space-x-2">
       <i class="fas fa-plus-circle"></i>
       <span>Crear Primer Desafío</span>

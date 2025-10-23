@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { DesafiosService } from '../../services/desafios.service';
+import { AuthService } from '../../../../auth/services/auth.service';
 import { Desafio } from '../../../../shared/models';
 import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
 import { ErrorAlertComponent } from '../../../../shared/components/error-alert/error-alert.component';
@@ -18,16 +19,24 @@ import { ErrorAlertComponent } from '../../../../shared/components/error-alert/e
     ErrorAlertComponent
   ]
 })
-
 export class ListaDesafiosComponent implements OnInit {
   desafios: (Desafio & { progreso: number; dias_restantes: number })[] = [];
   loading = true;
   error: string | null = null;
+  isLoggedIn = false;
 
-  constructor(private desafiosService: DesafiosService) {}
+  constructor(
+    private desafiosService: DesafiosService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
+    this.checkAuthentication();
     this.cargarDesafios();
+  }
+
+  private checkAuthentication(): void {
+    this.isLoggedIn = this.authService.isLoggedIn();
   }
 
   cargarDesafios(): void {
@@ -36,7 +45,7 @@ export class ListaDesafiosComponent implements OnInit {
 
     this.desafiosService.obtenerDesafios().subscribe({
       next: (desafios) => {
-        console.log('Datos recibidos:', desafios); // Para debug
+        console.log('Datos recibidos:', desafios);
         const normalizados = this.normalizarDatosDesafios(desafios);
         this.desafios = normalizados.map(d => this.calcularDatosExtras(d));
         this.loading = false;
@@ -53,7 +62,6 @@ export class ListaDesafiosComponent implements OnInit {
     if (!datos || !Array.isArray(datos)) return [];
 
     return datos.map(item => {
-  
       const icono = item.icono || this.getIconoFromTipoActividad(
         item.tipoActividad || item.tipo_actividad
       );
