@@ -19,12 +19,12 @@ export class LayoutComponent implements OnInit {
   tituloPagina = 'SportifyMe';
   isLoggedIn = false;
   isAdmin = false;
-  isAdminMenuOpen = false; 
+  isAdminMenuOpen = false;
 
   constructor(
     private router: Router,
     private authService: AuthService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.router.events
@@ -35,22 +35,37 @@ export class LayoutComponent implements OnInit {
 
     this.authService.isLoggedIn$.subscribe(loggedIn => {
       this.isLoggedIn = loggedIn;
+      console.log('🔄 isLoggedIn cambió:', loggedIn);
       if (loggedIn) {
         this.checkAdminStatus();
+      } else {
+        this.isAdmin = false;
       }
     });
 
     this.authService.currentUser$.subscribe(user => {
+      console.log('🔄 Usuario actual cambió:', user);
       if (user) {
         this.checkAdminStatus();
+      } else {
+        this.isAdmin = false;
       }
     });
+
+    setTimeout(() => {
+      this.checkAdminStatus();
+    }, 1000);
 
     this.actualizarTitulo();
   }
 
   private checkAdminStatus(): void {
-    this.isAdmin = this.authService.isAdmin();
+    const user = this.authService.getCurrentUser();
+    if (user) {
+      this.isAdmin = user.rol_id === 1 || user.rol === 'ADMIN';
+    } else {
+      this.isAdmin = false;
+    }
   }
 
   toggleAdminMenu(): void {
@@ -63,7 +78,7 @@ export class LayoutComponent implements OnInit {
 
   private actualizarTitulo(): void {
     const rutaActual = this.router.url;
-    
+
     const titulos: { [key: string]: string } = {
       '/desafios': 'Desafíos',
       '/desafios/crear': 'Crear Desafío',
@@ -77,7 +92,7 @@ export class LayoutComponent implements OnInit {
 
     if (rutaActual.startsWith('/desafios/') && !rutaActual.includes('/crear')) {
       this.tituloPagina = 'Detalle del Desafío';
-    } 
+    }
     else if (rutaActual.startsWith('/rankings')) {
       this.tituloPagina = 'Ranking Global';
     }
@@ -100,7 +115,6 @@ export class LayoutComponent implements OnInit {
     this.authService.logout();
     this.router.navigate(['/auth/login']);
   }
-
 
   irAGestionUsuarios(): void {
     this.router.navigate(['/admin/usuarios']);

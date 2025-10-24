@@ -49,7 +49,6 @@
         </select>
       </div>
 
-      <!-- Botón Limpiar -->
       <div>
         <button 
           (click)="limpiarFiltros()"
@@ -62,7 +61,6 @@
 
   <div *ngIf="errorMessage" class="bg-red-50 border border-red-200 rounded-2xl p-4 mb-6">
     <div class="flex items-center">
-      <span class="text-red-500 text-xl mr-3">⚠️</span>
       <p class="text-red-700 font-medium">{{ errorMessage }}</p>
     </div>
   </div>
@@ -129,7 +127,7 @@
 
     <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
       <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-6">
-        <h2 class="text-2xl font-bold text-white">📊 Ranking Completo</h2>
+        <h2 class="text-2xl font-bold text-white">Ranking Completo</h2>
         <p class="text-blue-100 mt-1">
           {{ tipoSeleccionado === 'global' ? 'Desafíos completados' : 'Progreso del desafío' }}
         </p>
@@ -139,7 +137,7 @@
         <div *ngFor="let item of rankingData; let i = index" 
              class="p-6 hover:bg-gray-50 transition-all duration-200 group">
           <div class="flex items-center space-x-4">
-            <!-- Posición -->
+
             <div class="flex-shrink-0">
               <div [class]="'w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg ' + 
                            (i < 3 ? 

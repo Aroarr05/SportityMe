@@ -40,6 +40,7 @@ export interface ApiResponse<T> {
 @Injectable({
   providedIn: 'root'
 })
+
 export class AuthService {
   private apiUrl = `${environment.apiUrl}/auth`;
   private currentUserSubject = new BehaviorSubject<Usuario | null>(null);
@@ -64,7 +65,7 @@ export class AuthService {
     });
   }
 
- 
+
   private initializeAuth(): void {
     const token = this.getToken();
     if (token && !this.isTokenExpired(token)) {
@@ -94,11 +95,11 @@ export class AuthService {
 
   login(credentials: LoginCredentials): Observable<AuthResponse> {
     this.loadingSubject.next(true);
-    console.log('🔐 Iniciando login con BD:', { email: credentials.email });
-    
+    console.log('Iniciando login con BD:', { email: credentials.email });
+
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
       tap((response: AuthResponse) => {
-        console.log('✅ Login exitoso - Datos desde BD:', response.user);
+        console.log('Login exitoso - Datos desde BD:', response.user);
         this.handleAuthentication(response);
         this.loadingSubject.next(false);
       }),
@@ -112,15 +113,15 @@ export class AuthService {
 
   register(userData: RegisterData): Observable<AuthResponse> {
     this.loadingSubject.next(true);
-    console.log('Guardando usuario en BD:', { 
-      nombre: userData.nombre, 
-      email: userData.email 
+    console.log('Guardando usuario en BD:', {
+      nombre: userData.nombre,
+      email: userData.email
     });
-    
+
     const userForDB = {
       nombre: userData.nombre,
       email: userData.email,
-      contraseña: userData.contraseña, 
+      contraseña: userData.contraseña,
       rol_id: 2,
       avatar_url: userData.avatar_url || null,
       biografia: userData.biografia || null,
@@ -130,7 +131,7 @@ export class AuthService {
       peso: userData.peso || null,
       altura: userData.altura || null
     };
-    
+
     return this.http.post<AuthResponse>(`${this.apiUrl}/register`, userForDB).pipe(
       tap((response: AuthResponse) => {
         console.log('Usuario guardado en BD:', response.user);
@@ -150,9 +151,9 @@ export class AuthService {
     this.tokenSubject.next(response.token);
     this.currentUserSubject.next(response.user);
     this.isLoggedInSubject.next(true);
-    
+
     console.log('Usuario autenticado desde BD:', response.user);
-    
+
     localStorage.setItem('userData', JSON.stringify(response.user));
   }
 
@@ -169,8 +170,8 @@ export class AuthService {
       }
     }
 
-    this.http.get<Usuario>(`${this.apiUrl}/me`, { 
-      headers: this.getAuthHeaders() 
+    this.http.get<Usuario>(`${this.apiUrl}/me`, {
+      headers: this.getAuthHeaders()
     }).subscribe({
       next: (user) => {
         console.log('Usuario cargado desde BD MySQL:', user);
@@ -186,8 +187,8 @@ export class AuthService {
   }
 
   getProfile(): Observable<Usuario> {
-    return this.http.get<Usuario>(`${this.apiUrl}/me`, { 
-      headers: this.getAuthHeaders() 
+    return this.http.get<Usuario>(`${this.apiUrl}/me`, {
+      headers: this.getAuthHeaders()
     }).pipe(
       tap(user => {
         console.log('Perfil completo desde BD:', user);
@@ -198,12 +199,12 @@ export class AuthService {
     );
   }
 
- 
+
   updateProfile(userData: Partial<Usuario>): Observable<Usuario> {
     console.log('Actualizando perfil en BD:', userData);
-    
-    return this.http.put<Usuario>(`${this.apiUrl}/profile`, userData, { 
-      headers: this.getAuthHeaders() 
+
+    return this.http.put<Usuario>(`${this.apiUrl}/profile`, userData, {
+      headers: this.getAuthHeaders()
     }).pipe(
       tap(user => {
         console.log('Perfil actualizado en BD:', user);
@@ -216,9 +217,9 @@ export class AuthService {
 
   logout(): void {
     console.log('🚪 Cerrando sesión...');
-    
-    this.http.post(`${this.apiUrl}/logout`, {}, { 
-      headers: this.getAuthHeaders() 
+
+    this.http.post(`${this.apiUrl}/logout`, {}, {
+      headers: this.getAuthHeaders()
     }).subscribe({
       next: () => {
         console.log('Sesión cerrada en servidor y BD');
@@ -230,7 +231,7 @@ export class AuthService {
         this.clearAuth();
       }
     });
-    
+
     this.clearAuth();
   }
 
@@ -259,9 +260,9 @@ export class AuthService {
 
   hasRole(role: Rol | string): boolean {
     const user = this.getCurrentUser();
-  
+
     if (typeof role === 'string' && Object.values(Rol).includes(role as Rol)) {
-    
+
       const roleId = role === Rol.ADMIN ? 1 : 2;
       return user?.rol_id === roleId;
     }
@@ -279,19 +280,19 @@ export class AuthService {
     });
   }
 
-  
+
   isAdmin(): boolean {
     const user = this.getCurrentUser();
-    return user?.rol_id === 1; 
+    return user?.rol_id === 1;
   }
-  
+
   isModerador(): boolean {
     return false;
   }
 
   isUsuario(): boolean {
     const user = this.getCurrentUser();
-    return user?.rol_id === 2; 
+    return user?.rol_id === 2;
   }
 
   isLoading(): boolean {
@@ -299,7 +300,7 @@ export class AuthService {
   }
 
   getRoleName(rolId: number): string {
-    switch(rolId) {
+    switch (rolId) {
       case 1: return Rol.ADMIN;
       case 2: return Rol.USUARIO;
       default: return 'DESCONOCIDO';
@@ -308,22 +309,20 @@ export class AuthService {
 
   private handleError(error: any): Observable<never> {
     let errorMessage = 'Error de autenticación';
-    
-    console.log('🔍 Analizando error desde BD:', error);
-    
+
     if (error.error instanceof ErrorEvent) {
-     
+
       errorMessage = `Error de conexión: ${error.error.message}`;
     } else {
-     
+
       const status = error.status;
       const errorBody = error.error;
-      
-      console.log('📊 Detalles del error BD:', { status, errorBody });
-      
-    
+
+      console.log('Detalles del error BD:', { status, errorBody });
+
+
       if (errorBody && typeof errorBody === 'object') {
-      
+
         if (errorBody.errors) {
           const validationErrors = errorBody.errors.map((err: any) => err.defaultMessage).join(', ');
           errorMessage = `Errores de validación: ${validationErrors}`;
@@ -333,7 +332,7 @@ export class AuthService {
           errorMessage = errorBody.error;
         }
       } else if (typeof errorBody === 'string') {
-     
+
         try {
           const parsedError = JSON.parse(errorBody);
           errorMessage = parsedError.message || parsedError.error || errorMessage;
@@ -341,7 +340,7 @@ export class AuthService {
           errorMessage = errorBody || errorMessage;
         }
       }
-      
+
       switch (status) {
         case 0:
           errorMessage = 'Error de conexión con la base de datos. Verifica tu conexión.';
@@ -384,7 +383,7 @@ export class AuthService {
           break;
       }
     }
-    
+
     console.error('Error de BD MySQL:', errorMessage);
     return throwError(() => new Error(errorMessage));
   }
@@ -410,8 +409,8 @@ export class AuthService {
     return this.http.post<{ message: string }>(`${this.apiUrl}/change-password`, {
       currentPassword,
       newPassword
-    }, { 
-      headers: this.getAuthHeaders() 
+    }, {
+      headers: this.getAuthHeaders()
     }).pipe(
       tap(() => console.log('Contraseña cambiada en BD')),
       catchError(this.handleError)
@@ -421,54 +420,53 @@ export class AuthService {
   checkEmailExists(email: string): Observable<boolean> {
     return this.http.post<{ exists: boolean }>(`${this.apiUrl}/check-email`, { email }).pipe(
       map(response => response.exists),
-      tap(exists => console.log(`📧 Verificación en BD - Email ${email} existe:`, exists)),
+      tap(exists => console.log(`Verificación en BD - Email ${email} existe:`, exists)),
       catchError(this.handleError)
     );
   }
 
   getAllUsers(): Observable<Usuario[]> {
-    return this.http.get<Usuario[]>(`${environment.apiUrl}/usuarios`, { 
-      headers: this.getAuthHeaders() 
+    return this.http.get<Usuario[]>(`${environment.apiUrl}/usuarios`, {
+      headers: this.getAuthHeaders()
     }).pipe(
-      tap(users => console.log('👥 Usuarios cargados desde BD:', users.length)),
+      tap(users => console.log('Usuarios cargados desde BD:', users.length)),
       catchError(this.handleError)
     );
   }
 
   getUserById(id: number): Observable<Usuario> {
-    return this.http.get<Usuario>(`${environment.apiUrl}/usuarios/${id}`, { 
-      headers: this.getAuthHeaders() 
+    return this.http.get<Usuario>(`${environment.apiUrl}/usuarios/${id}`, {
+      headers: this.getAuthHeaders()
     }).pipe(
-      tap(user => console.log('👤 Usuario por ID desde BD:', user)),
+      tap(user => console.log('Usuario por ID desde BD:', user)),
       catchError(this.handleError)
     );
   }
 
   updateLastLogin(): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/update-last-login`, {}, { 
-      headers: this.getAuthHeaders() 
+    return this.http.post<void>(`${this.apiUrl}/update-last-login`, {}, {
+      headers: this.getAuthHeaders()
     }).pipe(
-      tap(() => console.log('🕐 Último login actualizado en BD')),
+      tap(() => console.log('Último login actualizado en BD')),
       catchError(this.handleError)
     );
   }
 
   getUserStats(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/stats`, { 
-      headers: this.getAuthHeaders() 
+    return this.http.get(`${this.apiUrl}/stats`, {
+      headers: this.getAuthHeaders()
     }).pipe(
-      tap(stats => console.log('📊 Estadísticas desde BD:', stats)),
+      tap(stats => console.log('Estadísticas desde BD:', stats)),
       catchError(this.handleError)
     );
   }
 
   checkAuthStatus(): Observable<boolean> {
-    return this.http.get<{ authenticated: boolean }>(`${this.apiUrl}/status`, { 
-      headers: this.getAuthHeaders() 
+    return this.http.get<{ authenticated: boolean }>(`${this.apiUrl}/status`, {
+      headers: this.getAuthHeaders()
     }).pipe(
       map(response => response.authenticated),
       tap(authenticated => {
-        console.log('🔍 Estado de autenticación en BD:', authenticated);
         if (!authenticated) {
           this.clearAuth();
         }
@@ -481,8 +479,8 @@ export class AuthService {
   }
 
   getAvailableRoles(): Observable<string[]> {
-    return this.http.get<string[]>(`${this.apiUrl}/roles`, { 
-      headers: this.getAuthHeaders() 
+    return this.http.get<string[]>(`${this.apiUrl}/roles`, {
+      headers: this.getAuthHeaders()
     }).pipe(
       tap(roles => console.log('🎭 Roles disponibles en BD:', roles)),
       catchError(this.handleError)

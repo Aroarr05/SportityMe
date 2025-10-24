@@ -3,7 +3,8 @@ export interface Usuario {
   nombre: string;
   email: string;
   contraseña: string; 
-  rol_id: number;      
+  rol_id: number;
+  rol?: String;
   avatar_url?: string;
   biografia?: string;
   ubicacion?: string;

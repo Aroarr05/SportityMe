@@ -73,6 +73,22 @@ export const routes: Routes = [
           { path: '', redirectTo: 'global', pathMatch: 'full' }
         ]
       },
+      {
+        path: 'admin',
+        children: [
+          {
+            path: 'usuarios',
+            loadComponent: () => import('./modules/admin/components/gestion-usuarios/gestion-usuarios.component').then(m => m.GestionUsuariosComponent),
+            canActivate: [AuthGuard]
+          },
+          {
+            path: 'desafios',
+            loadComponent: () => import('./modules/admin/components/gestion-desafios/gestion-desafios.component').then(m => m.GestionDesafiosComponent),
+            canActivate: [AuthGuard] 
+          },
+          { path: '', redirectTo: 'usuarios', pathMatch: 'full' }
+        ]
+      },
       { path: '', redirectTo: 'desafios', pathMatch: 'full' }
     ]
   },
