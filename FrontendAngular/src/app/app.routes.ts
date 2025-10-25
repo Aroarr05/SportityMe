@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { NoAuthGuard } from './auth/guards/no-auth.guard';
+import { AdminGuard } from './auth/guards/admin.guard';
 
 export const routes: Routes = [
   {
@@ -79,12 +80,12 @@ export const routes: Routes = [
           {
             path: 'usuarios',
             loadComponent: () => import('./modules/admin/components/gestion-usuarios/gestion-usuarios.component').then(m => m.GestionUsuariosComponent),
-            canActivate: [AuthGuard]
+            canActivate: [AuthGuard,AdminGuard]
           },
           {
             path: 'desafios',
             loadComponent: () => import('./modules/admin/components/gestion-desafios/gestion-desafios.component').then(m => m.GestionDesafiosComponent),
-            canActivate: [AuthGuard] 
+            canActivate: [AuthGuard,AdminGuard] 
           },
           { path: '', redirectTo: 'usuarios', pathMatch: 'full' }
         ]

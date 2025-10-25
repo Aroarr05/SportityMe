@@ -1,183 +1,56 @@
-<div class="p-6">
+<div class="container mx-auto p-6">
   <div class="flex justify-between items-center mb-6">
-    <div>
-      <h2 class="text-2xl font-bold text-gray-800">Gestión de Usuarios</h2>
-      <p class="text-gray-600">Administra los usuarios del sistema</p>
-    </div>
-    <button (click)="abrirCrearUsuario()"
-      class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 flex items-center space-x-2">
-      <i class="fas fa-plus"></i>
-      <span>Nuevo Usuario</span>
+    <h1 class="text-2xl font-bold text-gray-900">Gestión de Usuarios</h1>
+    
+    <button 
+      *ngIf="vistaActual === 'lista'"
+      (click)="mostrarCrear()"
+      class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+    >
+      Crear Usuario
+    </button>
+
+    <button 
+      *ngIf="vistaActual !== 'lista'"
+      (click)="mostrarLista()"
+      class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors"
+    >
+      Volver a la Lista
     </button>
   </div>
 
-  <div *ngIf="mensajeError" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+
+  <div *ngIf="mensajeError" class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
     {{ mensajeError }}
   </div>
 
-  <div class="bg-white rounded-lg shadow overflow-hidden">
-    <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rol</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Registro</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <tr *ngIf="cargando">
-            <td colspan="6" class="px-6 py-4 text-center">
-              <div class="flex justify-center items-center">
-                <i class="fas fa-spinner fa-spin text-purple-600 text-xl"></i>
-                <span class="ml-2 text-gray-600">Cargando usuarios...</span>
-              </div>
-            </td>
-          </tr>
-          <tr *ngFor="let usuario of usuarios" class="hover:bg-gray-50">
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="flex items-center">
-                <div class="h-10 w-10 flex-shrink-0">
-                  <img class="h-10 w-10 rounded-full" [src]="usuario.avatar_url || '/assets/default-avatar.png'"
-                    [alt]="usuario.nombre">
-                </div>
-                <div class="ml-4">
-                  <div class="text-sm font-medium text-gray-900">{{ usuario.nombre }}</div>
-                </div>
-              </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">{{ usuario.email }}</div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                {{ getRolNombre(usuario.rol_id) }}
-              </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
-                [class]="getEstadoBadgeClass(usuario.activo)">
-                {{ getEstadoTexto(usuario.activo) }}
-              </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {{ formatearFecha(usuario.fecha_registro) }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-              <div class="flex space-x-2">
-                <button (click)="abrirEditarUsuario(usuario)"
-                  class="text-indigo-600 hover:text-indigo-900 transition-colors" title="Editar usuario">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button (click)="eliminarUsuario(usuario.id, usuario.nombre)"
-                  class="text-red-600 hover:text-red-900 transition-colors" title="Eliminar usuario">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </div>
-            </td>
-          </tr>
-          <tr *ngIf="!cargando && usuarios.length === 0">
-            <td colspan="6" class="px-6 py-4 text-center text-gray-500">
-              No se encontraron usuarios
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
 
-  <div *ngIf="mostrarModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
-      <div class="px-6 py-4 border-b border-gray-200">
-        <h3 class="text-lg font-medium text-gray-900">
-          {{ esEdicion ? 'Editar Usuario' : 'Crear Usuario' }}
-        </h3>
-      </div>
+  <app-lista-usuarios
+    *ngIf="vistaActual === 'lista'"
+    [usuarios]="usuarios"
+    [cargando]="cargando"
+    (editar)="mostrarEditar($event)"
+    (ver)="mostrarDetalle($event)"
+    (eliminar)="eliminarUsuario($event)"
+  ></app-lista-usuarios>
 
-      <form (ngSubmit)="guardarUsuario()" class="p-6 space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-          <input type="text" [(ngModel)]="usuarioEditando.nombre" name="nombre" required
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
-        </div>
+  <app-crear-usuario
+    *ngIf="vistaActual === 'crear'"
+    (creado)="onUsuarioCreado()"
+    (cancelar)="onCancelar()"
+  ></app-crear-usuario>
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <input type="email" [(ngModel)]="usuarioEditando.email" name="email" required
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
-        </div>
+  <app-editar-usuario
+    *ngIf="vistaActual === 'editar' && usuarioSeleccionado"
+    [usuario]="usuarioSeleccionado"
+    (actualizado)="onUsuarioActualizado()"
+    (cancelar)="onCancelar()"
+  ></app-editar-usuario>
 
-       
-        <div *ngIf="!esEdicion">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-          <input type="password" [ngModel]="usuarioEditando['contraseña']"
-            (ngModelChange)="usuarioEditando['contraseña'] = $event" name="contraseña" required
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
-        </div>
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Rol</label>
-          <select [(ngModel)]="usuarioEditando.rol_id" name="rol_id"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
-            <option *ngFor="let rol of roles" [value]="rol.id">{{ rol.nombre }}</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-          <select [(ngModel)]="usuarioEditando.activo" name="activo"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
-            <option *ngFor="let estado of estados" [value]="estado.valor">{{ estado.texto }}</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Avatar URL</label>
-          <input type="text" [(ngModel)]="usuarioEditando.avatar_url" name="avatar_url"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Biografía</label>
-          <textarea [(ngModel)]="usuarioEditando.biografia" name="biografia" rows="3"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Ubicación</label>
-          <input type="text" [(ngModel)]="usuarioEditando.ubicacion" name="ubicacion"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Género</label>
-          <select [(ngModel)]="usuarioEditando.genero" name="genero"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
-            <option value="">Seleccionar género</option>
-            <option *ngFor="let genero of generos" [value]="genero.valor">{{ genero.texto }}</option>
-          </select>
-        </div>
-
-        <div class="flex justify-end space-x-3 pt-4">
-          <button type="button" (click)="cerrarModal()"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors">
-            Cancelar
-          </button>
-          <button type="submit" [disabled]="guardando"
-            class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-            <span *ngIf="guardando">
-              <i class="fas fa-spinner fa-spin mr-2"></i>
-              {{ esEdicion ? 'Actualizando...' : 'Creando...' }}
-            </span>
-            <span *ngIf="!guardando">
-              {{ esEdicion ? 'Actualizar' : 'Crear' }}
-            </span>
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
+  <app-detalle-usuario
+    *ngIf="vistaActual === 'detalle' && usuarioSeleccionado"
+    [usuario]="usuarioSeleccionado"
+    (editar)="mostrarEditar(usuarioSeleccionado!)"
+  ></app-detalle-usuario>
 </div>

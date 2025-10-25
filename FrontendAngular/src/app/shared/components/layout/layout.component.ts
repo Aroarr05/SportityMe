@@ -36,35 +36,26 @@ export class LayoutComponent implements OnInit {
     this.authService.isLoggedIn$.subscribe(loggedIn => {
       this.isLoggedIn = loggedIn;
       console.log('🔄 isLoggedIn cambió:', loggedIn);
-      if (loggedIn) {
-        this.checkAdminStatus();
-      } else {
-        this.isAdmin = false;
-      }
+      this.checkAdminStatus();
     });
 
     this.authService.currentUser$.subscribe(user => {
       console.log('🔄 Usuario actual cambió:', user);
-      if (user) {
-        this.checkAdminStatus();
-      } else {
-        this.isAdmin = false;
-      }
-    });
-
-    setTimeout(() => {
       this.checkAdminStatus();
-    }, 1000);
-
+    });
+    this.checkAdminStatus();
     this.actualizarTitulo();
   }
 
   private checkAdminStatus(): void {
+
+    this.isAdmin = this.authService.isAdmin();
+    console.log('🔍 checkAdminStatus() - isAdmin:', this.isAdmin);
+    
     const user = this.authService.getCurrentUser();
+    console.log('🔍 checkAdminStatus() - Usuario:', user);
     if (user) {
-      this.isAdmin = user.rol_id === 1 || user.rol === 'ADMIN';
-    } else {
-      this.isAdmin = false;
+      console.log('🔍 checkAdminStatus() - Propiedades del usuario:', Object.keys(user));
     }
   }
 

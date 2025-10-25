@@ -12,11 +12,30 @@ export class AdminGuard implements CanActivate {
   ) {}
 
   canActivate(): boolean {
-    if (this.authService.isAdmin()) {
-      return true;
-    } else {
+    const isAdmin = this.authService.isAdmin();
+    const isLoggedIn = this.authService.isLoggedIn();
+    const currentUser = this.authService.getCurrentUser();
+
+    console.log('🔐 Verificando acceso admin:', {
+      isLoggedIn,
+      isAdmin,
+      currentUser: currentUser?.nombre,
+      rolId: currentUser?.rol_id
+    });
+
+    if (!isLoggedIn) {
+      console.log('❌ Usuario no autenticado, redirigiendo a login');
+      this.router.navigate(['/auth/login']);
+      return false;
+    }
+
+    if (!isAdmin) {
+      console.log(' Usuario no es admin, redirigiendo a desafíos');
       this.router.navigate(['/desafios']);
       return false;
     }
+
+    console.log('Acceso admin permitido');
+    return true;
   }
 }

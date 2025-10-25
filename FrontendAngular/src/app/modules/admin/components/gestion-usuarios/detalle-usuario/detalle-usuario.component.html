@@ -1,0 +1,96 @@
+<div class="bg-white shadow-md rounded-lg overflow-hidden">
+  <div class="bg-gray-50 px-6 py-4 border-b">
+    <div class="flex justify-between items-center">
+      <h2 class="text-2xl font-bold text-gray-900">{{ usuario.nombre }}</h2>
+      <button 
+        (click)="editar.emit()"
+        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+      >
+        Editar Usuario
+      </button>
+    </div>
+    <p class="text-gray-600 mt-2">{{ usuario.email }}</p>
+  </div>
+
+  <div class="p-6">
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+
+      <div class="space-y-4">
+        <h3 class="text-lg font-semibold text-gray-900 border-b pb-2">Información Personal</h3>
+        
+        <div class="flex items-center space-x-4">
+          <div *ngIf="usuario.avatar_url" class="flex-shrink-0">
+            <img [src]="usuario.avatar_url" alt="Foto perfil" class="h-16 w-16 rounded-full">
+          </div>
+          <div *ngIf="!usuario.avatar_url" class="flex-shrink-0">
+            <div class="h-16 w-16 rounded-full bg-gray-300 flex items-center justify-center">
+              <span class="text-gray-600 font-medium text-xl">{{ usuario.nombre?.charAt(0) }}</span>
+            </div>
+          </div>
+          <div>
+            <p class="text-lg font-semibold">{{ usuario.nombre }}</p>
+            <p class="text-gray-600">{{ getGeneroTexto() }}</p>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-sm font-medium text-gray-500">Email</label>
+          <p class="text-gray-900">{{ usuario.email }}</p>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <h3 class="text-lg font-semibold text-gray-900 border-b pb-2">Información de Cuenta</h3>
+        
+        <div>
+          <label class="text-sm font-medium text-gray-500">Rol</label>
+          <p class="text-gray-900">
+            <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+              {{ getRolNombre(usuario.rol_id) }}
+            </span>
+          </p>
+        </div>
+
+        <div>
+          <label class="text-sm font-medium text-gray-500">Estado</label>
+          <p class="text-gray-900">
+            <span [class]="getEstadoBadgeClass()">
+              {{ getEstadoTexto() }}
+            </span>
+          </p>
+        </div>
+
+        <div>
+          <label class="text-sm font-medium text-gray-500">Fecha de Registro</label>
+          <p class="text-gray-900">{{ formatearFecha(usuario.fecha_registro) }}</p>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <h3 class="text-lg font-semibold text-gray-900 border-b pb-2">Estadísticas</h3>
+        
+        <div class="text-center p-4 bg-blue-50 rounded-lg">
+          <p class="text-2xl font-bold text-blue-600">0</p>
+          <p class="text-sm text-blue-500">Desafíos Completados</p>
+        </div>
+        
+        <div class="text-center p-4 bg-green-50 rounded-lg">
+          <p class="text-2xl font-bold text-green-600">0</p>
+          <p class="text-sm text-green-500">Desafíos Activos</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="border-t pt-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Información Adicional</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="text-sm font-medium text-gray-500">ID del Usuario</label>
+          <p class="mt-1 text-gray-900 font-mono">{{ usuario.id }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

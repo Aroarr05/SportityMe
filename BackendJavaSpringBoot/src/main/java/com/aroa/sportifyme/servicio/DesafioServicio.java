@@ -21,9 +21,9 @@ public class DesafioServicio {
 
     @Transactional
     public Desafio crearDesafio(String titulo, String descripcion, Desafio.TipoActividad tipoActividad,
-                               Double objetivo, String unidadObjetivo, LocalDateTime fechaInicio,
-                               LocalDateTime fechaFin, Boolean esPublico, String icono, Desafio.Dificultad dificultad,
-                               Integer maxParticipantes, Long creadorId) {
+            Double objetivo, String unidadObjetivo, LocalDateTime fechaInicio,
+            LocalDateTime fechaFin, Boolean esPublico, String icono, Desafio.Dificultad dificultad,
+            Integer maxParticipantes, Long creadorId) {
         Usuario creador = usuarioServicio.buscarPorId(creadorId)
                 .orElseThrow(() -> new UsuarioNoEncontradoException(creadorId));
 
@@ -38,7 +38,7 @@ public class DesafioServicio {
         desafio.setFechaInicio(fechaInicio);
         desafio.setFechaFin(fechaFin);
         desafio.setEsPublico(esPublico != null ? esPublico : true);
-        desafio.setIcono(icono); 
+        desafio.setIcono(icono);
         desafio.setDificultad(dificultad);
         desafio.setMaxParticipantes(maxParticipantes);
         desafio.setCreador(creador);
@@ -79,9 +79,9 @@ public class DesafioServicio {
 
     @Transactional
     public Desafio actualizarDesafio(Long id, String titulo, String descripcion, Desafio.TipoActividad tipoActividad,
-                                    Double objetivo, String unidadObjetivo, LocalDateTime fechaInicio,
-                                    LocalDateTime fechaFin, Boolean esPublico, String icono, Desafio.Dificultad dificultad,
-                                    Integer maxParticipantes, Long usuarioId) {
+            Double objetivo, String unidadObjetivo, LocalDateTime fechaInicio,
+            LocalDateTime fechaFin, Boolean esPublico, String icono, Desafio.Dificultad dificultad,
+            Integer maxParticipantes, Long usuarioId) {
         Desafio desafioExistente = buscarPorId(id);
         Usuario usuario = usuarioServicio.buscarPorId(usuarioId)
                 .orElseThrow(() -> new UsuarioNoEncontradoException(usuarioId));
@@ -100,7 +100,7 @@ public class DesafioServicio {
         desafioExistente.setFechaInicio(fechaInicio);
         desafioExistente.setFechaFin(fechaFin);
         desafioExistente.setEsPublico(esPublico);
-        desafioExistente.setIcono(icono); 
+        desafioExistente.setIcono(icono);
         desafioExistente.setDificultad(dificultad);
         desafioExistente.setMaxParticipantes(maxParticipantes);
         desafioExistente.setFechaActualizacion(LocalDateTime.now());
@@ -146,26 +146,26 @@ public class DesafioServicio {
         Desafio desafio = buscarPorId(desafioId);
         Usuario usuario = usuarioServicio.buscarPorId(usuarioId)
                 .orElseThrow(() -> new UsuarioNoEncontradoException(usuarioId));
-        
+
         if (desafioRepository.esParticipante(desafioId, usuarioId)) {
             throw new IllegalArgumentException("Ya eres participante de este desafío");
         }
-        
+
         if (desafio.getMaxParticipantes() != null) {
             Long participantesActuales = desafioRepository.countParticipantesByDesafioId(desafioId);
             if (participantesActuales >= desafio.getMaxParticipantes()) {
                 throw new IllegalArgumentException("El desafío ha alcanzado el máximo de participantes");
             }
         }
-        
+
         if (desafio.getFechaFin().isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("El desafío ya ha expirado");
         }
-        
+
         if (desafio.getCreador().getId().equals(usuarioId)) {
             throw new IllegalArgumentException("El creador no puede unirse como participante");
         }
-        
+
         desafio.agregarParticipante(usuario);
         desafioRepository.save(desafio);
     }
@@ -175,7 +175,7 @@ public class DesafioServicio {
         if (!desafioRepository.existsById(desafioId)) {
             throw new DesafioNoEncontradoException(desafioId);
         }
-        
+
         return desafioRepository.findParticipantesByDesafioId(desafioId);
     }
 
@@ -193,21 +193,53 @@ public class DesafioServicio {
         if (fechaInicio == null || fechaFin == null) {
             throw new IllegalArgumentException("Las fechas de inicio y fin son requeridas");
         }
-        
+
         if (fechaFin.isBefore(fechaInicio)) {
             throw new IllegalArgumentException("La fecha de fin debe ser posterior a la de inicio");
         }
-        
+
     }
 
     private boolean tienePermisosParaModificar(Desafio desafio, Usuario usuario) {
         if (desafio.getCreador() == null || usuario.getRol() == null) {
             return false;
         }
-        
+
         boolean esCreador = desafio.getCreador().getId().equals(usuario.getId());
         boolean esAdmin = "ADMIN".equals(usuario.getRol().getNombre());
-        
+
         return esCreador || esAdmin;
     }
+
+    @Transactional(readOnly = true)
+    public List<Desafio> obtenerTodosDesafios() {
+        return desafioRepository.findAll();
+    }
+
+    @Transactional
+    public Desafio crearDesafio(Desafio desafio) {
+        if (desafio.getTitulo() == null || desafio.getTitulo().trim().isEmpty()) {
+            throw new IllegalArgumentException("El título es obligatorio");
+        }
+        if (desafio.getCreador() == null || desafio.getCreador().getId() == null) {
+            throw new IllegalArgumentException("El creador es obligatorio");
+        }
+
+        Desafio.Dificultad dificultadPorDefecto = Desafio.Dificultad.values()[0];
+
+        return crearDesafio(
+                desafio.getTitulo(),
+                desafio.getDescripcion(),
+                desafio.getTipoActividad(),
+                desafio.getObjetivo() != null ? desafio.getObjetivo().doubleValue() : null,
+                desafio.getUnidadObjetivo(),
+                desafio.getFechaInicio(),
+                desafio.getFechaFin(),
+                desafio.getEsPublico() != null ? desafio.getEsPublico() : true,
+                desafio.getIcono(),
+                desafio.getDificultad() != null ? desafio.getDificultad() : dificultadPorDefecto,
+                desafio.getMaxParticipantes() != null ? desafio.getMaxParticipantes() : 100,
+                desafio.getCreador().getId());
+    }
+
 }

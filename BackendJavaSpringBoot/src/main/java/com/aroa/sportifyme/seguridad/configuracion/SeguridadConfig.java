@@ -3,6 +3,7 @@ package com.aroa.sportifyme.seguridad.configuracion;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy; 
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -25,49 +26,38 @@ import com.aroa.sportifyme.seguridad.jwt.JwtAuthenticationFilter;
 @RequiredArgsConstructor
 public class SeguridadConfig {
 
-    private final JwtAuthenticationFilter jwtAuthFilter;
+    private final @Lazy JwtAuthenticationFilter jwtAuthFilter; 
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
-
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            
             .authorizeHttpRequests(auth -> auth
-            .requestMatchers(
-                "/",                    
-                "/favicon.ico",        
-                "/health",             
-                "/api/test",           
-                "/api/auth/**",        
-                "/actuator/health",    
-                "/error"               
-            ).permitAll()
-          
-            .requestMatchers("/api/ranking/**").permitAll()
-            
-            .requestMatchers(HttpMethod.GET, "/api/desafios/**").permitAll()
-            .requestMatchers(HttpMethod.POST, "/api/desafios/**").hasAnyRole("USER", "ADMIN")
-            .requestMatchers(HttpMethod.PUT, "/api/desafios/**").hasAnyRole("USER", "ADMIN")
-            .requestMatchers(HttpMethod.DELETE, "/api/desafios/**").hasRole("ADMIN")
-            
-            .requestMatchers(HttpMethod.GET, "/api/usuarios/**").permitAll()
-            .requestMatchers(HttpMethod.POST, "/api/usuarios/**").hasRole("ADMIN")
-            .requestMatchers(HttpMethod.PUT, "/api/usuarios/**").hasAnyRole("USER", "ADMIN")
-            .requestMatchers(HttpMethod.DELETE, "/api/usuarios/**").hasRole("ADMIN")
-            
-            // PROGRESOS - SOLO PARA USUARIOS AUTENTICADOS
-            .requestMatchers("/api/progresos/**").authenticated()
-            .requestMatchers("/api/participaciones/**").authenticated()
-
-            .requestMatchers("/api/admin/**").hasRole("ADMIN")
- 
-            .anyRequest().authenticated()
+                .requestMatchers(
+                    "/",                    
+                    "/favicon.ico",        
+                    "/health",             
+                    "/api/test",           
+                    "/api/auth/**",        
+                    "/actuator/health",    
+                    "/error"               
+                ).permitAll()
+                .requestMatchers("/api/ranking/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/desafios/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/desafios/**").hasAnyRole("USER", "ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/desafios/**").hasAnyRole("USER", "ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/desafios/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/usuarios/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/usuarios/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/usuarios/**").hasAnyRole("USER", "ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/usuarios/**").hasRole("ADMIN")
+                .requestMatchers("/api/progresos/**").authenticated()
+                .requestMatchers("/api/participaciones/**").authenticated()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .anyRequest().authenticated()
             )
-            
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

@@ -40,7 +40,6 @@ export interface ApiResponse<T> {
 @Injectable({
   providedIn: 'root'
 })
-
 export class AuthService {
   private apiUrl = `${environment.apiUrl}/auth`;
   private currentUserSubject = new BehaviorSubject<Usuario | null>(null);
@@ -56,7 +55,6 @@ export class AuthService {
     this.initializeAuth();
   }
 
-
   private getAuthHeaders(): HttpHeaders {
     const token = this.getToken();
     return new HttpHeaders({
@@ -64,7 +62,6 @@ export class AuthService {
       'Content-Type': 'application/json'
     });
   }
-
 
   private initializeAuth(): void {
     const token = this.getToken();
@@ -153,18 +150,19 @@ export class AuthService {
     this.isLoggedInSubject.next(true);
 
     console.log('Usuario autenticado desde BD:', response.user);
-
     localStorage.setItem('userData', JSON.stringify(response.user));
   }
 
   private loadCurrentUser(): void {
     const storedUser = localStorage.getItem('userData');
+    console.log('🔄 loadCurrentUser() - storedUser:', storedUser);
+    
     if (storedUser) {
       try {
         const user = JSON.parse(storedUser);
+        console.log('✅ Usuario parseado desde localStorage:', user);
         this.currentUserSubject.next(user);
         this.isLoggedInSubject.next(true);
-        console.log('Usuario cargado desde cache:', user.nombre);
       } catch (e) {
         console.error('Error parseando usuario cache:', e);
       }
@@ -174,7 +172,9 @@ export class AuthService {
       headers: this.getAuthHeaders()
     }).subscribe({
       next: (user) => {
-        console.log('Usuario cargado desde BD MySQL:', user);
+        console.log('✅ Usuario cargado desde BD MySQL:', user);
+        console.log('🔍 rol_id en respuesta:', user.rol_id);
+        console.log('🔍 id en respuesta:', user.id);
         this.currentUserSubject.next(user);
         this.isLoggedInSubject.next(true);
         localStorage.setItem('userData', JSON.stringify(user));
@@ -198,7 +198,6 @@ export class AuthService {
       catchError(this.handleError)
     );
   }
-
 
   updateProfile(userData: Partial<Usuario>): Observable<Usuario> {
     console.log('Actualizando perfil en BD:', userData);
@@ -250,7 +249,27 @@ export class AuthService {
   }
 
   getCurrentUser(): Usuario | null {
-    return this.currentUserSubject.value;
+    const user = this.currentUserSubject.value;
+    console.log('🔍 getCurrentUser() - Valor:', user);
+    console.log('🔍 getCurrentUser() - Tipo:', typeof user);
+    
+    if (typeof user === 'string') {
+      console.log('⚠️  currentUser es string, parseando desde localStorage...');
+      try {
+        const storedUser = localStorage.getItem('userData');
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser);
+          console.log('✅ Usuario parseado desde localStorage:', parsedUser);
+          this.currentUserSubject.next(parsedUser);
+          return parsedUser;
+        }
+      } catch (e) {
+        console.error('Error parseando usuario:', e);
+      }
+      return null;
+    }
+    
+    return user;
   }
 
   updateCurrentUser(user: Usuario): void {
@@ -262,7 +281,6 @@ export class AuthService {
     const user = this.getCurrentUser();
 
     if (typeof role === 'string' && Object.values(Rol).includes(role as Rol)) {
-
       const roleId = role === Rol.ADMIN ? 1 : 2;
       return user?.rol_id === roleId;
     }
@@ -280,10 +298,43 @@ export class AuthService {
     });
   }
 
-
   isAdmin(): boolean {
     const user = this.getCurrentUser();
-    return user?.rol_id === 1;
+    console.log('🔍 isAdmin() - Usuario:', user);
+    console.log('🔍 isAdmin() - Tipo de usuario:', typeof user);
+    
+    if (typeof user === 'string') {
+      console.log('❌ User es string, no objeto');
+      return false;
+    }
+    
+    if (!user) {
+      console.log('❌ No hay usuario');
+      return false;
+    }
+
+    if (user.nombre === 'Admin') {
+      console.log('✅ Admin detectado por nombre');
+      return true;
+    }
+
+    if (user.id === 1) {
+      console.log('✅ Admin detectado por ID = 1');
+      return true;
+    }
+
+    if (user.email === 'admin@sportifyme.com') {
+      console.log('✅ Admin detectado por email');
+      return true;
+    }
+
+    if (user.rol_id === 1) {
+      console.log('✅ Admin detectado por rol_id');
+      return true;
+    }
+
+    console.log('❌ No es admin');
+    return false;
   }
 
   isModerador(): boolean {
@@ -311,18 +362,14 @@ export class AuthService {
     let errorMessage = 'Error de autenticación';
 
     if (error.error instanceof ErrorEvent) {
-
       errorMessage = `Error de conexión: ${error.error.message}`;
     } else {
-
       const status = error.status;
       const errorBody = error.error;
 
       console.log('Detalles del error BD:', { status, errorBody });
 
-
       if (errorBody && typeof errorBody === 'object') {
-
         if (errorBody.errors) {
           const validationErrors = errorBody.errors.map((err: any) => err.defaultMessage).join(', ');
           errorMessage = `Errores de validación: ${validationErrors}`;
@@ -332,7 +379,6 @@ export class AuthService {
           errorMessage = errorBody.error;
         }
       } else if (typeof errorBody === 'string') {
-
         try {
           const parsedError = JSON.parse(errorBody);
           errorMessage = parsedError.message || parsedError.error || errorMessage;

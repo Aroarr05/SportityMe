@@ -1,20 +1,28 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { AdminService, Desafio } from '../../services/admin.service';
+import { ListaDesafiosComponent } from './lista-desafios/lista-desafios.component';
+import { CrearDesafioComponent } from './crear-desafio/crear-desafio.component';
+import { EditarDesafioComponent } from './editar-desafio/editar-desafio.component';
+import { DetalleDesafioComponent } from '../../../desafios/components/detalle-desafio/detalle-desafio.component';
+import { AdminService } from '../../services/admin.service';
+import { Desafio } from '../../../../shared/models';
 
 @Component({
   selector: 'app-gestion-desafios',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule, 
+    ListaDesafiosComponent,
+    CrearDesafioComponent,
+    EditarDesafioComponent,
+    DetalleDesafioComponent
+  ],
   templateUrl: './gestion-desafios.component.html'
 })
-
 export class GestionDesafiosComponent implements OnInit {
   desafios: Desafio[] = [];
-  desafioEditando: Partial<Desafio> = {};
-  mostrarModal = false;
-  esEdicion = false;
+  vistaActual: 'lista' | 'crear' | 'editar' | 'detalle' = 'lista';
+  desafioSeleccionado: Desafio | null = null;
   cargando = true;
 
   constructor(private adminService: AdminService) {}
@@ -37,40 +45,37 @@ export class GestionDesafiosComponent implements OnInit {
     });
   }
 
-  abrirCrearDesafio(): void {
-    this.desafioEditando = {
-      tipo: 'CORRER',
-      estado: 'ACTIVO',
-      meta: 0
-    };
-    this.esEdicion = false;
-    this.mostrarModal = true;
+  mostrarLista(): void {
+    this.vistaActual = 'lista';
+    this.desafioSeleccionado = null;
   }
 
-  abrirEditarDesafio(desafio: Desafio): void {
-    this.desafioEditando = { ...desafio };
-    this.esEdicion = true;
-    this.mostrarModal = true;
+  mostrarCrear(): void {
+    this.vistaActual = 'crear';
   }
 
-  guardarDesafio(): void {
-    if (this.esEdicion) {
-      this.adminService.actualizarDesafio(this.desafioEditando.id!, this.desafioEditando).subscribe({
-        next: () => {
-          this.cargarDesafios();
-          this.cerrarModal();
-        },
-        error: (error) => console.error('Error actualizando desafío:', error)
-      });
-    } else {
-      this.adminService.crearDesafio(this.desafioEditando).subscribe({
-        next: () => {
-          this.cargarDesafios();
-          this.cerrarModal();
-        },
-        error: (error) => console.error('Error creando desafío:', error)
-      });
-    }
+  mostrarEditar(desafio: Desafio): void {
+    this.desafioSeleccionado = desafio;
+    this.vistaActual = 'editar';
+  }
+
+  mostrarDetalle(desafio: Desafio): void {
+    this.desafioSeleccionado = desafio;
+    this.vistaActual = 'detalle';
+  }
+
+  onDesafioCreado(): void {
+    this.cargarDesafios();
+    this.mostrarLista();
+  }
+
+  onDesafioActualizado(): void {
+    this.cargarDesafios();
+    this.mostrarLista();
+  }
+
+  onCancelar(): void {
+    this.mostrarLista();
   }
 
   eliminarDesafio(id: number): void {
@@ -79,30 +84,11 @@ export class GestionDesafiosComponent implements OnInit {
         next: () => {
           this.cargarDesafios();
         },
-        error: (error) => console.error('Error eliminando desafío:', error)
+        error: (error) => {
+          console.error('Error eliminando desafío:', error);
+          alert('Error al eliminar el desafío');
+        }
       });
-    }
-  }
-
-  cerrarModal(): void {
-    this.mostrarModal = false;
-    this.desafioEditando = {};
-  }
-
-  getEstadoBadgeClass(estado: string): string {
-    switch (estado) {
-      case 'ACTIVO': return 'bg-green-100 text-green-800';
-      case 'INACTIVO': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  }
-
-  getTipoBadgeClass(tipo: string): string {
-    switch (tipo) {
-      case 'CORRER': return 'bg-blue-100 text-blue-800';
-      case 'NADAR': return 'bg-cyan-100 text-cyan-800';
-      case 'CICLISMO': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
     }
   }
 }

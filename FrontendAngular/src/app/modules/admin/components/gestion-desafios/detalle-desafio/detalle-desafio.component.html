@@ -1,0 +1,156 @@
+<div class="bg-white shadow-md rounded-lg overflow-hidden">
+  <div class="bg-gray-50 px-6 py-4 border-b">
+    <div class="flex justify-between items-center">
+      <h2 class="text-2xl font-bold text-gray-900">{{ desafio.titulo }}</h2>
+      <button 
+        (click)="editar.emit()"
+        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+      >
+        Editar Desafío
+      </button>
+    </div>
+    <p class="text-gray-600 mt-2">{{ desafio.descripcion }}</p>
+  </div>
+
+  <div class="p-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <div class="space-y-4">
+        <h3 class="text-lg font-semibold text-gray-900 border-b pb-2">Información Básica</h3>
+        
+        <div>
+          <label class="text-sm font-medium text-gray-500">Tipo de Actividad</label>
+          <div class="mt-1">
+            <span [class]="'px-3 py-1 text-sm font-semibold rounded-full ' + getTipoBadgeClass()">
+              {{ desafio.tipo_actividad }}
+            </span>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-sm font-medium text-gray-500">Dificultad</label>
+          <div class="mt-1">
+            <span [class]="'px-3 py-1 text-sm font-semibold rounded-full ' + getDificultadBadgeClass()">
+              {{ desafio.dificultad }}
+            </span>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-sm font-medium text-gray-500">Estado</label>
+          <div class="mt-1">
+            <span [class]="'px-3 py-1 text-sm font-semibold rounded-full ' + getEstadoBadgeClass()">
+              {{ desafio.estado || 'ACTIVO' }}
+              <span *ngIf="esDesafioActivo()" class="ml-1">🟢</span>
+              <span *ngIf="!esDesafioActivo()" class="ml-1">🔴</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <h3 class="text-lg font-semibold text-gray-900 border-b pb-2">Objetivo y Tiempo</h3>
+        
+        <div>
+          <label class="text-sm font-medium text-gray-500">Objetivo</label>
+          <p class="mt-1 text-lg font-semibold text-gray-900">
+            {{ desafio.objetivo }} {{ desafio.unidad_objetivo }}
+          </p>
+        </div>
+
+        <div>
+          <label class="text-sm font-medium text-gray-500">Fecha de Inicio</label>
+          <p class="mt-1 text-gray-900">
+            {{ formatearFecha(desafio.fecha_inicio) }}
+          </p>
+        </div>
+
+        <div>
+          <label class="text-sm font-medium text-gray-500">Fecha de Fin</label>
+          <p class="mt-1 text-gray-900">
+            {{ formatearFecha(desafio.fecha_fin) }}
+          </p>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <h3 class="text-lg font-semibold text-gray-900 border-b pb-2">Configuración</h3>
+        
+        <div>
+          <label class="text-sm font-medium text-gray-500">Límite de Participantes</label>
+          <p class="mt-1 text-gray-900">
+            {{ desafio.max_participantes }}
+          </p>
+        </div>
+
+        <div>
+          <label class="text-sm font-medium text-gray-500">Visibilidad</label>
+          <p class="mt-1 text-gray-900">
+            {{ desafio.es_publico ? 'Público' : 'Privado' }}
+          </p>
+        </div>
+
+        <div>
+          <label class="text-sm font-medium text-gray-500">Creador ID</label>
+          <p class="mt-1 text-gray-900">{{ desafio.creador_id }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="border-t pt-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Información Adicional</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="text-sm font-medium text-gray-500">ID del Desafío</label>
+          <p class="mt-1 text-gray-900 font-mono">{{ desafio.id }}</p>
+        </div>
+
+        <div *ngIf="desafio.icono">
+          <label class="text-sm font-medium text-gray-500">Icono</label>
+          <div class="mt-1">
+            <img [src]="desafio.icono" alt="Icono del desafío" class="h-8 w-8 rounded">
+          </div>
+        </div>
+
+        <div *ngIf="desafio.fecha_creacion">
+          <label class="text-sm font-medium text-gray-500">Fecha de Creación</label>
+          <p class="mt-1 text-gray-900">
+            {{ formatearFecha(desafio.fecha_creacion) }}
+          </p>
+        </div>
+
+        <div *ngIf="desafio.fecha_actualizacion">
+          <label class="text-sm font-medium text-gray-500">Última Actualización</label>
+          <p class="mt-1 text-gray-900">
+            {{ formatearFecha(desafio.fecha_actualizacion) }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="border-t pt-6 mt-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Estado Actual</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="text-center p-4 bg-blue-50 rounded-lg">
+          <p class="text-2xl font-bold text-blue-600">{{ desafio.max_participantes }}</p>
+          <p class="text-sm text-blue-500">Máx. Participantes</p>
+        </div>
+        
+        <div class="text-center p-4 bg-green-50 rounded-lg">
+          <p class="text-2xl font-bold text-green-600">
+            {{ esDesafioActivo() ? 'Activo' : 'Finalizado' }}
+          </p>
+          <p class="text-sm text-green-500">Estado</p>
+        </div>
+        
+        <div class="text-center p-4 bg-purple-50 rounded-lg">
+          <p class="text-2xl font-bold text-purple-600">
+            {{ desafio.es_publico ? 'Público' : 'Privado' }}
+          </p>
+          <p class="text-sm text-purple-500">Visibilidad</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

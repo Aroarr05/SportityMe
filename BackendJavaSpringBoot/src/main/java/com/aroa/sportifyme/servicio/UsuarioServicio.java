@@ -29,16 +29,14 @@ public class UsuarioServicio implements UserDetailsService {
                 .orElseThrow(() -> new UsuarioNoEncontradoException(email));
 
         String rolNombre = usuario.getRol() != null ? usuario.getRol().getNombre() : "USUARIO";
-        
+
         List<GrantedAuthority> authorities = Collections.singletonList(
-            new SimpleGrantedAuthority("ROLE_" + rolNombre)
-        );
+                new SimpleGrantedAuthority("ROLE_" + rolNombre));
 
         return new User(
                 usuario.getEmail(),
                 usuario.getContraseña(),
-                authorities
-        );
+                authorities);
     }
 
     @Transactional
@@ -88,5 +86,10 @@ public class UsuarioServicio implements UserDetailsService {
         if (usuario.getNombre() == null || usuario.getNombre().trim().isEmpty()) {
             throw new IllegalArgumentException("El nombre es obligatorio");
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<Usuario> obtenerTodosUsuarios() {
+        return usuarioRepository.findAll();
     }
 }
