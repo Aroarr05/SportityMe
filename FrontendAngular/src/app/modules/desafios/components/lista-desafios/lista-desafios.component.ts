@@ -4,8 +4,6 @@ import { RouterModule } from '@angular/router';
 import { DesafiosService } from '../../services/desafios.service';
 import { AuthService } from '../../../../auth/services/auth.service';
 import { Desafio } from '../../../../shared/models';
-import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
-import { ErrorAlertComponent } from '../../../../shared/components/error-alert/error-alert.component';
 
 @Component({
   selector: 'app-lista-desafios',
@@ -15,15 +13,15 @@ import { ErrorAlertComponent } from '../../../../shared/components/error-alert/e
   imports: [
     CommonModule,
     RouterModule,
-    LoadingSpinnerComponent,
-    ErrorAlertComponent
   ]
 })
+
 export class ListaDesafiosComponent implements OnInit {
   desafios: (Desafio & { progreso: number; dias_restantes: number })[] = [];
   loading = true;
   error: string | null = null;
   isLoggedIn = false;
+  isAdmin = false;
 
   constructor(
     private desafiosService: DesafiosService,
@@ -37,6 +35,7 @@ export class ListaDesafiosComponent implements OnInit {
 
   private checkAuthentication(): void {
     this.isLoggedIn = this.authService.isLoggedIn();
+    this.isAdmin = this.authService.isAdmin(); 
   }
 
   cargarDesafios(): void {
@@ -110,37 +109,4 @@ export class ListaDesafiosComponent implements OnInit {
     return { ...desafio, progreso, dias_restantes };
   }
 
-  unirseADesafio(desafioId: number): void {
-    this.desafiosService.unirseADesafio(desafioId).subscribe({
-      next: () => {
-        alert('¡Te has unido al desafío exitosamente!');
-        this.cargarDesafios();
-      },
-      error: (err) => {
-        alert('Error: ' + err.message);
-      }
-    });
-  }
-
-  eliminarDesafio(desafioId: number): void {
-    if (!confirm('¿Estás seguro de que quieres eliminar este desafío?')) return;
-
-    this.desafiosService.eliminarDesafio(desafioId).subscribe({
-      next: () => {
-        this.desafios = this.desafios.filter(d => d.id !== desafioId);
-        alert('Desafío eliminado exitosamente');
-      },
-      error: (err) => {
-        alert('Error: ' + err.message);
-      }
-    });
-  }
-
-  reintentar(): void {
-    this.cargarDesafios();
-  }
-
-  formatearFecha(fecha: string): string {
-    return new Date(fecha).toLocaleDateString('es-ES');
-  }
 }

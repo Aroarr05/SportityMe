@@ -3,20 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { Usuario } from '../../../shared/models/usuario.model';
+import { Desafio } from '../../../shared/models/desafio.model';
 
-export interface Desafio {
-  id: number;
-  titulo: string;
-  descripcion: string;
-  tipo: string;
-  meta: number;
-  unidad: string;
-  fecha_inicio: string;
-  fecha_fin: string;
-  estado: 'ACTIVO' | 'INACTIVO';
-  creado_por: number;
-  creado_en: string;
-}
 
 @Injectable({
   providedIn: 'root'
@@ -26,7 +14,6 @@ export class AdminService {
 
   constructor(private http: HttpClient) {}
 
-  // Métodos para Usuarios
   getUsuarios(): Observable<Usuario[]> {
     return this.http.get<Usuario[]>(`${this.apiUrl}/usuarios`);
   }
@@ -43,7 +30,6 @@ export class AdminService {
     return this.http.delete<void>(`${this.apiUrl}/usuarios/${id}`);
   }
 
-  // Métodos para Desafíos
   getDesafios(): Observable<Desafio[]> {
     return this.http.get<Desafio[]>(`${this.apiUrl}/desafios`);
   }
