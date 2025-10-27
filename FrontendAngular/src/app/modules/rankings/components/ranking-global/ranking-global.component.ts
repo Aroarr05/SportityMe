@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RankingService } from '../../services/rankings.service';
-import { Ranking,FiltroRanking } from '../../../../shared/models';
+import { Ranking, FiltroRanking } from '../../../../shared/models';
+import { TipoActividad } from '../../../../shared/models'; 
 
 @Component({
   selector: 'app-ranking-global',
@@ -11,48 +12,52 @@ import { Ranking,FiltroRanking } from '../../../../shared/models';
   standalone: true,
   imports: [CommonModule, FormsModule]
 })
-
 export class RankingGlobalComponent implements OnInit {
   rankingData: Ranking[] = [];
   loading: boolean = false;
   errorMessage: string = '';
   
-  tipoSeleccionado: 'global' | 'desafio' = 'global';
-  limitSeleccionado: number = 10;
   desafioIdSeleccionado?: number;
+  limitSeleccionado: number = 50;
 
   desafios = [
-    { id: 1, nombre: 'Desafío Running' },
-    { id: 2, nombre: 'Desafío Natación' },
-    { id: 3, nombre: 'Desafío Ciclismo' }
+    { id: 1, nombre: 'Desafío Running', tipo: TipoActividad.CORRER },
+    { id: 2, nombre: 'Desafío Natación', tipo: TipoActividad.NADAR },
+    { id: 3, nombre: 'Desafío Ciclismo', tipo: TipoActividad.CICLISMO },
+    { id: 4, nombre: 'Desafío Gimnasio', tipo: TipoActividad.GIMNASIO },
+    { id: 5, nombre: 'Desafío Senderismo', tipo: TipoActividad.SENDERISMO },
+    { id: 6, nombre: 'Desafío Yoga', tipo: TipoActividad.YOGA }
   ];
 
   topUsuarios: any[] = [];
-  estadisticas: any = {};
+  rankingCompleto: any[] = [];
 
   constructor(private rankingService: RankingService) { }
 
   ngOnInit(): void {
-    this.cargarRanking();
+    if (this.desafios.length > 0) {
+      this.desafioIdSeleccionado = this.desafios[0].id;
+      this.cargarRanking();
+    }
   }
 
   cargarRanking(): void {
+    if (!this.desafioIdSeleccionado) {
+      this.errorMessage = 'Debes seleccionar un desafío.';
+      return;
+    }
+
     this.loading = true;
     this.errorMessage = '';
 
+    const desafioSeleccionado = this.desafios.find(d => d.id === this.desafioIdSeleccionado);
+    
     const filtros: FiltroRanking = {
-      tipo: this.tipoSeleccionado,
+      tipo: 'desafio',
+      desafioId: this.desafioIdSeleccionado,
+      tipoActividad: desafioSeleccionado?.tipo, 
       limit: this.limitSeleccionado
     };
-
-    if (this.tipoSeleccionado === 'desafio') {
-      if (!this.desafioIdSeleccionado) {
-        this.errorMessage = 'Para ver el ranking por desafío, debes seleccionar un desafío.';
-        this.loading = false;
-        return;
-      }
-      filtros.desafioId = this.desafioIdSeleccionado;
-    }
 
     this.rankingService.getRankingFiltrado(filtros)
       .subscribe({
@@ -76,29 +81,15 @@ export class RankingGlobalComponent implements OnInit {
       alturaPodio: index === 0 ? 120 : index === 1 ? 90 : 70
     }));
 
-    if (this.rankingData.length > 0) {
-      const valores = this.rankingData.map(item => {
-        if (this.tipoSeleccionado === 'global') {
-          return item.totalDesafiosCompletados || 0;
-        } else {
-          return item.progresoActual ? Number(item.progresoActual) : 0;
-        }
-      });
-
-      this.estadisticas = {
-        totalUsuarios: this.rankingData.length,
-        promedioPuntuacion: Math.round(valores.reduce((sum, val) => sum + val, 0) / valores.length),
-        maxPuntuacion: Math.max(...valores),
-        usuarioDestacado: this.rankingData[0]?.nombre || 'N/A'
-      };
-    }
+    this.rankingCompleto = this.rankingData.map((item, index) => ({
+      ...item,
+      posicionReal: index + 1
+    }));
   }
 
-  cambiarTipo(event: any): void {
-    this.tipoSeleccionado = event.target.value;
-    if (this.tipoSeleccionado === 'global') {
-      this.desafioIdSeleccionado = undefined;
-    }
+  cambiarDesafio(event: any): void {
+    const value = event.target.value;
+    this.desafioIdSeleccionado = value ? Number(value) : undefined;
     this.cargarRanking();
   }
 
@@ -107,28 +98,8 @@ export class RankingGlobalComponent implements OnInit {
     this.cargarRanking();
   }
 
-  cambiarDesafio(event: any): void {
-    const value = event.target.value;
-    this.desafioIdSeleccionado = value ? Number(value) : undefined;
-    if (this.tipoSeleccionado === 'desafio') {
-      this.cargarRanking();
-    }
-  }
-
-  limpiarFiltros(): void {
-    this.tipoSeleccionado = 'global';
-    this.limitSeleccionado = 10;
-    this.desafioIdSeleccionado = undefined;
-    this.cargarRanking();
-  }
-
-  getMedalClass(posicion: number): string {
-    switch(posicion) {
-      case 1: return 'gold';
-      case 2: return 'silver';
-      case 3: return 'bronze';
-      default: return '';
-    }
+  getValorDisplay(item: Ranking): number {
+    return item.progresoActual ? Number(item.progresoActual) : 0;
   }
 
   getProgressColor(progreso: number): string {
@@ -138,11 +109,16 @@ export class RankingGlobalComponent implements OnInit {
     return '#6b7280';
   }
 
-  getValorDisplay(item: Ranking): number {
-    if (this.tipoSeleccionado === 'global') {
-      return item.totalDesafiosCompletados || 0;
-    } else {
-      return item.progresoActual ? Number(item.progresoActual) : 0;
+  getDesafioIcon(desafioId: number): string {
+    const desafio = this.desafios.find(d => d.id === desafioId);
+    switch(desafio?.tipo) {
+      case TipoActividad.CORRER: return '';
+      case TipoActividad.NADAR: return '';
+      case TipoActividad.CICLISMO: return '';
+      case TipoActividad.GIMNASIO: return '';
+      case TipoActividad.SENDERISMO: return '';
+      case TipoActividad.YOGA: return '';
+      default: return '';
     }
   }
 }

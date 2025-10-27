@@ -1,3 +1,6 @@
+import { TipoActividad } from "./desafio.model";
+
+
 export interface Ranking {
   usuarioId: number;
   nombre: string;
@@ -8,7 +11,8 @@ export interface Ranking {
 }
 
 export interface FiltroRanking {
-  tipo: 'global' | 'desafio';
+  tipo: 'desafio';
   desafioId?: number;
+  tipoActividad?: TipoActividad;
   limit?: number;
 }

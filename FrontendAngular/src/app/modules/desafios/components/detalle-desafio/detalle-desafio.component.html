@@ -15,7 +15,7 @@
       </div>
 
       <a routerLink="/desafios" 
-         class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-3 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 font-semibold flex items-center space-x-2 group mt-4 sm:mt-0 no-underline">
+         class="bg-white text-purple-600 border border-purple-600 px-6 py-3 rounded-xl hover:bg-purple-50 transition-all duration-300 transform hover:scale-105 font-semibold flex items-center space-x-2 group mt-4 sm:mt-0 no-underline">
         <i class="fas fa-arrow-left group-hover:-translate-x-1 transition-transform duration-300"></i>
         <span>Volver a Desafíos</span>
       </a>
@@ -82,7 +82,7 @@
             <div class="mt-8 pt-6 border-t border-gray-200">
               <button *ngIf="!participando"
                       (click)="unirseADesafio()"
-                      class="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-4 rounded-xl hover:from-green-700 hover:to-green-600 transition-all duration-300 transform hover:scale-105 font-semibold flex items-center justify-center space-x-2 group/btn text-lg">
+                      class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-4 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 font-semibold flex items-center justify-center space-x-2 group/btn text-lg">
                 <i class="fas fa-plus-circle group-hover/btn:rotate-90 transition-transform duration-300"></i>
                 <span>Unirse al Desafío</span>
               </button>
@@ -177,7 +177,7 @@
       <h3 class="text-2xl font-bold text-gray-700 mb-2">Desafío no encontrado</h3>
       <p class="text-gray-600 mb-6">El desafío que buscas no existe o no está disponible</p>
       <a routerLink="/desafios"
-         class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-8 py-3 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 font-semibold inline-flex items-center space-x-2 no-underline">
+         class="bg-white text-purple-600 border border-purple-600 px-8 py-3 rounded-xl hover:bg-purple-50 transition-all duration-300 transform hover:scale-105 font-semibold inline-flex items-center space-x-2 no-underline">
         <i class="fas fa-arrow-left"></i>
         <span>Volver a Desafíos</span>
       </a>
