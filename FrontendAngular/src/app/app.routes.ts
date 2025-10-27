@@ -75,17 +75,22 @@ export const routes: Routes = [
         ]
       },
       {
+        path: 'perfil',
+        loadComponent: () => import('./modules/perfil/components/perfil.component').then(m => m.PerfilComponent),
+        canActivate: [AuthGuard]
+      },
+      {
         path: 'admin',
         children: [
           {
             path: 'usuarios',
             loadComponent: () => import('./modules/admin/components/gestion-usuarios/gestion-usuarios.component').then(m => m.GestionUsuariosComponent),
-            canActivate: [AuthGuard,AdminGuard]
+            canActivate: [AuthGuard, AdminGuard]
           },
           {
             path: 'desafios',
             loadComponent: () => import('./modules/admin/components/gestion-desafios/gestion-desafios.component').then(m => m.GestionDesafiosComponent),
-            canActivate: [AuthGuard,AdminGuard] 
+            canActivate: [AuthGuard, AdminGuard] 
           },
           { path: '', redirectTo: 'usuarios', pathMatch: 'full' }
         ]
