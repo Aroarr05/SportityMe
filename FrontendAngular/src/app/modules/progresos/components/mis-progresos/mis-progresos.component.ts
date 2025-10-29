@@ -39,14 +39,23 @@ export class MisProgresosComponent implements OnInit {
 
     this.progresosService.obtenerMiHistorial().subscribe({
       next: (data) => {
+        console.log('✅ Datos recibidos:', data); 
         this.progresos = data;
         this.calcularEstadisticas();
         this.cargando = false;
       },
       error: (error) => {
+        console.error('❌ Error completo:', error);
+        console.error('❌ Status:', error.status);
+        console.error('❌ Mensaje:', error.message);
+        
         this.error = 'Error al cargar los progresos';
+        if (error.status === 403) {
+          this.error += ' - No tienes permisos';
+        } else if (error.status === 401) {
+          this.error += ' - Sesión expirada';
+        }
         this.cargando = false;
-        console.error('Error:', error);
       }
     });
   }
@@ -54,17 +63,18 @@ export class MisProgresosComponent implements OnInit {
   calcularEstadisticas() {
     this.estadisticas.totalRegistros = this.progresos.length;
     
-    const desafiosUnicos = new Set(this.progresos.map(p => p.desafio.id));
+  
+    const desafiosUnicos = new Set(this.progresos.map(p => p.desafio_id));
     this.estadisticas.desafiosActivos = desafiosUnicos.size;
 
     if (this.progresos.length > 0) {
-      const sumaProgresos = this.progresos.reduce((sum, p) => sum + (p.porcentajeCompletado || 0), 0);
+      const sumaProgresos = this.progresos.reduce((sum, p) => sum + (p.porcentaje_completado || 0), 0);
       this.estadisticas.progresoPromedio = Math.round(sumaProgresos / this.progresos.length);
     }
 
     if (this.progresos.length > 0) {
       const ultimo = this.progresos[0];
-      this.estadisticas.ultimoRegistro = this.formatearFecha(ultimo.fechaRegistro);
+      this.estadisticas.ultimoRegistro = this.formatearFecha(ultimo.fecha_registro);
     }
   }
 
@@ -87,18 +97,24 @@ export class MisProgresosComponent implements OnInit {
   }
 
   obtenerNombreDesafio(progreso: Progreso): string {
-    return progreso.desafio.titulo;
+    if (progreso.desafio) {
+      return progreso.desafio.titulo;
+    }
+    return `Desafío ${progreso.desafio_id}`;
   }
-
   obtenerObjetivoDesafio(progreso: Progreso): string {
-    return `${progreso.desafio.objetivo} ${progreso.desafio.unidad_objetivo}`;
+    if (progreso.desafio) {
+      return `${progreso.desafio.objetivo} ${progreso.desafio.unidad_objetivo}`;
+    }
+    return 'Objetivo no disponible';
   }
 
   get progresosAgrupados(): { [key: string]: Progreso[] } {
     const agrupados: { [key: string]: Progreso[] } = {};
     
     this.progresos.forEach(progreso => {
-      const clave = progreso.desafio.id.toString();
+
+      const clave = progreso.desafio_id.toString();
       if (!agrupados[clave]) {
         agrupados[clave] = [];
       }
@@ -112,7 +128,7 @@ export class MisProgresosComponent implements OnInit {
     const ultimosProgresos: Progreso[] = [];
     Object.values(this.progresosAgrupados).forEach(progresos => {
       const ultimo = progresos.sort((a, b) => 
-        new Date(b.fechaRegistro).getTime() - new Date(a.fechaRegistro).getTime()
+        new Date(b.fecha_registro).getTime() - new Date(a.fecha_registro).getTime()
       )[0];
       ultimosProgresos.push(ultimo);
     });
@@ -121,7 +137,8 @@ export class MisProgresosComponent implements OnInit {
   }
 
   obtenerPorcentaje(progreso: Progreso): number {
-    return progreso.porcentajeCompletado || 0;
+
+    return progreso.porcentaje_completado || 0;
   }
 
   estaCompletado(progreso: Progreso): boolean {

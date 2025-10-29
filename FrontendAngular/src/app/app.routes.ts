@@ -60,8 +60,7 @@ export const routes: Routes = [
             path: 'registrar/:desafioId',
             loadComponent: () => import('./modules/progresos/components/registrar-progreso/registrar-progreso.component').then(m => m.RegistrarProgresoComponent),
             canActivate: [AuthGuard]
-          },
-          { path: '', redirectTo: 'mis-progresos', pathMatch: 'full' }
+          }
         ]
       },
       {
@@ -70,8 +69,7 @@ export const routes: Routes = [
           {
             path: '',
             loadComponent: () => import('./modules/rankings/components/ranking-global/ranking-global.component').then(m => m.RankingGlobalComponent)
-          },
-          { path: '', redirectTo: 'global', pathMatch: 'full' }
+          }
         ]
       },
       {
