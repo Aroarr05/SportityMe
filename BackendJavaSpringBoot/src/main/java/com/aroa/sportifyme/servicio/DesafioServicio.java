@@ -242,4 +242,19 @@ public class DesafioServicio {
                 desafio.getCreador().getId());
     }
 
+    @Transactional
+    public void abandonarDesafio(Long desafioId, Long usuarioId) {
+        Desafio desafio = buscarPorId(desafioId);
+
+        usuarioServicio.buscarPorId(usuarioId)
+                .orElseThrow(() -> new UsuarioNoEncontradoException(usuarioId));
+
+        if (!desafioRepository.esParticipante(desafioId, usuarioId)) {
+            throw new IllegalArgumentException("No eres participante de este desafío");
+        }
+
+        desafio.getParticipantes().removeIf(participante -> participante.getId().equals(usuarioId));
+        desafioRepository.save(desafio);
+    }
+
 }

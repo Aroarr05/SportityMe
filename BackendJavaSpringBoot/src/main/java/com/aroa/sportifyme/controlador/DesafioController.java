@@ -32,11 +32,11 @@ public class DesafioController {
             log.info("Solicitando lista de desafíos");
             List<Desafio> desafios = desafioServicio.listarTodos();
             log.info("Encontrados {} desafíos", desafios.size());
-            
+
             List<DesafioDTO> desafiosDTO = desafios.stream()
                     .map(DesafioDTO::fromEntity)
                     .collect(Collectors.toList());
-            
+
             return ResponseEntity.ok(desafiosDTO);
         } catch (Exception e) {
             log.error("Error al listar desafíos: ", e);
@@ -70,7 +70,7 @@ public class DesafioController {
 
     @PostMapping("/{desafioId}/unirse")
     public ResponseEntity<?> unirseADesafio(
-            @PathVariable Long desafioId, 
+            @PathVariable Long desafioId,
             @AuthenticationPrincipal UserDetails userDetails) {
         try {
             Long usuarioId = obtenerUsuarioIdDesdeUserDetails(userDetails);
@@ -87,5 +87,33 @@ public class DesafioController {
         return usuarioServicio.buscarPorEmail(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + username))
                 .getId();
+    }
+
+    @GetMapping("/{desafioId}/participacion")
+    public ResponseEntity<?> verificarParticipacion(
+            @PathVariable Long desafioId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            Long usuarioId = obtenerUsuarioIdDesdeUserDetails(userDetails);
+            boolean participa = desafioServicio.esParticipante(desafioId, usuarioId);
+            return ResponseEntity.ok(Map.of("participando", participa));
+        } catch (Exception e) {
+            log.error("Error al verificar participación en desafío {}: ", desafioId, e);
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/{desafioId}/participar")
+    public ResponseEntity<?> abandonarDesafio(
+            @PathVariable Long desafioId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            Long usuarioId = obtenerUsuarioIdDesdeUserDetails(userDetails);
+            desafioServicio.abandonarDesafio(desafioId, usuarioId);
+            return ResponseEntity.ok().body(Map.of("message", "Has abandonado el desafío exitosamente"));
+        } catch (Exception e) {
+            log.error("Error al abandonar el desafío {}: ", desafioId, e);
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 }

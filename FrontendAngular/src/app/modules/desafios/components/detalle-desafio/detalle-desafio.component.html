@@ -54,7 +54,6 @@
               </span>
             </div>
 
-
             <div class="mb-8">
               <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center">
                 <i class="fas fa-align-left text-purple-500 mr-2"></i>
@@ -80,7 +79,16 @@
             </div>
 
             <div class="mt-8 pt-6 border-t border-gray-200">
-              <button *ngIf="!participando"
+              <div *ngIf="!usuarioAutenticado" class="text-center p-4 bg-yellow-50 rounded-xl border border-yellow-200 mb-4">
+                <i class="fas fa-exclamation-triangle text-yellow-500 text-xl mb-2"></i>
+                <p class="text-yellow-700 font-medium mb-3">Inicia sesión para unirte a este desafío</p>
+                <button (click)="redirigirALogin()"
+                        class="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white py-3 px-6 rounded-xl hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300 font-semibold">
+                  Iniciar Sesión
+                </button>
+              </div>
+
+              <button *ngIf="usuarioAutenticado && !participando"
                       (click)="unirseADesafio()"
                       class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-4 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 font-semibold flex items-center justify-center space-x-2 group/btn text-lg">
                 <i class="fas fa-plus-circle group-hover/btn:rotate-90 transition-transform duration-300"></i>
@@ -99,7 +107,6 @@
       </div>
 
       <div class="space-y-6">
-        
         <div class="bg-white rounded-2xl border border-gray-200 p-6">
           <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
             <i class="fas fa-calendar-alt text-purple-500 mr-2"></i>
@@ -136,13 +143,37 @@
 
         <div class="bg-white rounded-2xl border border-gray-200 p-6">
           <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-users text-purple-500 mr-2"></i>
+            Participantes
+          </h3>
+          <div class="space-y-4">
+            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
+              <div class="flex items-center">
+                <span class="text-gray-600">Total:</span>
+              </div>
+              <span class="font-semibold text-gray-800">
+                {{ desafio.participantes_count || 0 }} 
+                <span *ngIf="desafio.max_participantes > 0">/ {{ desafio.max_participantes }}</span>
+              </span>
+            </div>
+            <div *ngIf="participando" class="flex justify-between items-center p-3 bg-green-50 rounded-xl border border-green-100">
+              <div class="flex items-center">
+                <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                <span class="text-green-700 font-medium">Estás participando</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
             <i class="fas fa-info-circle text-purple-500 mr-2"></i>
             Información
           </h3>
           <div class="space-y-4">
             <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
               <div class="flex items-center">
-                <span class="text-gray-600">Participantes:</span>
+                <span class="text-gray-600">Límite participantes:</span>
               </div>
               <span class="font-semibold text-gray-800">
                 {{ desafio.max_participantes > 0 ? 'Máx. ' + desafio.max_participantes : 'Ilimitados' }}
@@ -160,8 +191,8 @@
               <div class="flex items-center">
                 <span class="text-gray-600">Estado:</span>
               </div>
-              <span [class]="'font-semibold ' + (desafio.estado === 'ACTIVO' ? 'text-green-600' : 'text-gray-600')">
-                {{ desafio.estado || 'SIN ESTADO' }}
+              <span [class]="'font-semibold ' + (desafio.estado === 'ACTIVO' ? 'text-green-600' : (desafio.estado === 'COMPLETADO' ? 'text-blue-600' : 'text-gray-600'))">
+                {{ desafio.estado || 'ACTIVO' }}
               </span>
             </div>
           </div>

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { DesafiosService } from '../../services/desafios.service';
+import { AuthService } from '../../../../auth/services/auth.service';
 import { Desafio } from '../../../../shared/models';
 import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
 import { ErrorAlertComponent } from '../../../../shared/components/error-alert/error-alert.component';
@@ -18,20 +19,38 @@ import { ErrorAlertComponent } from '../../../../shared/components/error-alert/e
     ErrorAlertComponent
   ]
 })
+
 export class DetalleDesafioComponent implements OnInit {
-  desafio!: Desafio & { progreso: number; dias_restantes: number };
+  desafio!: Desafio & { progreso: number; dias_restantes: number; participantes_count: number };
   loading = true;
   error: string | null = null;
   participando = false;
+  usuarioAutenticado = false;
+  usuarioActual: any = null;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private desafiosService: DesafiosService
+    private desafiosService: DesafiosService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
+    this.verificarAutenticacion();
     this.cargarDesafio();
+  }
+
+  private verificarAutenticacion(): void {
+    this.usuarioAutenticado = this.authService.isLoggedIn();
+    this.usuarioActual = this.authService.getCurrentUser();
+    
+    this.authService.isLoggedIn$.subscribe(isLoggedIn => {
+      this.usuarioAutenticado = isLoggedIn;
+    });
+    
+    this.authService.currentUser$.subscribe(user => {
+      this.usuarioActual = user;
+    });
   }
 
   cargarDesafio(): void {
@@ -47,16 +66,11 @@ export class DetalleDesafioComponent implements OnInit {
 
     this.desafiosService.obtenerDesafioPorId(+desafioId).subscribe({
       next: (desafio) => {
-        console.log('Datos completos del desafío:', desafio);
-        console.log('Fecha inicio:', desafio.fecha_inicio);
-        console.log('Fecha fin:', desafio.fecha_fin);
-        
         this.desafio = this.calcularDatosExtras(desafio);
         this.verificarParticipacion();
         this.loading = false;
       },
       error: (err) => {
-        console.error('Error completo:', err);
         this.error = 'Error al cargar el desafío. Por favor, inténtalo de nuevo más tarde.';
         this.loading = false;
       }
@@ -64,16 +78,34 @@ export class DetalleDesafioComponent implements OnInit {
   }
 
   private verificarParticipacion(): void {
-    this.participando = false;
+    if (!this.usuarioAutenticado || !this.usuarioActual) {
+      this.participando = false;
+      return;
+    }
+
+    this.desafiosService.verificarParticipacion(this.desafio.id).subscribe({
+      next: (participa) => {
+        this.participando = participa;
+      },
+      error: (err) => {
+        this.participando = false;
+      }
+    });
   }
 
-  private calcularDatosExtras(desafio: Desafio): Desafio & { progreso: number; dias_restantes: number } {
+  private calcularDatosExtras(desafio: Desafio): Desafio & { progreso: number; dias_restantes: number; participantes_count: number } {
     if (!desafio.fecha_inicio || !desafio.fecha_fin) {
-      console.warn('Fechas no disponibles:', {
-        fecha_inicio: desafio.fecha_inicio,
-        fecha_fin: desafio.fecha_fin
-      });
-      return { ...desafio, progreso: 0, dias_restantes: 0 };
+      const fechaInicioDefault = desafio.fecha_creacion || new Date().toISOString();
+      const fechaFinDefault = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+      
+      return { 
+        ...desafio, 
+        fecha_inicio: desafio.fecha_inicio || fechaInicioDefault,
+        fecha_fin: desafio.fecha_fin || fechaFinDefault,
+        progreso: 0, 
+        dias_restantes: 30, 
+        participantes_count: 0 
+      };
     }
 
     try {
@@ -82,11 +114,12 @@ export class DetalleDesafioComponent implements OnInit {
       const hoy = new Date();
 
       if (isNaN(fechaInicio.getTime()) || isNaN(fechaFin.getTime())) {
-        console.error('Fechas inválidas después de conversion:', {
-          fecha_inicio: desafio.fecha_inicio,
-          fecha_fin: desafio.fecha_fin
-        });
-        return { ...desafio, progreso: 0, dias_restantes: 0 };
+        return { 
+          ...desafio, 
+          progreso: 0, 
+          dias_restantes: 0, 
+          participantes_count: 0 
+        };
       }
 
       const totalDias = Math.ceil((fechaFin.getTime() - fechaInicio.getTime()) / (1000 * 60 * 60 * 24));
@@ -94,18 +127,75 @@ export class DetalleDesafioComponent implements OnInit {
       const progreso = totalDias > 0 ? Math.round((diasTranscurridos / totalDias) * 100) : 0;
       const dias_restantes = Math.max(0, totalDias - diasTranscurridos);
 
-      console.log('Cálculos:', {
-        totalDias,
-        diasTranscurridos,
-        progreso,
-        dias_restantes
-      });
-
-      return { ...desafio, progreso, dias_restantes };
+      return { 
+        ...desafio, 
+        progreso, 
+        dias_restantes, 
+        participantes_count: 0
+      };
     } catch (error) {
-      console.error('Error en calcularDatosExtras:', error);
-      return { ...desafio, progreso: 0, dias_restantes: 0 };
+      return { 
+        ...desafio, 
+        progreso: 0, 
+        dias_restantes: 0, 
+        participantes_count: 0 
+      };
     }
+  }
+
+  unirseADesafio(): void {
+    if (!this.usuarioAutenticado) {
+      this.redirigirALogin();
+      return;
+    }
+
+    this.desafiosService.unirseADesafio(this.desafio.id).subscribe({
+      next: (response) => {
+        this.participando = true;
+        this.desafio.participantes_count++;
+        alert('¡Te has unido al desafío exitosamente!');
+        this.verificarParticipacion();
+      },
+      error: (err) => {
+        let mensajeError = 'Error al unirse al desafío';
+        
+        if (err.status === 403) {
+          mensajeError = 'No tienes permisos para unirte a este desafío. Tu sesión puede haber expirado. Por favor, inicia sesión nuevamente.';
+          this.authService.logout();
+          this.redirigirALogin();
+          return;
+        } else if (err.status === 400) {
+          mensajeError = err.error?.message || 'No puedes unirte a este desafío';
+        } else if (err.status === 404) {
+          mensajeError = 'El desafío no existe o no está disponible';
+        } else if (err.status === 0) {
+          mensajeError = 'Error de conexión. Verifica tu conexión a internet.';
+        }
+        
+        alert(mensajeError);
+      }
+    });
+  }
+
+  abandonarDesafio(): void {
+    if (!confirm('¿Estás seguro de que quieres abandonar este desafío?')) return;
+
+    this.desafiosService.abandonarDesafio(this.desafio.id).subscribe({
+      next: () => {
+        this.participando = false;
+        this.desafio.participantes_count = Math.max(0, this.desafio.participantes_count - 1);
+        alert('Has abandonado el desafío');
+      },
+      error: (err) => {
+        alert('Error al abandonar el desafío: ' + err.message);
+      }
+    });
+  }
+
+  redirigirALogin(): void {
+    this.router.navigate(['/auth/login'], { 
+      queryParams: { returnUrl: this.router.url } 
+    });
   }
 
   getIconoClase(tipo: string): string {
@@ -140,32 +230,6 @@ export class DetalleDesafioComponent implements OnInit {
     }
   }
 
-  unirseADesafio(): void {
-    this.desafiosService.unirseADesafio(this.desafio.id).subscribe({
-      next: () => {
-        this.participando = true;
-        alert('¡Te has unido al desafío exitosamente!');
-      },
-      error: (err) => {
-        alert('Error: ' + err.message);
-      }
-    });
-  }
-
-  abandonarDesafio(): void {
-    if (!confirm('¿Estás seguro de que quieres abandonar este desafío?')) return;
-
-    this.desafiosService.abandonarDesafio(this.desafio.id).subscribe({
-      next: () => {
-        this.participando = false;
-        alert('Has abandonado el desafío');
-      },
-      error: (err) => {
-        alert('Error: ' + err.message);
-      }
-    });
-  }
-
   calcularDuracionDias(): number {
     if (!this.desafio || !this.desafio.fecha_inicio || !this.desafio.fecha_fin) {
       return 0;
@@ -182,42 +246,9 @@ export class DetalleDesafioComponent implements OnInit {
       const diferenciaMs = fechaFin.getTime() - fechaInicio.getTime();
       const dias = Math.ceil(diferenciaMs / (1000 * 60 * 60 * 24));
       
-      return dias;
+      return Math.max(1, dias);
     } catch (error) {
-      console.error('Error calculando duración:', error);
       return 0;
-    }
-  }
-
-  eliminarDesafio(): void {
-    if (!confirm('¿Estás seguro de que quieres eliminar este desafío?')) return;
-
-    this.desafiosService.eliminarDesafio(this.desafio.id).subscribe({
-      next: () => {
-        alert('Desafío eliminado exitosamente');
-        this.router.navigate(['/desafios']);
-      },
-      error: (err) => {
-        alert('Error: ' + err.message);
-      }
-    });
-  }
-
-  formatearFecha(fecha: string): string {
-    if (!fecha) return 'No disponible';
-    
-    try {
-      const fechaObj = new Date(fecha);
-      if (isNaN(fechaObj.getTime())) {
-        return 'Fecha inválida';
-      }
-      return fechaObj.toLocaleDateString('es-ES', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    } catch (error) {
-      return 'Fecha inválida';
     }
   }
 
@@ -229,30 +260,17 @@ export class DetalleDesafioComponent implements OnInit {
       if (isNaN(fechaObj.getTime())) {
         return 'Fecha inválida';
       }
-      return fechaObj.toLocaleDateString('es-ES');
+      return fechaObj.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
     } catch (error) {
       return 'Fecha inválida';
     }
   }
 
-  calcularTiempoRestante(): string {
-    if (!this.desafio) return 'No disponible';
-    
-    if (this.desafio.dias_restantes === 0) {
-      return 'Finaliza hoy';
-    } else if (this.desafio.dias_restantes === 1) {
-      return '1 día restante';
-    } else {
-      return `${this.desafio.dias_restantes} días restantes`;
-    }
-  }
-
   reintentar(): void {
     this.cargarDesafio();
-  }
-
-  verDatosCompletos(): void {
-    console.log('Datos completos del desafío:', this.desafio);
-    alert('Revisa la consola para ver todos los datos del desafío');
   }
 }
