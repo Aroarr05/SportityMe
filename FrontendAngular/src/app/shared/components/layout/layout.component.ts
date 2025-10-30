@@ -14,6 +14,7 @@ import { AuthService } from '../../../auth/services/auth.service';
     RouterModule
   ]
 })
+
 export class LayoutComponent implements OnInit {
   tituloPagina = 'SportifyMe';
   isLoggedIn = false;
@@ -73,7 +74,7 @@ export class LayoutComponent implements OnInit {
       '/desafios/crear': 'Crear Desafío',
       '/rankings': 'Ranking Global',
       '/progresos': 'Mi Progreso',
-      '/perfil': 'Mi Perfil', // AÑADIR TÍTULO PARA PERFIL
+      '/perfil': 'Mi Perfil', 
       '/auth/login': 'Iniciar Sesión',
       '/auth/registro': 'Registrarse',
       '/admin/usuarios': 'Gestión de Usuarios',
@@ -87,7 +88,7 @@ export class LayoutComponent implements OnInit {
       this.tituloPagina = 'Ranking Global';
     }
     else if (rutaActual.startsWith('/perfil')) {
-      this.tituloPagina = 'Mi Perfil'; // AÑADIR CASO PARA PERFIL
+      this.tituloPagina = 'Mi Perfil'; 
     }
     else if (rutaActual.startsWith('/admin/usuarios')) {
       this.tituloPagina = 'Gestión de Usuarios';

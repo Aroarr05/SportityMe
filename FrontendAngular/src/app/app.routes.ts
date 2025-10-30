@@ -50,17 +50,8 @@ export const routes: Routes = [
             path: '',
             loadComponent: () => import('./modules/progresos/components/mis-progresos/mis-progresos.component').then(m => m.MisProgresosComponent),
             canActivate: [AuthGuard]
-          },
-          {
-            path: 'registrar',
-            loadComponent: () => import('./modules/progresos/components/registrar-progreso/registrar-progreso.component').then(m => m.RegistrarProgresoComponent),
-            canActivate: [AuthGuard]
-          },
-          {
-            path: 'registrar/:desafioId',
-            loadComponent: () => import('./modules/progresos/components/registrar-progreso/registrar-progreso.component').then(m => m.RegistrarProgresoComponent),
-            canActivate: [AuthGuard]
           }
+          
         ]
       },
       {

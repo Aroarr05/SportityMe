@@ -3,7 +3,6 @@ package com.aroa.sportifyme.seguridad.configuracion;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy; 
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -26,7 +25,7 @@ import com.aroa.sportifyme.seguridad.jwt.JwtAuthenticationFilter;
 @RequiredArgsConstructor
 public class SeguridadConfig {
 
-    private final @Lazy JwtAuthenticationFilter jwtAuthFilter; 
+    private final JwtAuthenticationFilter jwtAuthFilter; 
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
