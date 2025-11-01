@@ -14,7 +14,7 @@
         </div>
       </div>
 
-      <a routerLink="/desafios" 
+      <a [routerLink]="['/desafios']" 
          class="bg-white text-purple-600 border border-purple-600 px-6 py-3 rounded-xl hover:bg-purple-50 transition-all duration-300 transform hover:scale-105 font-semibold flex items-center space-x-2 group mt-4 sm:mt-0 no-underline">
         <i class="fas fa-arrow-left group-hover:-translate-x-1 transition-transform duration-300"></i>
         <span>Volver a Desafíos</span>
@@ -82,25 +82,43 @@
               <div *ngIf="!usuarioAutenticado" class="text-center p-4 bg-yellow-50 rounded-xl border border-yellow-200 mb-4">
                 <i class="fas fa-exclamation-triangle text-yellow-500 text-xl mb-2"></i>
                 <p class="text-yellow-700 font-medium mb-3">Inicia sesión para unirte a este desafío</p>
-                <button (click)="redirigirALogin()"
+                <button type="button" (click)="redirigirALogin()"
                         class="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white py-3 px-6 rounded-xl hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300 font-semibold">
                   Iniciar Sesión
                 </button>
               </div>
 
-              <button *ngIf="usuarioAutenticado && !participando"
+              <button *ngIf="usuarioAutenticado && !participando && !uniendo"
+                      type="button"
                       (click)="unirseADesafio()"
                       class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-4 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 font-semibold flex items-center justify-center space-x-2 group/btn text-lg">
                 <i class="fas fa-plus-circle group-hover/btn:rotate-90 transition-transform duration-300"></i>
                 <span>Unirse al Desafío</span>
               </button>
 
-              <button *ngIf="participando"
-                      (click)="abandonarDesafio()"
-                      class="w-full bg-gradient-to-r from-red-600 to-red-500 text-white py-4 rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 transform hover:scale-105 font-semibold flex items-center justify-center space-x-2 group/btn text-lg">
-                <i class="fas fa-sign-out-alt group-hover/btn:-translate-x-1 transition-transform duration-300"></i>
-                <span>Abandonar Desafío</span>
+              <button *ngIf="uniendo"
+                      type="button"
+                      disabled
+                      class="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-4 rounded-xl font-semibold flex items-center justify-center space-x-2 text-lg cursor-not-allowed">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>Uniéndose...</span>
               </button>
+
+              <div *ngIf="participando && !uniendo">
+                <button type="button"
+                        disabled
+                        class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-xl font-semibold flex items-center justify-center space-x-2 text-lg cursor-default transform scale-105 transition-all duration-500 shadow-lg shadow-green-200">
+                  <i class="fas fa-check-circle text-xl"></i>
+                  <span>¡Unido al Desafío!</span>
+                </button>
+
+                <button type="button"
+                        (click)="abandonarDesafio()"
+                        class="w-full mt-3 bg-gradient-to-r from-red-600 to-red-500 text-white py-3 rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 transform hover:scale-105 font-semibold flex items-center justify-center space-x-2 group/btn text-sm">
+                  <i class="fas fa-sign-out-alt group-hover/btn:-translate-x-1 transition-transform duration-300"></i>
+                  <span>Abandonar Desafío</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -206,7 +224,7 @@
       </div>
       <h3 class="text-2xl font-bold text-gray-700 mb-2">Desafío no encontrado</h3>
       <p class="text-gray-600 mb-6">El desafío que buscas no existe o no está disponible</p>
-      <a routerLink="/desafios"
+      <a [routerLink]="['/desafios']"
          class="bg-white text-purple-600 border border-purple-600 px-8 py-3 rounded-xl hover:bg-purple-50 transition-all duration-300 transform hover:scale-105 font-semibold inline-flex items-center space-x-2 no-underline">
         <i class="fas fa-arrow-left"></i>
         <span>Volver a Desafíos</span>

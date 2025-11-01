@@ -92,16 +92,13 @@ export class AuthService {
 
   login(credentials: LoginCredentials): Observable<AuthResponse> {
     this.loadingSubject.next(true);
-    console.log('Iniciando login con BD:', { email: credentials.email });
 
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
       tap((response: AuthResponse) => {
-        console.log('Login exitoso - Datos desde BD:', response.user);
         this.handleAuthentication(response);
         this.loadingSubject.next(false);
       }),
       catchError(error => {
-        console.error('Error en login con BD:', error);
         this.loadingSubject.next(false);
         return this.handleError(error);
       })
@@ -110,10 +107,6 @@ export class AuthService {
 
   register(userData: RegisterData): Observable<AuthResponse> {
     this.loadingSubject.next(true);
-    console.log('Guardando usuario en BD:', {
-      nombre: userData.nombre,
-      email: userData.email
-    });
 
     const userForDB = {
       nombre: userData.nombre,
@@ -131,12 +124,10 @@ export class AuthService {
 
     return this.http.post<AuthResponse>(`${this.apiUrl}/register`, userForDB).pipe(
       tap((response: AuthResponse) => {
-        console.log('Usuario guardado en BD:', response.user);
         this.handleAuthentication(response);
         this.loadingSubject.next(false);
       }),
       catchError(error => {
-        console.error('Error guardando en BD:', error);
         this.loadingSubject.next(false);
         return this.handleError(error);
       })
@@ -148,23 +139,19 @@ export class AuthService {
     this.tokenSubject.next(response.token);
     this.currentUserSubject.next(response.user);
     this.isLoggedInSubject.next(true);
-
-    console.log('Usuario autenticado desde BD:', response.user);
     localStorage.setItem('userData', JSON.stringify(response.user));
   }
 
   private loadCurrentUser(): void {
     const storedUser = localStorage.getItem('userData');
-    console.log('🔄 loadCurrentUser() - storedUser:', storedUser);
     
     if (storedUser) {
       try {
         const user = JSON.parse(storedUser);
-        console.log('✅ Usuario parseado desde localStorage:', user);
         this.currentUserSubject.next(user);
         this.isLoggedInSubject.next(true);
       } catch (e) {
-        console.error('Error parseando usuario cache:', e);
+        // Silently handle parse error
       }
     }
 
@@ -172,15 +159,11 @@ export class AuthService {
       headers: this.getAuthHeaders()
     }).subscribe({
       next: (user) => {
-        console.log('✅ Usuario cargado desde BD MySQL:', user);
-        console.log('🔍 rol_id en respuesta:', user.rol_id);
-        console.log('🔍 id en respuesta:', user.id);
         this.currentUserSubject.next(user);
         this.isLoggedInSubject.next(true);
         localStorage.setItem('userData', JSON.stringify(user));
       },
-      error: (error) => {
-        console.error('Error cargando usuario desde BD:', error);
+      error: () => {
         this.clearAuth();
       }
     });
@@ -191,7 +174,6 @@ export class AuthService {
       headers: this.getAuthHeaders()
     }).pipe(
       tap(user => {
-        console.log('Perfil completo desde BD:', user);
         this.currentUserSubject.next(user);
         localStorage.setItem('userData', JSON.stringify(user));
       }),
@@ -200,13 +182,10 @@ export class AuthService {
   }
 
   updateProfile(userData: Partial<Usuario>): Observable<Usuario> {
-    console.log('Actualizando perfil en BD:', userData);
-
     return this.http.put<Usuario>(`${this.apiUrl}/profile`, userData, {
       headers: this.getAuthHeaders()
     }).pipe(
       tap(user => {
-        console.log('Perfil actualizado en BD:', user);
         this.currentUserSubject.next(user);
         localStorage.setItem('userData', JSON.stringify(user));
       }),
@@ -214,26 +193,29 @@ export class AuthService {
     );
   }
 
-  logout(): void {
-    console.log('🚪 Cerrando sesión...');
+  logout(): Observable<any> {
+  const token = this.getToken();
+  
+  this.clearAuth();
 
-    this.http.post(`${this.apiUrl}/logout`, {}, {
-      headers: this.getAuthHeaders()
-    }).subscribe({
-      next: () => {
-        console.log('Sesión cerrada en servidor y BD');
-      },
-      error: (error) => {
-        console.warn('Error al cerrar sesión en servidor:', error);
-      },
-      complete: () => {
-        this.clearAuth();
-      }
+  if (!token) {
+    return new Observable(subscriber => {
+      subscriber.next(null);
+      subscriber.complete();
     });
-
-    this.clearAuth();
   }
 
+  return this.http.post(`${this.apiUrl}/logout`, {}, {
+    headers: this.getAuthHeaders()
+  }).pipe(
+    catchError(() => {
+      return new Observable(subscriber => {
+        subscriber.next(null);
+        subscriber.complete();
+      });
+    })
+  );
+}
   private clearAuth(): void {
     localStorage.removeItem('authToken');
     localStorage.removeItem('userData');
@@ -241,7 +223,6 @@ export class AuthService {
     this.isLoggedInSubject.next(false);
     this.tokenSubject.next(null);
     this.loadingSubject.next(false);
-    console.log('🧹 Datos de autenticación limpiados');
   }
 
   isLoggedIn(): boolean {
@@ -250,21 +231,17 @@ export class AuthService {
 
   getCurrentUser(): Usuario | null {
     const user = this.currentUserSubject.value;
-    console.log('🔍 getCurrentUser() - Valor:', user);
-    console.log('🔍 getCurrentUser() - Tipo:', typeof user);
     
     if (typeof user === 'string') {
-      console.log('⚠️  currentUser es string, parseando desde localStorage...');
       try {
         const storedUser = localStorage.getItem('userData');
         if (storedUser) {
           const parsedUser = JSON.parse(storedUser);
-          console.log('✅ Usuario parseado desde localStorage:', parsedUser);
           this.currentUserSubject.next(parsedUser);
           return parsedUser;
         }
       } catch (e) {
-        console.error('Error parseando usuario:', e);
+        return null;
       }
       return null;
     }
@@ -300,41 +277,15 @@ export class AuthService {
 
   isAdmin(): boolean {
     const user = this.getCurrentUser();
-    console.log('🔍 isAdmin() - Usuario:', user);
-    console.log('🔍 isAdmin() - Tipo de usuario:', typeof user);
     
-    if (typeof user === 'string') {
-      console.log('❌ User es string, no objeto');
-      return false;
-    }
-    
-    if (!user) {
-      console.log('❌ No hay usuario');
+    if (typeof user === 'string' || !user) {
       return false;
     }
 
-    if (user.nombre === 'Admin') {
-      console.log('✅ Admin detectado por nombre');
-      return true;
-    }
-
-    if (user.id === 1) {
-      console.log('✅ Admin detectado por ID = 1');
-      return true;
-    }
-
-    if (user.email === 'admin@sportifyme.com') {
-      console.log('✅ Admin detectado por email');
-      return true;
-    }
-
-    if (user.rol_id === 1) {
-      console.log('✅ Admin detectado por rol_id');
-      return true;
-    }
-
-    console.log('❌ No es admin');
-    return false;
+    return user.nombre === 'Admin' || 
+           user.id === 1 || 
+           user.email === 'admin@sportifyme.com' || 
+           user.rol_id === 1;
   }
 
   isModerador(): boolean {
@@ -366,8 +317,6 @@ export class AuthService {
     } else {
       const status = error.status;
       const errorBody = error.error;
-
-      console.log('Detalles del error BD:', { status, errorBody });
 
       if (errorBody && typeof errorBody === 'object') {
         if (errorBody.errors) {
@@ -430,13 +379,11 @@ export class AuthService {
       }
     }
 
-    console.error('Error de BD MySQL:', errorMessage);
     return throwError(() => new Error(errorMessage));
   }
 
   forgotPassword(email: string): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${this.apiUrl}/forgot-password`, { email }).pipe(
-      tap(() => console.log('Token de recuperación guardado en BD')),
       catchError(this.handleError)
     );
   }
@@ -446,7 +393,6 @@ export class AuthService {
       token,
       newPassword
     }).pipe(
-      tap(() => console.log('Contraseña actualizada en BD')),
       catchError(this.handleError)
     );
   }
@@ -458,7 +404,6 @@ export class AuthService {
     }, {
       headers: this.getAuthHeaders()
     }).pipe(
-      tap(() => console.log('Contraseña cambiada en BD')),
       catchError(this.handleError)
     );
   }
@@ -466,7 +411,6 @@ export class AuthService {
   checkEmailExists(email: string): Observable<boolean> {
     return this.http.post<{ exists: boolean }>(`${this.apiUrl}/check-email`, { email }).pipe(
       map(response => response.exists),
-      tap(exists => console.log(`Verificación en BD - Email ${email} existe:`, exists)),
       catchError(this.handleError)
     );
   }
@@ -475,7 +419,6 @@ export class AuthService {
     return this.http.get<Usuario[]>(`${environment.apiUrl}/usuarios`, {
       headers: this.getAuthHeaders()
     }).pipe(
-      tap(users => console.log('Usuarios cargados desde BD:', users.length)),
       catchError(this.handleError)
     );
   }
@@ -484,7 +427,6 @@ export class AuthService {
     return this.http.get<Usuario>(`${environment.apiUrl}/usuarios/${id}`, {
       headers: this.getAuthHeaders()
     }).pipe(
-      tap(user => console.log('Usuario por ID desde BD:', user)),
       catchError(this.handleError)
     );
   }
@@ -493,7 +435,6 @@ export class AuthService {
     return this.http.post<void>(`${this.apiUrl}/update-last-login`, {}, {
       headers: this.getAuthHeaders()
     }).pipe(
-      tap(() => console.log('Último login actualizado en BD')),
       catchError(this.handleError)
     );
   }
@@ -502,7 +443,6 @@ export class AuthService {
     return this.http.get(`${this.apiUrl}/stats`, {
       headers: this.getAuthHeaders()
     }).pipe(
-      tap(stats => console.log('Estadísticas desde BD:', stats)),
       catchError(this.handleError)
     );
   }
@@ -528,7 +468,6 @@ export class AuthService {
     return this.http.get<string[]>(`${this.apiUrl}/roles`, {
       headers: this.getAuthHeaders()
     }).pipe(
-      tap(roles => console.log('🎭 Roles disponibles en BD:', roles)),
       catchError(this.handleError)
     );
   }
@@ -538,7 +477,6 @@ export class AuthService {
       params: { q: query },
       headers: this.getAuthHeaders()
     }).pipe(
-      tap(users => console.log('🔍 Resultados búsqueda BD:', users)),
       catchError(this.handleError)
     );
   }

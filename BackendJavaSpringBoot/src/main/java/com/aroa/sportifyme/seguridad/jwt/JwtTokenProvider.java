@@ -12,20 +12,29 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    @Value("${app.jwt-secret}")
+    @Value("${app.jwt-secret:miClaveSecretaMuyLargaParaJWT256BitsDeSeguridad}")
     private String jwtSecret;
 
-    @Value("${app.jwt-expiration-ms}")
+    @Value("${app.jwt-expiration-ms:86400000}")
     private int jwtExpirationMs;
 
     private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(jwtSecret.getBytes());
+        // Asegurar que la clave tenga al menos 256 bits (32 bytes)
+        byte[] keyBytes = jwtSecret.getBytes();
+        if (keyBytes.length < 32) {
+            byte[] paddedKey = new byte[32];
+            System.arraycopy(keyBytes, 0, paddedKey, 0, keyBytes.length);
+            return Keys.hmacShaKeyFor(paddedKey);
+        }
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     public String generarToken(Authentication authentication) {
         String username = authentication.getName();
         Date ahora = new Date();
         Date expiracion = new Date(ahora.getTime() + jwtExpirationMs);
+
+        System.out.println("🔐 Generando token para: " + username);
 
         return Jwts.builder()
                 .setSubject(username)
@@ -36,31 +45,47 @@ public class JwtTokenProvider {
     }
 
     public String obtenerUsernameDeToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            
+            String username = claims.getSubject();
+            System.out.println("🔐 Username extraído: " + username);
+            return username;
+            
+        } catch (Exception e) {
+            System.out.println("❌ Error extrayendo username: " + e.getMessage());
+            return null;
+        }
     }
 
     public boolean validarToken(String token) {
         try {
+            System.out.println("🔐 Validando token...");
+            
             Jwts.parserBuilder()
                     .setSigningKey(getSigningKey())
                     .build()
                     .parseClaimsJws(token);
+            
+            System.out.println("✅ Token válido");
             return true;
+            
         } catch (SignatureException ex) {
-            
+            System.out.println("❌ Firma JWT inválida");
         } catch (MalformedJwtException ex) {
-            
+            System.out.println("❌ Token JWT mal formado");
         } catch (ExpiredJwtException ex) {
-            
+            System.out.println("❌ Token JWT expirado");
         } catch (UnsupportedJwtException ex) {
-            
+            System.out.println("❌ Token JWT no soportado");
         } catch (IllegalArgumentException ex) {
-            
+            System.out.println("❌ Claims JWT vacíos");
+        } catch (Exception ex) {
+            System.out.println("❌ Error validando token: " + ex.getMessage());
         }
         return false;
     }

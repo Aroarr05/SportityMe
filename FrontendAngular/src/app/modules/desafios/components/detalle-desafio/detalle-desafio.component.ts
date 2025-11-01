@@ -19,7 +19,6 @@ import { ErrorAlertComponent } from '../../../../shared/components/error-alert/e
     ErrorAlertComponent
   ]
 })
-
 export class DetalleDesafioComponent implements OnInit {
   desafio!: Desafio & { progreso: number; dias_restantes: number; participantes_count: number };
   loading = true;
@@ -27,6 +26,7 @@ export class DetalleDesafioComponent implements OnInit {
   participando = false;
   usuarioAutenticado = false;
   usuarioActual: any = null;
+  uniendo = false; 
 
   constructor(
     private route: ActivatedRoute,
@@ -149,14 +149,23 @@ export class DetalleDesafioComponent implements OnInit {
       return;
     }
 
+    this.uniendo = true;
+
     this.desafiosService.unirseADesafio(this.desafio.id).subscribe({
       next: (response) => {
         this.participando = true;
+        this.uniendo = false;
         this.desafio.participantes_count++;
-        alert('¡Te has unido al desafío exitosamente!');
+        
+
+        setTimeout(() => {
+          alert('¡Te has unido al desafío exitosamente!');
+        }, 500);
+        
         this.verificarParticipacion();
       },
       error: (err) => {
+        this.uniendo = false;
         let mensajeError = 'Error al unirse al desafío';
         
         if (err.status === 403) {

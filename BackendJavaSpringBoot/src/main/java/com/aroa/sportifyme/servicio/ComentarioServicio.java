@@ -27,9 +27,9 @@ public class ComentarioServicio {
 
         Desafio desafio = desafioServicio.buscarPorId(desafioId);
 
-        if (!participacionServicio.usuarioParticipaEnDesafio(usuario.getId(), desafio.getId())) {
+       /*  if (!participacionServicio.usuarioParticipaEnDesafio(usuario.getId(), desafio.getId())) {
             throw new ParticipacionNoEncontradaException(usuario.getId(), desafio.getId());
-        }
+        } */
 
         Comentario comentario = new Comentario();
         comentario.setContenido(contenido);

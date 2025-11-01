@@ -43,14 +43,21 @@ public class SeguridadConfig {
                     "/error"               
                 ).permitAll()
                 .requestMatchers("/api/ranking/**").permitAll()
+                // Permisos para desafíos
                 .requestMatchers(HttpMethod.GET, "/api/desafios/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/desafios/**").hasAnyRole("USER", "ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/desafios/**").hasAnyRole("USER", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/desafios/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/desafios/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/desafios/**").hasRole("ADMIN")
+                // Permisos para participación en desafíos
+                .requestMatchers(HttpMethod.GET, "/api/desafios/*/participacion").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/desafios/*/unirse").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/desafios/*/abandonar").authenticated()
+                // Permisos para usuarios
                 .requestMatchers(HttpMethod.GET, "/api/usuarios/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/usuarios/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/usuarios/**").hasAnyRole("USER", "ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/usuarios/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/usuarios/**").hasRole("ADMIN")
+                // Otros endpoints
                 .requestMatchers("/api/progresos/**").authenticated()
                 .requestMatchers("/api/participaciones/**").authenticated()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
