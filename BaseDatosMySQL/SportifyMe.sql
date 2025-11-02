@@ -145,6 +145,3 @@ CREATE TABLE desafios_completados (
     FOREIGN KEY (desafio_id) REFERENCES desafios(id) ON DELETE CASCADE,
     UNIQUE KEY (usuario_id, desafio_id)
 );
-
-
-
