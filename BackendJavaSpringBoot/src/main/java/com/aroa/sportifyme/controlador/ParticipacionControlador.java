@@ -10,17 +10,17 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/desafios")
+@RequestMapping("/api/participaciones")
 @RequiredArgsConstructor
 public class ParticipacionControlador {
 
     private final ParticipacionServicio participacionServicio;
 
-    @GetMapping("/{desafioId}/participacion")
+    @GetMapping("/desafio/{desafioId}")
     public ResponseEntity<Boolean> verificarParticipacion(
             @PathVariable Long desafioId,
             @AuthenticationPrincipal UserDetails userDetails) {
-        
+
         if (userDetails == null) {
             return ResponseEntity.ok(false);
         }
@@ -29,11 +29,11 @@ public class ParticipacionControlador {
         return ResponseEntity.ok(participa);
     }
 
-    @PostMapping("/{desafioId}/unirse")
+    @PostMapping("/desafio/{desafioId}/unirse")
     public ResponseEntity<?> unirseADesafio(
             @PathVariable Long desafioId,
             @AuthenticationPrincipal UserDetails userDetails) {
-        
+
         if (userDetails == null) {
             return ResponseEntity.status(401).body(Map.of("error", "No autenticado"));
         }
@@ -46,16 +46,20 @@ public class ParticipacionControlador {
         }
     }
 
-    @PostMapping("/{desafioId}/abandonar")
+    @PostMapping("/desafio/{desafioId}/abandonar")
     public ResponseEntity<?> abandonarDesafio(
             @PathVariable Long desafioId,
             @AuthenticationPrincipal UserDetails userDetails) {
-        
+
         if (userDetails == null) {
             return ResponseEntity.status(401).body(Map.of("error", "No autenticado"));
         }
 
-        participacionServicio.abandonarDesafio(userDetails.getUsername(), desafioId);
-        return ResponseEntity.ok(Map.of("message", "Desafío abandonado"));
+        try {
+            participacionServicio.abandonarDesafio(userDetails.getUsername(), desafioId);
+            return ResponseEntity.ok(Map.of("message", "Desafío abandonado"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 }
