@@ -1,4 +1,3 @@
-
 a[routerLink] {
   text-decoration: none !important;
 }
@@ -9,4 +8,10 @@ a[routerLink]:hover {
 
 .router-link-active {
   text-decoration: none !important;
+}
+
+.logo-grande {
+  height: 50px;
+  width: 140px;
+  object-fit: contain;
 }

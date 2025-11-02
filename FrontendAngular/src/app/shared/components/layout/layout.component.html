@@ -3,18 +3,10 @@
     <div class="flex justify-between items-center px-4 sm:px-6 py-3 sm:py-4">
       <div class="flex items-center space-x-2 sm:space-x-3">
         <div class="relative">
-          <img src="assets/nuevo-logo-sin-fondo.png" alt="SportifyMe Logo" 
-               class="h-7 w-7 sm:h-8 sm:w-8 object-contain"
-               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-          <div class="hidden items-center space-x-2">
-            <div class="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg flex items-center justify-center">
-              <i class="fas fa-trophy text-white text-xs sm:text-sm"></i>
-            </div>
+          <div class="relative">
+            <img src="logo-sin-fondo.png" alt="SportifyMe Logo" class="logo-grande">
           </div>
         </div>
-        <h1 class="text-lg sm:text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-          SportifyMe
-        </h1>
       </div>
 
       <div *ngIf="!isLoggedIn; else usuarioLogueado">
@@ -43,7 +35,8 @@
 
   <div class="flex-1 flex min-h-0">
 
-    <aside class="w-16 sm:w-64 bg-white shadow-inner border-r border-purple-100 flex-shrink-0 overflow-y-auto py-4 sm:py-6 transition-all duration-300">
+    <aside
+      class="w-16 sm:w-64 bg-white shadow-inner border-r border-purple-100 flex-shrink-0 overflow-y-auto py-4 sm:py-6 transition-all duration-300">
       <nav>
         <ul class="space-y-1 sm:space-y-2 px-2 sm:px-4">
 
@@ -70,7 +63,7 @@
               <span class="font-medium hidden sm:block">Ranking</span>
             </a>
           </li>
-          
+
           <li *ngIf="isLoggedIn && !isAdmin">
             <a routerLink="/progresos"
               routerLinkActive="bg-purple-50 text-purple-600 sm:border-r-2 border-purple-600 shadow-sm"
@@ -98,8 +91,7 @@
                 [class.rotate-180]="isAdminMenuOpen" [class.text-purple-500]="isAdminMenuOpen"></i>
             </div>
 
-            <div *ngIf="isAdminMenuOpen"
-              class="mt-2 bg-white border border-purple-200 rounded-lg shadow-md overflow-hidden mx-1 sm:mx-2 
+            <div *ngIf="isAdminMenuOpen" class="mt-2 bg-white border border-purple-200 rounded-lg shadow-md overflow-hidden mx-1 sm:mx-2 
                      absolute left-full ml-2 sm:left-0 sm:relative z-50 w-48 sm:w-auto">
               <ul class="py-2">
                 <li>
