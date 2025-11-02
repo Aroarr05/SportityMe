@@ -14,11 +14,11 @@ import { Desafio } from '../../../../shared/models';
     CommonModule, 
     ListaDesafiosComponent,
     CrearDesafioComponent,
-    EditarDesafioComponent,
-    DetalleDesafioComponent
+    EditarDesafioComponent
   ],
   templateUrl: './gestion-desafios.component.html'
 })
+
 export class GestionDesafiosComponent implements OnInit {
   desafios: Desafio[] = [];
   vistaActual: 'lista' | 'crear' | 'editar' | 'detalle' = 'lista';

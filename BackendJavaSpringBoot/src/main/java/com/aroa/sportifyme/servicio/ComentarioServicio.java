@@ -16,7 +16,6 @@ public class ComentarioServicio {
     private final ComentarioRepository comentarioRepository;
     private final UsuarioServicio usuarioServicio;
     private final DesafioServicio desafioServicio;
-    private final ParticipacionServicio participacionServicio;
 
     @Transactional
     public Comentario crearComentario(Long desafioId, String contenido, String emailUsuario) {
