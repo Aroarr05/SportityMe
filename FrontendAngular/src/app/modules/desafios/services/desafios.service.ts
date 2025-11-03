@@ -12,7 +12,7 @@ import { AuthService } from '../../../auth/services/auth.service';
 })
 export class DesafiosService {
   private apiUrl = `${environment.apiUrl}/desafios`;
-  private participacionesUrl = `${environment.apiUrl}/participaciones`; // Añade esta URL
+  private participacionesUrl = `${environment.apiUrl}/participaciones`;
 
   constructor(
     private http: HttpClient,
@@ -34,6 +34,7 @@ export class DesafiosService {
     }
   }
 
+  // SOLO métodos de API - NO lógica de filtrado
   obtenerDesafios(): Observable<Desafio[]> {
     return this.http.get<Desafio[]>(this.apiUrl);
   }
@@ -48,26 +49,12 @@ export class DesafiosService {
     });
   }
 
-  actualizarDesafio(id: number, desafio: Partial<Desafio>): Observable<Desafio> {
-    return this.http.put<Desafio>(`${this.apiUrl}/${id}`, desafio, {
-      headers: this.getAuthHeaders()
-    });
-  }
-
-  eliminarDesafio(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`, {
-      headers: this.getAuthHeaders()
-    });
-  }
-
-  // **CORREGIDO: Usar el endpoint correcto de participaciones**
   unirseADesafio(id: number): Observable<any> {
     return this.http.post<any>(`${this.participacionesUrl}/desafio/${id}/unirse`, {}, {
       headers: this.getAuthHeaders()
     });
   }
 
-  // **CORREGIDO: Usar el endpoint correcto de participaciones**
   verificarParticipacion(desafioId: number): Observable<boolean> {
     return this.http.get<boolean>(
       `${this.participacionesUrl}/desafio/${desafioId}`,
@@ -75,17 +62,6 @@ export class DesafiosService {
     );
   }
 
-  obtenerParticipantes(desafioId: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/${desafioId}/participantes`, {
-      headers: this.getAuthHeaders()
-    });
-  }
-
-  obtenerDesafiosActivos(): Observable<Desafio[]> {
-    return this.http.get<Desafio[]>(`${this.apiUrl}/activos`);
-  }
- 
-  // **CORREGIDO: Usar el endpoint correcto de participaciones**
   abandonarDesafio(desafioId: number): Observable<any> {
     return this.http.post(`${this.participacionesUrl}/desafio/${desafioId}/abandonar`, {}, {
       headers: this.getAuthHeaders()

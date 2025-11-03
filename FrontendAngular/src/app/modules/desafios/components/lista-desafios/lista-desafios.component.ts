@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { DesafiosService } from '../../services/desafios.service';
 import { AuthService } from '../../../../auth/services/auth.service';
 import { Desafio } from '../../../../shared/models';
@@ -13,18 +14,30 @@ import { Desafio } from '../../../../shared/models';
   imports: [
     CommonModule,
     RouterModule,
+    FormsModule
   ]
 })
-
 export class ListaDesafiosComponent implements OnInit {
-  desafios: (Desafio & { progreso: number; dias_restantes: number })[] = [];
+  desafios: Desafio[] = [];
+  desafiosFiltrados: Desafio[] = [];
   loading = true;
   error: string | null = null;
   isLoggedIn = false;
   isAdmin = false;
+  
+  // Filtros - ESTA PROPIEDAD PERTENECE AL COMPONENTE
+  filtroActividad: string = 'todos';
+  tiposActividad = [
+    { valor: 'todos', label: 'Todos los desafíos', icono: 'fa-list' },
+    { valor: 'correr', label: 'Correr', icono: 'fa-running' },
+    { valor: 'ciclismo', label: 'Ciclismo', icono: 'fa-bicycle' },
+    { valor: 'natacion', label: 'Natación', icono: 'fa-swimmer' },
+    { valor: 'gimnasio', label: 'Gimnasio', icono: 'fa-dumbbell' },
+    { valor: 'otros', label: 'Otros', icono: 'fa-star' }
+  ];
 
   constructor(
-    private desafiosService: DesafiosService,
+    private desafiosService: DesafiosService, // Servicio para API calls
     private authService: AuthService
   ) {}
 
@@ -45,8 +58,8 @@ export class ListaDesafiosComponent implements OnInit {
     this.desafiosService.obtenerDesafios().subscribe({
       next: (desafios) => {
         console.log('Datos recibidos:', desafios);
-        const normalizados = this.normalizarDatosDesafios(desafios);
-        this.desafios = normalizados.map(d => this.calcularDatosExtras(d));
+        this.desafios = this.normalizarDatosDesafios(desafios);
+        this.aplicarFiltro(); // Filtrado en el COMPONENTE
         this.loading = false;
       },
       error: (err) => {
@@ -55,6 +68,42 @@ export class ListaDesafiosComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  // Método para aplicar filtros - EN EL COMPONENTE
+  aplicarFiltro(): void {
+    if (this.filtroActividad === 'todos') {
+      this.desafiosFiltrados = [...this.desafios];
+    } else {
+      this.desafiosFiltrados = this.desafios.filter(desafio => 
+        desafio.tipo_actividad === this.filtroActividad
+      );
+    }
+  }
+
+  // Método para cambiar filtro - EN EL COMPONENTE
+  cambiarFiltro(nuevoFiltro: string): void {
+    this.filtroActividad = nuevoFiltro;
+    this.aplicarFiltro();
+  }
+
+  // Método para obtener el número de desafíos por tipo - EN EL COMPONENTE
+  contarDesafiosPorTipo(tipo: string): number {
+    if (tipo === 'todos') {
+      return this.desafios.length;
+    }
+    return this.desafios.filter(desafio => desafio.tipo_actividad === tipo).length;
+  }
+
+  // Método para obtener las clases CSS de los botones de filtro - EN EL COMPONENTE
+  getBotonFiltroClase(tipo: string): string {
+    const baseClases = 'flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-105';
+    
+    if (this.filtroActividad === tipo) {
+      return `${baseClases} bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg`;
+    } else {
+      return `${baseClases} bg-white text-gray-700 border border-gray-200 hover:border-purple-300 hover:bg-purple-50`;
+    }
   }
 
   private normalizarDatosDesafios(datos: any[]): Desafio[] {
@@ -95,18 +144,4 @@ export class ListaDesafiosComponent implements OnInit {
     };
     return iconos[tipoActividad] || 'fa-star';
   }
-
-  private calcularDatosExtras(desafio: Desafio): Desafio & { progreso: number; dias_restantes: number } {
-    const fechaInicio = new Date(desafio.fecha_inicio);
-    const fechaFin = new Date(desafio.fecha_fin);
-    const hoy = new Date();
-
-    const totalDias = Math.ceil((fechaFin.getTime() - fechaInicio.getTime()) / (1000 * 60 * 60 * 24));
-    const diasTranscurridos = Math.max(0, Math.min(totalDias, Math.ceil((hoy.getTime() - fechaInicio.getTime()) / (1000 * 60 * 60 * 24))));
-    const progreso = totalDias > 0 ? Math.round((diasTranscurridos / totalDias) * 100) : 0;
-    const dias_restantes = Math.max(0, totalDias - diasTranscurridos);
-
-    return { ...desafio, progreso, dias_restantes };
-  }
-
 }
