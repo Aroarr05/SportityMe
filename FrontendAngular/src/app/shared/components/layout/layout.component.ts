@@ -43,6 +43,7 @@ export class LayoutComponent implements OnInit {
       console.log('🔄 Usuario actual cambió:', user);
       this.checkAdminStatus();
     });
+    
     this.checkAdminStatus();
     this.actualizarTitulo();
   }

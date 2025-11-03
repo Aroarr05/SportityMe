@@ -2,91 +2,98 @@ package com.aroa.sportifyme.seguridad.jwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.SignatureException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import java.security.Key;
+
+import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenProvider {
 
-    @Value("${app.jwt-secret:miClaveSecretaMuyLargaParaJWT256BitsDeSeguridad}")
-    private String jwtSecret;
-
-    @Value("${app.jwt-expiration-ms:86400000}")
-    private int jwtExpirationMs;
-
-    private Key getSigningKey() {
-        // Asegurar que la clave tenga al menos 256 bits (32 bytes)
-        byte[] keyBytes = jwtSecret.getBytes();
-        if (keyBytes.length < 32) {
-            byte[] paddedKey = new byte[32];
-            System.arraycopy(keyBytes, 0, paddedKey, 0, keyBytes.length);
-            return Keys.hmacShaKeyFor(paddedKey);
-        }
-        return Keys.hmacShaKeyFor(keyBytes);
-    }
+    private final SecretKey jwtSecret = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    
+    private final long jwtExpirationMs = 86400000; 
 
     public String generarToken(Authentication authentication) {
         String username = authentication.getName();
         Date ahora = new Date();
         Date expiracion = new Date(ahora.getTime() + jwtExpirationMs);
 
-        System.out.println("🔐 Generando token para: " + username);
+        String roles = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
 
         return Jwts.builder()
                 .setSubject(username)
+                .claim("roles", roles)
                 .setIssuedAt(ahora)
                 .setExpiration(expiracion)
-                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+                .signWith(jwtSecret, SignatureAlgorithm.HS256) 
+                .compact();
+    }
+
+    public String generarToken(UserDetails userDetails) {
+        String username = userDetails.getUsername();
+        Date ahora = new Date();
+        Date expiracion = new Date(ahora.getTime() + jwtExpirationMs);
+
+        String roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+
+        return Jwts.builder()
+                .setSubject(username)
+                .claim("roles", roles)
+                .setIssuedAt(ahora)
+                .setExpiration(expiracion)
+                .signWith(jwtSecret, SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public String obtenerUsernameDeToken(String token) {
         try {
             Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(getSigningKey())
+                    .setSigningKey(jwtSecret)
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
             
-            String username = claims.getSubject();
-            System.out.println("🔐 Username extraído: " + username);
-            return username;
+            return claims.getSubject();
             
         } catch (Exception e) {
-            System.out.println("❌ Error extrayendo username: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public String obtenerRolesDeToken(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(jwtSecret)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            
+            return claims.get("roles", String.class);
+            
+        } catch (Exception e) {
             return null;
         }
     }
 
     public boolean validarToken(String token) {
         try {
-            System.out.println("🔐 Validando token...");
-            
             Jwts.parserBuilder()
-                    .setSigningKey(getSigningKey())
+                    .setSigningKey(jwtSecret)
                     .build()
                     .parseClaimsJws(token);
-            
-            System.out.println("✅ Token válido");
             return true;
             
-        } catch (SignatureException ex) {
-            System.out.println("❌ Firma JWT inválida");
-        } catch (MalformedJwtException ex) {
-            System.out.println("❌ Token JWT mal formado");
-        } catch (ExpiredJwtException ex) {
-            System.out.println("❌ Token JWT expirado");
-        } catch (UnsupportedJwtException ex) {
-            System.out.println("❌ Token JWT no soportado");
-        } catch (IllegalArgumentException ex) {
-            System.out.println("❌ Claims JWT vacíos");
         } catch (Exception ex) {
-            System.out.println("❌ Error validando token: " + ex.getMessage());
+            return false;
         }
-        return false;
     }
 }

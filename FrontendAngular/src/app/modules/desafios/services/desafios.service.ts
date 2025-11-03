@@ -6,12 +6,13 @@ import { environment } from '../../../../environments/environment';
 import { Desafio } from '../../../shared/models';
 import { CrearDesafioDto } from '../dto/crear-desafio.dto';
 import { AuthService } from '../../../auth/services/auth.service';
+
 @Injectable({
   providedIn: 'root'
 })
-
 export class DesafiosService {
   private apiUrl = `${environment.apiUrl}/desafios`;
+  private participacionesUrl = `${environment.apiUrl}/participaciones`; // Añade esta URL
 
   constructor(
     private http: HttpClient,
@@ -59,18 +60,18 @@ export class DesafiosService {
     });
   }
 
+  // **CORREGIDO: Usar el endpoint correcto de participaciones**
   unirseADesafio(id: number): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/${id}/unirse`, {}, {
+    return this.http.post<any>(`${this.participacionesUrl}/desafio/${id}/unirse`, {}, {
       headers: this.getAuthHeaders()
     });
   }
 
+  // **CORREGIDO: Usar el endpoint correcto de participaciones**
   verificarParticipacion(desafioId: number): Observable<boolean> {
-    return this.http.get<{ participando: boolean }>(
-      `${this.apiUrl}/${desafioId}/participacion`,
+    return this.http.get<boolean>(
+      `${this.participacionesUrl}/desafio/${desafioId}`,
       { headers: this.getAuthHeaders() }
-    ).pipe(
-      map(response => response.participando)
     );
   }
 
@@ -84,8 +85,9 @@ export class DesafiosService {
     return this.http.get<Desafio[]>(`${this.apiUrl}/activos`);
   }
  
+  // **CORREGIDO: Usar el endpoint correcto de participaciones**
   abandonarDesafio(desafioId: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${desafioId}/participar`, {
+    return this.http.post(`${this.participacionesUrl}/desafio/${desafioId}/abandonar`, {}, {
       headers: this.getAuthHeaders()
     });
   }

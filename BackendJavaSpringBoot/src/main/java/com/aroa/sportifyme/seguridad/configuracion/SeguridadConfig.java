@@ -15,9 +15,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.aroa.sportifyme.seguridad.jwt.JwtAuthenticationFilter;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -25,7 +28,7 @@ import com.aroa.sportifyme.seguridad.jwt.JwtAuthenticationFilter;
 @RequiredArgsConstructor
 public class SeguridadConfig {
 
-    private final JwtAuthenticationFilter jwtAuthFilter; 
+    private final JwtAuthenticationFilter jwtAuthFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -43,24 +46,28 @@ public class SeguridadConfig {
                     "/error"               
                 ).permitAll()
                 .requestMatchers("/api/ranking/**").permitAll()
+                
                 // Permisos para desafíos
                 .requestMatchers(HttpMethod.GET, "/api/desafios/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/desafios/**").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/desafios/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/desafios/**").hasRole("ADMIN")
+                
                 // Permisos para participación en desafíos
                 .requestMatchers(HttpMethod.GET, "/api/desafios/*/participacion").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/desafios/*/unirse").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/desafios/*/abandonar").authenticated()
-                // Permisos para usuarios
-                .requestMatchers(HttpMethod.GET, "/api/usuarios/**").permitAll()
+                
+                // Permisos para usuarios (endpoints públicos)
+                .requestMatchers(HttpMethod.GET, "/api/usuarios/perfil/**").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/usuarios/{id}").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/usuarios/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/usuarios/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/usuarios/**").hasRole("ADMIN")
-                // Otros endpoints
-                .requestMatchers("/api/progresos/**").authenticated()
-                .requestMatchers("/api/participaciones/**").authenticated()
+                
+                // Endpoints de ADMIN
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                
                 .anyRequest().authenticated()
             )
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -70,16 +77,15 @@ public class SeguridadConfig {
     }
 
     @Bean
-    public UrlBasedCorsConfigurationSource corsConfigurationSource() {
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        CorsConfiguration config = new CorsConfiguration();
-
-        config.setAllowCredentials(true);
-        config.addAllowedOriginPattern("*"); 
-        config.addAllowedHeader("*");
-        config.addAllowedMethod("*");
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowCredentials(true);
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         
-        source.registerCorsConfiguration("/**", config);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 

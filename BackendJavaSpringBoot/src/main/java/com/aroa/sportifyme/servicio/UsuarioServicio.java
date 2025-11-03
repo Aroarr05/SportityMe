@@ -20,7 +20,7 @@ import java.util.*;
 public class UsuarioServicio implements UserDetailsService {
 
     private final UsuarioRepository usuarioRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder; 
 
     @Override
     @Transactional(readOnly = true)
@@ -33,10 +33,22 @@ public class UsuarioServicio implements UserDetailsService {
         List<GrantedAuthority> authorities = Collections.singletonList(
                 new SimpleGrantedAuthority("ROLE_" + rolNombre));
 
-        return new User(
-                usuario.getEmail(),
-                usuario.getContraseña(),
-                authorities);
+      
+        return User.builder()
+                .username(usuario.getEmail())
+                .password(usuario.getContraseña()) 
+                .authorities(authorities)
+                .build();
+    }
+
+
+    public boolean verificarPassword(String email, String passwordPlana) {
+        Optional<Usuario> usuarioOpt = buscarPorEmail(email);
+        if (usuarioOpt.isEmpty()) {
+            return false;
+        }
+        Usuario usuario = usuarioOpt.get();
+        return passwordEncoder.matches(passwordPlana, usuario.getContraseña());
     }
 
     @Transactional

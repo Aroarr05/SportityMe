@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
+
 export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
   loading: boolean = false;
@@ -26,7 +27,7 @@ export class LoginComponent implements OnInit {
   ngOnInit(): void {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      contraseña: ['', Validators.required] 
+      password: ['', Validators.required] 
     });
   }
   
@@ -37,7 +38,7 @@ export class LoginComponent implements OnInit {
 
       const loginData = {
         email: this.loginForm.get('email')?.value || '',
-        contraseña: this.loginForm.get('contraseña')?.value || '' 
+        password: this.loginForm.get('password')?.value || '' 
       };
       
       this.authService.login(loginData).subscribe({

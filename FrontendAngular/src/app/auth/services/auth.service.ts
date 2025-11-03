@@ -7,7 +7,7 @@ import { Usuario, Rol } from '../../shared/models/usuario.model';
 
 export interface LoginCredentials {
   email: string;
-  contraseña: string;
+  password: string; 
 }
 
 export interface RegisterData {
@@ -90,21 +90,6 @@ export class AuthService {
     }
   }
 
-  login(credentials: LoginCredentials): Observable<AuthResponse> {
-    this.loadingSubject.next(true);
-
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
-      tap((response: AuthResponse) => {
-        this.handleAuthentication(response);
-        this.loadingSubject.next(false);
-      }),
-      catchError(error => {
-        this.loadingSubject.next(false);
-        return this.handleError(error);
-      })
-    );
-  }
-
   register(userData: RegisterData): Observable<AuthResponse> {
     this.loadingSubject.next(true);
 
@@ -144,7 +129,7 @@ export class AuthService {
 
   private loadCurrentUser(): void {
     const storedUser = localStorage.getItem('userData');
-    
+
     if (storedUser) {
       try {
         const user = JSON.parse(storedUser);
@@ -194,28 +179,29 @@ export class AuthService {
   }
 
   logout(): Observable<any> {
-  const token = this.getToken();
-  
-  this.clearAuth();
+    const token = this.getToken();
 
-  if (!token) {
-    return new Observable(subscriber => {
-      subscriber.next(null);
-      subscriber.complete();
-    });
-  }
+    this.clearAuth();
 
-  return this.http.post(`${this.apiUrl}/logout`, {}, {
-    headers: this.getAuthHeaders()
-  }).pipe(
-    catchError(() => {
+    if (!token) {
       return new Observable(subscriber => {
         subscriber.next(null);
         subscriber.complete();
       });
-    })
-  );
-}
+    }
+
+    return this.http.post(`${this.apiUrl}/logout`, {}, {
+      headers: this.getAuthHeaders()
+    }).pipe(
+      catchError(() => {
+        return new Observable(subscriber => {
+          subscriber.next(null);
+          subscriber.complete();
+        });
+      })
+    );
+  }
+
   private clearAuth(): void {
     localStorage.removeItem('authToken');
     localStorage.removeItem('userData');
@@ -231,7 +217,7 @@ export class AuthService {
 
   getCurrentUser(): Usuario | null {
     const user = this.currentUserSubject.value;
-    
+
     if (typeof user === 'string') {
       try {
         const storedUser = localStorage.getItem('userData');
@@ -245,7 +231,7 @@ export class AuthService {
       }
       return null;
     }
-    
+
     return user;
   }
 
@@ -277,15 +263,15 @@ export class AuthService {
 
   isAdmin(): boolean {
     const user = this.getCurrentUser();
-    
+
     if (typeof user === 'string' || !user) {
       return false;
     }
 
-    return user.nombre === 'Admin' || 
-           user.id === 1 || 
-           user.email === 'admin@sportifyme.com' || 
-           user.rol_id === 1;
+    return user.nombre === 'Admin' ||
+      user.id === 1 ||
+      user.email === 'admin@sportifyme.com' ||
+      user.rol_id === 1;
   }
 
   isModerador(): boolean {
@@ -307,6 +293,38 @@ export class AuthService {
       case 2: return Rol.USUARIO;
       default: return 'DESCONOCIDO';
     }
+  }
+
+  login(credentials: LoginCredentials): Observable<AuthResponse> {
+    this.loadingSubject.next(true);
+
+    const loginData = {
+      email: credentials.email,
+      password: credentials.password 
+    };
+
+    console.log('Credenciales enviadas al backend:', loginData);
+    console.log('Email:', loginData.email);
+    console.log('Password:', loginData.password);
+    console.log('Tipo de password:', typeof loginData.password);
+    console.log('Longitud password:', loginData.password?.length);
+
+
+    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, loginData).pipe(
+      tap((response: AuthResponse) => {
+        console.log('Respuesta del login:', response);
+        this.handleAuthentication(response);
+        this.loadingSubject.next(false);
+      }),
+      catchError(error => {
+        console.error('Error completo del login:', error);
+        console.error('Status:', error.status);
+        console.error('Mensaje:', error.message);
+        console.error('Error body:', error.error);
+        this.loadingSubject.next(false);
+        return this.handleError(error);
+      })
+    );
   }
 
   private handleError(error: any): Observable<never> {
