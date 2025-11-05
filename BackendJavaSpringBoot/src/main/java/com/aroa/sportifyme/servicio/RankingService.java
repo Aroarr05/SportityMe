@@ -40,7 +40,6 @@ public class RankingService {
     public List<RankingDTO> obtenerRankingPorDesafio(Long desafioId) {
         try {
             List<RankingDTO> ranking = rankingRepository.findRankingByDesafioId(desafioId);
-            // Asignar posiciones
             for (int i = 0; i < ranking.size(); i++) {
                 ranking.get(i).setPosicion(i + 1);
             }

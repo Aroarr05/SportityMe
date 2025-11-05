@@ -7,6 +7,12 @@ import { Desafio } from '../../../../shared/models';
 import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
 import { ErrorAlertComponent } from '../../../../shared/components/error-alert/error-alert.component';
 
+interface DesafioConExtras extends Desafio {
+  progreso: number;
+  dias_restantes: number;
+  participantes_count: number;
+}
+
 @Component({
   selector: 'app-detalle-desafio',
   templateUrl: './detalle-desafio.component.html',
@@ -20,7 +26,7 @@ import { ErrorAlertComponent } from '../../../../shared/components/error-alert/e
   ]
 })
 export class DetalleDesafioComponent implements OnInit {
-  desafio!: Desafio & { progreso: number; dias_restantes: number; participantes_count: number };
+  desafio!: DesafioConExtras;
   loading = true;
   error: string | null = null;
   participando = false;
@@ -46,6 +52,9 @@ export class DetalleDesafioComponent implements OnInit {
     
     this.authService.isLoggedIn$.subscribe(isLoggedIn => {
       this.usuarioAutenticado = isLoggedIn;
+      if (isLoggedIn) {
+        this.verificarParticipacion();
+      }
     });
     
     this.authService.currentUser$.subscribe(user => {
@@ -78,7 +87,7 @@ export class DetalleDesafioComponent implements OnInit {
   }
 
   private verificarParticipacion(): void {
-    if (!this.usuarioAutenticado || !this.usuarioActual) {
+    if (!this.usuarioAutenticado || !this.usuarioActual || !this.desafio) {
       this.participando = false;
       return;
     }
@@ -93,18 +102,24 @@ export class DetalleDesafioComponent implements OnInit {
     });
   }
 
-  private calcularDatosExtras(desafio: Desafio): Desafio & { progreso: number; dias_restantes: number; participantes_count: number } {
+  private calcularDatosExtras(desafio: Desafio): DesafioConExtras {
+    const desafioBase: DesafioConExtras = {
+      ...desafio,
+      progreso: 0,
+      dias_restantes: 0,
+      participantes_count: 0
+    };
+
     if (!desafio.fecha_inicio || !desafio.fecha_fin) {
       const fechaInicioDefault = desafio.fecha_creacion || new Date().toISOString();
       const fechaFinDefault = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
       
       return { 
-        ...desafio, 
+        ...desafioBase,
         fecha_inicio: desafio.fecha_inicio || fechaInicioDefault,
         fecha_fin: desafio.fecha_fin || fechaFinDefault,
         progreso: 0, 
-        dias_restantes: 30, 
-        participantes_count: 0 
+        dias_restantes: 30
       };
     }
 
@@ -114,12 +129,7 @@ export class DetalleDesafioComponent implements OnInit {
       const hoy = new Date();
 
       if (isNaN(fechaInicio.getTime()) || isNaN(fechaFin.getTime())) {
-        return { 
-          ...desafio, 
-          progreso: 0, 
-          dias_restantes: 0, 
-          participantes_count: 0 
-        };
+        return desafioBase;
       }
 
       const totalDias = Math.ceil((fechaFin.getTime() - fechaInicio.getTime()) / (1000 * 60 * 60 * 24));
@@ -128,24 +138,22 @@ export class DetalleDesafioComponent implements OnInit {
       const dias_restantes = Math.max(0, totalDias - diasTranscurridos);
 
       return { 
-        ...desafio, 
+        ...desafioBase,
         progreso, 
-        dias_restantes, 
-        participantes_count: 0
+        dias_restantes
       };
     } catch (error) {
-      return { 
-        ...desafio, 
-        progreso: 0, 
-        dias_restantes: 0, 
-        participantes_count: 0 
-      };
+      return desafioBase;
     }
   }
 
   unirseADesafio(): void {
     if (!this.usuarioAutenticado) {
       this.redirigirALogin();
+      return;
+    }
+
+    if (this.participando) {
       return;
     }
 
@@ -156,47 +164,27 @@ export class DetalleDesafioComponent implements OnInit {
         this.participando = true;
         this.uniendo = false;
         this.desafio.participantes_count++;
-        
-
-        setTimeout(() => {
-          alert('¡Te has unido al desafío exitosamente!');
-        }, 500);
-        
         this.verificarParticipacion();
       },
       error: (err) => {
         this.uniendo = false;
-        let mensajeError = 'Error al unirse al desafío';
-        
-        if (err.status === 403) {
-          mensajeError = 'No tienes permisos para unirte a este desafío. Tu sesión puede haber expirado. Por favor, inicia sesión nuevamente.';
-          this.authService.logout();
-          this.redirigirALogin();
-          return;
-        } else if (err.status === 400) {
-          mensajeError = err.error?.message || 'No puedes unirte a este desafío';
-        } else if (err.status === 404) {
-          mensajeError = 'El desafío no existe o no está disponible';
-        } else if (err.status === 0) {
-          mensajeError = 'Error de conexión. Verifica tu conexión a internet.';
+        if (err.status === 400 && err.error?.message?.includes('ya está participando')) {
+          this.participando = true;
+          this.verificarParticipacion();
         }
-        
-        alert(mensajeError);
       }
     });
   }
 
   abandonarDesafio(): void {
-    if (!confirm('¿Estás seguro de que quieres abandonar este desafío?')) return;
-
     this.desafiosService.abandonarDesafio(this.desafio.id).subscribe({
       next: () => {
         this.participando = false;
         this.desafio.participantes_count = Math.max(0, this.desafio.participantes_count - 1);
-        alert('Has abandonado el desafío');
+        this.verificarParticipacion();
       },
       error: (err) => {
-        alert('Error al abandonar el desafío: ' + err.message);
+        this.verificarParticipacion();
       }
     });
   }
