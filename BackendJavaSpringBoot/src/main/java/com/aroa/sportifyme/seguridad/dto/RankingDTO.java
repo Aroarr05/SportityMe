@@ -12,31 +12,24 @@ public class RankingDTO {
     private Long usuarioId;
     private String nombre;
     private String avatarUrl;
-    private Long totalDesafiosCompletados; 
-    private BigDecimal progresoActual;
-    private Integer posicion; 
-    
-    public RankingDTO(Long usuarioId, String nombre, String avatarUrl, Long totalDesafiosCompletados) {
+    private Long totalDesafios;
+    private BigDecimal porcentajeCompletado;
+    private BigDecimal valorActual;
+    private Integer posicion;
+
+    public RankingDTO(Long usuarioId, String nombre, String avatarUrl, Long totalDesafios, BigDecimal porcentajeCompletado) {
         this.usuarioId = usuarioId;
         this.nombre = nombre;
         this.avatarUrl = avatarUrl;
-        this.totalDesafiosCompletados = totalDesafiosCompletados;
+        this.totalDesafios = totalDesafios;
+        this.porcentajeCompletado = porcentajeCompletado;
     }
-   
-    public RankingDTO(Long usuarioId, String nombre, String avatarUrl, BigDecimal progresoActual) {
+
+    public RankingDTO(Long usuarioId, String nombre, String avatarUrl, BigDecimal valorActual, BigDecimal porcentajeCompletado) {
         this.usuarioId = usuarioId;
         this.nombre = nombre;
         this.avatarUrl = avatarUrl;
-        this.progresoActual = progresoActual;
-    }
-    
-    
-    public BigDecimal getValorOrdenamiento() {
-        if (progresoActual != null) {
-            return progresoActual;
-        } else if (totalDesafiosCompletados != null) {
-            return new BigDecimal(totalDesafiosCompletados);
-        }
-        return BigDecimal.ZERO;
+        this.valorActual = valorActual;
+        this.porcentajeCompletado = porcentajeCompletado;
     }
 }

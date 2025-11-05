@@ -59,7 +59,7 @@ export const routes: Routes = [
         children: [
           {
             path: '',
-            loadComponent: () => import('./modules/rankings/components/ranking-global/ranking-global.component').then(m => m.RankingGlobalComponent)
+            loadComponent: () => import('./modules/rankings/components/ranking-global/ranking.component').then(m => m.RankingComponent)
           }
         ]
       },

@@ -2,14 +2,12 @@ package com.aroa.sportifyme.servicio;
 
 import com.aroa.sportifyme.seguridad.dto.RankingDTO;
 import com.aroa.sportifyme.repository.RankingRepository;
-import com.aroa.sportifyme.repository.DesafiosCompletadosRepository;
-import com.aroa.sportifyme.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -17,39 +15,22 @@ import java.util.stream.Collectors;
 public class RankingService {
 
     private final RankingRepository rankingRepository;
-    private final DesafiosCompletadosRepository desafiosCompletadosRepository;
-    private final UsuarioRepository usuarioRepository;
 
     public List<RankingDTO> obtenerRankingGlobal() {
         try {
-            return rankingRepository.findGlobalRanking();
+            List<RankingDTO> ranking = rankingRepository.findGlobalRanking();
+            // Asignar posiciones
+            for (int i = 0; i < ranking.size(); i++) {
+                ranking.get(i).setPosicion(i + 1);
+            }
+            return ranking;
         } catch (Exception e) {
-            return usuarioRepository.findAll().stream()
-                    .map(usuario -> {
-                        Integer totalCompletados = desafiosCompletadosRepository
-                                .countDesafiosCompletadosByUsuario(usuario.getId());
-
-                        String nombre = usuario.getNombre() != null ? usuario.getNombre() : "Anónimo";
-                        String avatarUrl = usuario.getAvatarUrl() != null ? usuario.getAvatarUrl() : ""; 
-                        Long completedChallenges = totalCompletados != null ? totalCompletados.longValue() : 0L;
-
-                        return new RankingDTO(
-                                usuario.getId(),
-                                nombre,
-                                avatarUrl,
-                                completedChallenges
-                        );
-                    })
-                    .sorted((r1, r2) -> r2.getTotalDesafiosCompletados().compareTo(r1.getTotalDesafiosCompletados())) // CORREGIDO
-                    .collect(Collectors.toList());
+            throw new RuntimeException("Error al obtener ranking global: " + e.getMessage());
         }
     }
 
     public List<RankingDTO> obtenerRankingGlobalConLimite(Integer limit) {
         List<RankingDTO> ranking = obtenerRankingGlobal();
-        for (int i = 0; i < ranking.size(); i++) {
-            ranking.get(i).setPosicion(i + 1);
-        }
         
         if (limit != null && limit > 0 && ranking.size() > limit) {
             return ranking.subList(0, limit);
@@ -58,20 +39,40 @@ public class RankingService {
     }
 
     public List<RankingDTO> obtenerRankingPorDesafio(Long desafioId) {
-        List<RankingDTO> ranking = rankingRepository.findRankingByDesafioId(desafioId);
-
-        for (int i = 0; i < ranking.size(); i++) {
-            ranking.get(i).setPosicion(i + 1);
+        try {
+            List<RankingDTO> ranking = rankingRepository.findRankingByDesafioId(desafioId);
+            // Asignar posiciones
+            for (int i = 0; i < ranking.size(); i++) {
+                ranking.get(i).setPosicion(i + 1);
+            }
+            return ranking;
+        } catch (Exception e) {
+            throw new RuntimeException("Error al obtener ranking por desafío: " + e.getMessage());
         }
+    }
+
+    public List<RankingDTO> obtenerRankingPorDesafioConLimite(Long desafioId, Integer limit) {
+        List<RankingDTO> ranking = obtenerRankingPorDesafio(desafioId);
         
+        if (limit != null && limit > 0 && ranking.size() > limit) {
+            return ranking.subList(0, limit);
+        }
         return ranking;
     }
 
     public Long obtenerTotalParticipantesDesafio(Long desafioId) {
-        return rankingRepository.countParticipantesByDesafioId(desafioId);
+        try {
+            return rankingRepository.countParticipantesByDesafioId(desafioId);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al obtener total participantes: " + e.getMessage());
+        }
     }
 
     public boolean esUsuarioParticipante(Long desafioId, Long usuarioId) {
-        return rankingRepository.esParticipante(desafioId, usuarioId);
+        try {
+            return rankingRepository.esParticipante(desafioId, usuarioId);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al verificar participación: " + e.getMessage());
+        }
     }
 }
