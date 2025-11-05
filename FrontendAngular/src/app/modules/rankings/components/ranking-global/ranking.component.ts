@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { RankingService } from '../../services/rankings.service';
 import { Ranking } from '../../../../shared/models';
-import { TipoActividad } from '../../../../shared/models/desafio.model';
+
 
 @Component({
   selector: 'app-ranking',
@@ -19,7 +19,7 @@ export class RankingComponent implements OnInit {
   loading: boolean = false;
   errorMessage: string = '';
   
-  desafioIdSeleccionado?: number;
+  desafioIdSeleccionado: number | null = null;
   limitSeleccionado: number = 100;
 
   desafios = [
@@ -73,6 +73,14 @@ export class RankingComponent implements OnInit {
     }
   }
 
+  onDesafioChange(): void {
+    this.cargarRanking();
+  }
+
+  onLimitChange(): void {
+    this.cargarRanking();
+  }
+
   procesarDatosRanking(data: Ranking[]): void {
     this.rankingData = data.map((item, index) => ({
       ...item,
@@ -80,19 +88,7 @@ export class RankingComponent implements OnInit {
     }));
 
     this.topUsuarios = this.rankingData.slice(0, 3);
-    
     this.rankingCompleto = this.rankingData;
-  }
-
-  cambiarDesafio(event: any): void {
-    const value = event.target.value;
-    this.desafioIdSeleccionado = value ? Number(value) : undefined;
-    this.cargarRanking();
-  }
-
-  cambiarLimit(event: any): void {
-    this.limitSeleccionado = Number(event.target.value);
-    this.cargarRanking();
   }
 
   getValorDisplay(item: Ranking): number {

@@ -19,7 +19,6 @@ public class RankingService {
     public List<RankingDTO> obtenerRankingGlobal() {
         try {
             List<RankingDTO> ranking = rankingRepository.findGlobalRanking();
-            // Asignar posiciones
             for (int i = 0; i < ranking.size(); i++) {
                 ranking.get(i).setPosicion(i + 1);
             }
