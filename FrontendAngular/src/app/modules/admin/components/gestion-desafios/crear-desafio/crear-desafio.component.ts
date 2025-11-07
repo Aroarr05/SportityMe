@@ -10,6 +10,7 @@ import { CrearDesafioDto,TipoActividad } from '../../../../../shared/models';
   imports: [CommonModule, FormsModule],
   templateUrl: './crear-desafio.component.html'
 })
+
 export class CrearDesafioComponent {
   @Output() creado = new EventEmitter<void>();
   @Output() cancelar = new EventEmitter<void>();
@@ -22,7 +23,6 @@ export class CrearDesafioComponent {
     unidad_objetivo: 'km',
     fecha_inicio: new Date().toISOString().split('T')[0],
     fecha_fin: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    creador_id: 1,
     es_publico: true,
     dificultad: 'MEDIO',
     max_participantes: 100

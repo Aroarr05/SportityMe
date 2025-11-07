@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Desafio,TipoActividad } from '../../../../../shared/models';
+import { Desafio, TipoActividad } from '../../../../../shared/models';
 
 @Component({
   selector: 'app-lista-desafios',
@@ -28,14 +28,13 @@ export class ListaDesafiosComponent {
   }
 
   getTipoBadgeClass(tipo?: string): string {
-    const tipoValor = tipo ?? TipoActividad.OTRO;
+    const tipoValor = tipo ?? TipoActividad.OTROS;
     switch (tipoValor) {
       case TipoActividad.CORRER: return 'bg-blue-100 text-blue-800';
-      case TipoActividad.NADAR: return 'bg-cyan-100 text-cyan-800';
+      case TipoActividad.NATACION: return 'bg-cyan-100 text-cyan-800';
       case TipoActividad.CICLISMO: return 'bg-orange-100 text-orange-800';
       case TipoActividad.GIMNASIO: return 'bg-purple-100 text-purple-800';
-      case TipoActividad.SENDERISMO: return 'bg-emerald-100 text-emerald-800';
-      case TipoActividad.YOGA: return 'bg-pink-100 text-pink-800';
+      case TipoActividad.OTROS: return 'bg-gray-100 text-gray-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   }

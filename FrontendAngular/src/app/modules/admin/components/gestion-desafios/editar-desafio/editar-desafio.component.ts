@@ -10,6 +10,7 @@ import { Desafio, CrearDesafioDto, TipoActividad } from '../../../../../shared/m
   imports: [CommonModule, FormsModule],
   templateUrl: './editar-desafio.component.html'
 })
+
 export class EditarDesafioComponent implements OnInit {
   @Input() desafio!: Desafio;
   @Output() actualizado = new EventEmitter<void>();
@@ -38,7 +39,6 @@ export class EditarDesafioComponent implements OnInit {
       unidad_objetivo: this.desafio.unidad_objetivo,
       fecha_inicio: this.desafio.fecha_inicio,
       fecha_fin: this.desafio.fecha_fin,
-      creador_id: this.desafio.creador_id,
       es_publico: this.desafio.es_publico,
       dificultad: this.desafio.dificultad,
       max_participantes: this.desafio.max_participantes ?? 100,
@@ -60,7 +60,6 @@ export class EditarDesafioComponent implements OnInit {
       unidad_objetivo: this.desafioEditado.unidad_objetivo ?? 'km',
       fecha_inicio: this.desafioEditado.fecha_inicio ?? new Date().toISOString().split('T')[0],
       fecha_fin: this.desafioEditado.fecha_fin ?? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      creador_id: this.desafioEditado.creador_id ?? 1,
       es_publico: this.desafioEditado.es_publico ?? true,
       dificultad: this.desafioEditado.dificultad ?? 'MEDIO',
       max_participantes: this.desafioEditado.max_participantes ?? 100,

@@ -25,7 +25,7 @@ export class ListaDesafiosComponent implements OnInit {
   isLoggedIn = false;
   isAdmin = false;
   
-  // Filtros - ESTA PROPIEDAD PERTENECE AL COMPONENTE
+
   filtroActividad: string = 'todos';
   tiposActividad = [
     { valor: 'todos', label: 'Todos los desafíos', icono: 'fa-list' },
@@ -37,7 +37,7 @@ export class ListaDesafiosComponent implements OnInit {
   ];
 
   constructor(
-    private desafiosService: DesafiosService, // Servicio para API calls
+    private desafiosService: DesafiosService, 
     private authService: AuthService
   ) {}
 
@@ -59,7 +59,7 @@ export class ListaDesafiosComponent implements OnInit {
       next: (desafios) => {
         console.log('Datos recibidos:', desafios);
         this.desafios = this.normalizarDatosDesafios(desafios);
-        this.aplicarFiltro(); // Filtrado en el COMPONENTE
+        this.aplicarFiltro(); 
         this.loading = false;
       },
       error: (err) => {
@@ -70,7 +70,7 @@ export class ListaDesafiosComponent implements OnInit {
     });
   }
 
-  // Método para aplicar filtros - EN EL COMPONENTE
+  
   aplicarFiltro(): void {
     if (this.filtroActividad === 'todos') {
       this.desafiosFiltrados = [...this.desafios];
@@ -87,7 +87,7 @@ export class ListaDesafiosComponent implements OnInit {
     this.aplicarFiltro();
   }
 
-  // Método para obtener el número de desafíos por tipo - EN EL COMPONENTE
+ 
   contarDesafiosPorTipo(tipo: string): number {
     if (tipo === 'todos') {
       return this.desafios.length;
@@ -95,7 +95,7 @@ export class ListaDesafiosComponent implements OnInit {
     return this.desafios.filter(desafio => desafio.tipo_actividad === tipo).length;
   }
 
-  // Método para obtener las clases CSS de los botones de filtro - EN EL COMPONENTE
+  
   getBotonFiltroClase(tipo: string): string {
     const baseClases = 'flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-105';
     

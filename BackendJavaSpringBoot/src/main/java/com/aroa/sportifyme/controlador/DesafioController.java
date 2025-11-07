@@ -3,6 +3,7 @@ package com.aroa.sportifyme.controlador;
 import com.aroa.sportifyme.modelo.Desafio;
 import com.aroa.sportifyme.modelo.Usuario;
 import com.aroa.sportifyme.seguridad.dto.DesafioDTO;
+import com.aroa.sportifyme.seguridad.dto.request.CrearDesafioRequest;
 import com.aroa.sportifyme.servicio.DesafioServicio;
 import com.aroa.sportifyme.servicio.UsuarioServicio;
 import lombok.RequiredArgsConstructor;
@@ -113,6 +114,66 @@ public class DesafioController {
             return ResponseEntity.ok().body(Map.of("message", "Has abandonado el desafío exitosamente"));
         } catch (Exception e) {
             log.error("Error al abandonar el desafío {}: ", desafioId, e);
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping
+    public ResponseEntity<?> crearDesafio(
+            @RequestBody CrearDesafioRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            log.info("Creando nuevo desafío: {}", request.getTitulo());
+
+ 
+            Long usuarioId = obtenerUsuarioIdDesdeUserDetails(userDetails);
+
+       
+            Desafio.TipoActividad tipoActividad = Desafio.TipoActividad.valueOf(
+                    request.getTipo_actividad().toLowerCase() 
+            );
+            Desafio.Dificultad dificultad = Desafio.Dificultad.valueOf(
+                    request.getDificultad().toUpperCase() 
+            );
+
+          
+            if (request.getFecha_inicio() == null || request.getFecha_fin() == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Las fechas de inicio y fin son requeridas"));
+            }
+
+            if (request.getFecha_fin().isBefore(request.getFecha_inicio())) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "La fecha de fin debe ser posterior a la de inicio"));
+            }
+
+          
+            Desafio desafio = desafioServicio.crearDesafio(
+                    request.getTitulo(),
+                    request.getDescripcion(),
+                    tipoActividad,
+                    request.getObjetivo(),
+                    request.getUnidad_objetivo(),
+                    request.getFecha_inicio(),
+                    request.getFecha_fin(),
+                    request.getEs_publico() != null ? request.getEs_publico() : true,
+                    request.getIcono() != null ? request.getIcono() : "🏃‍♂️",
+                    dificultad,
+                    request.getMax_participantes() != null ? request.getMax_participantes() : 10,
+                    usuarioId);
+
+            DesafioDTO respuestaDTO = DesafioDTO.fromEntity(desafio);
+            log.info("Desafío creado exitosamente con ID: {}", desafio.getId());
+
+            return ResponseEntity.status(201).body(respuestaDTO);
+
+        } catch (IllegalArgumentException e) {
+            log.error("Error de conversión de enum: ", e);
+            return ResponseEntity.badRequest().body(Map.of("error",
+                    "Tipo de actividad o dificultad inválida. " +
+                            "Tipos válidos: correr, ciclismo, natacion, gimnasio, otros. " +
+                            "Dificultades válidas: PRINCIPIANTE, INTERMEDIO, AVANZADO"));
+        } catch (Exception e) {
+            log.error("Error al crear desafío: ", e);
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }

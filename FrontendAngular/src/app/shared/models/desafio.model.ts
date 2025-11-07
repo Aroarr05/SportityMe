@@ -18,26 +18,29 @@ export interface Desafio {
 }
 
 export interface CrearDesafioDto {
-  titulo: string;  
+  titulo: string;
   descripcion: string;
   tipo_actividad: string;  
-  objetivo: number;  
-  unidad_objetivo: string;  
-  fecha_inicio: string;     
-  fecha_fin: string;       
-  creador_id: number;       
-  es_publico: boolean;      
-  dificultad: string;  
-  max_participantes: number;  
-  icono?: string;       
+  objetivo: number;
+  unidad_objetivo: string;
+  fecha_inicio: string;
+  fecha_fin: string;
+  es_publico: boolean;
+  dificultad: string;     
+  max_participantes: number;
+  icono?: string;
 }
 
 export enum TipoActividad {
-  CORRER = 'correr',  
-  CICLISMO = 'ciclismo',  
-  NADAR = 'natacion', 
-  GIMNASIO = 'gimnasio',  
-  SENDERISMO = 'senderismo',  
-  YOGA = 'yoga',  
-  OTRO = 'otros'  
+  CORRER = 'correr',
+  CICLISMO = 'ciclismo', 
+  NATACION = 'natacion',
+  GIMNASIO = 'gimnasio',
+  OTROS = 'otros'
+}
+
+export enum Dificultad {
+  PRINCIPIANTE = 'PRINCIPIANTE',
+  INTERMEDIO = 'INTERMEDIO', 
+  AVANZADO = 'AVANZADO'
 }
