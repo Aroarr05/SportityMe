@@ -35,12 +35,10 @@ export class LayoutComponent implements OnInit {
 
     this.authService.isLoggedIn$.subscribe(loggedIn => {
       this.isLoggedIn = loggedIn;
-      console.log('🔄 isLoggedIn cambió:', loggedIn);
       this.checkAdminStatus();
     });
 
     this.authService.currentUser$.subscribe(user => {
-      console.log('🔄 Usuario actual cambió:', user);
       this.checkAdminStatus();
     });
     
@@ -49,14 +47,9 @@ export class LayoutComponent implements OnInit {
   }
 
   private checkAdminStatus(): void {
-    this.isAdmin = this.authService.isAdmin();
-    console.log('🔍 checkAdminStatus() - isAdmin:', this.isAdmin);
+    this.isAdmin = this.authService.isAdmin()
     
     const user = this.authService.getCurrentUser();
-    console.log('🔍 checkAdminStatus() - Usuario:', user);
-    if (user) {
-      console.log('🔍 checkAdminStatus() - Propiedades del usuario:', Object.keys(user));
-    }
   }
 
   toggleAdminMenu(): void {

@@ -29,9 +29,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
 
-        String requestPath = request.getRequestURI();
-        String method = request.getMethod();
-
         try {
             String token = obtenerTokenDeRequest(request);
 
@@ -44,8 +41,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             UserDetails userDetails = usuarioServicio.loadUserByUsername(username);
 
                             if (userDetails != null) {
-                                String roles = jwtTokenProvider.obtenerRolesDeToken(token);
-                                
                                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                                         userDetails,
                                         null,

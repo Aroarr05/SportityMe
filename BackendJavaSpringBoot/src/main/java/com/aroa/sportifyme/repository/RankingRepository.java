@@ -17,6 +17,7 @@ public class RankingRepository {
     @PersistenceContext
     private final EntityManager entityManager;
 
+    @SuppressWarnings("unchecked")
     public List<RankingDTO> findGlobalRanking() {
         String sql = """
             SELECT 
@@ -39,6 +40,7 @@ public class RankingRepository {
         return mapToRankingDTO(results);
     }
 
+    @SuppressWarnings("unchecked")
     public List<RankingDTO> findRankingByDesafioId(Long desafioId) {
         String sql = """
             SELECT 
