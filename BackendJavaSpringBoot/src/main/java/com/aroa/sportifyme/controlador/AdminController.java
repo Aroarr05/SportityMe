@@ -1,5 +1,7 @@
 package com.aroa.sportifyme.controlador;
 
+import com.aroa.sportifyme.seguridad.dto.UsuarioDTO;
+import com.aroa.sportifyme.seguridad.dto.DesafioDTO;
 import com.aroa.sportifyme.modelo.Usuario;
 import com.aroa.sportifyme.modelo.Desafio;
 import com.aroa.sportifyme.servicio.UsuarioServicio;
@@ -11,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -23,37 +26,65 @@ public class AdminController {
 
     @GetMapping("/test")
     public ResponseEntity<String> testAdmin(Authentication authentication) {
-        System.out.println("AdminController - Usuario autenticado: " + authentication.getName());
-        System.out.println("AdminController - Authorities: " + authentication.getAuthorities());
         return ResponseEntity.ok("Acceso admin concedido para: " + authentication.getName());
     }
 
     @GetMapping("/usuarios")
-    public ResponseEntity<List<Usuario>> obtenerTodosUsuarios(Authentication authentication) {
-        System.out.println("AdminController/usuarios - Usuario: " + authentication.getName());
-        System.out.println("AdminController/usuarios - Authorities: " + authentication.getAuthorities());
-        
+    public ResponseEntity<List<UsuarioDTO>> obtenerTodosUsuarios(Authentication authentication) {
         List<Usuario> usuarios = usuarioServicio.obtenerTodosUsuarios();
-        return ResponseEntity.ok(usuarios);
+        List<UsuarioDTO> usuariosDTO = usuarios.stream()
+                .map(this::convertirAUsuarioDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(usuariosDTO);
     }
 
     @GetMapping("/desafios")
-    public ResponseEntity<List<Desafio>> obtenerTodosDesafios(Authentication authentication) {
-        System.out.println("AdminController/desafios - Usuario: " + authentication.getName());
-        System.out.println("AdminController/desafios - Authorities: " + authentication.getAuthorities());
-        
+    public ResponseEntity<List<DesafioDTO>> obtenerTodosDesafios(Authentication authentication) {
         List<Desafio> desafios = desafioServicio.obtenerTodosDesafios();
-        return ResponseEntity.ok(desafios);
+        List<DesafioDTO> desafiosDTO = desafios.stream()
+                .map(DesafioDTO::fromEntity)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(desafiosDTO);
+    }
+
+    private UsuarioDTO convertirAUsuarioDTO(Usuario usuario) {
+        UsuarioDTO dto = new UsuarioDTO();
+        dto.setId(usuario.getId());
+        dto.setNombre(usuario.getNombre());
+        dto.setEmail(usuario.getEmail());
+        dto.setAvatarUrl(usuario.getAvatarUrl());
+        
+        if (usuario.getRol() != null && usuario.getRol().getNombre() != null) {
+            dto.setRol(usuario.getRol().getNombre());
+        }
+        
+        dto.setFechaRegistro(usuario.getFechaRegistro());
+        dto.setUltimoLogin(usuario.getUltimoLogin());
+        dto.setBiografia(usuario.getBiografia());
+        dto.setUbicacion(usuario.getUbicacion());
+        dto.setFechaNacimiento(usuario.getFechaNacimiento());
+        
+        if (usuario.getGenero() != null) {
+            dto.setGenero(usuario.getGenero().name().toLowerCase());
+        }
+        
+        if (usuario.getPeso() != null) {
+            dto.setPeso(usuario.getPeso().doubleValue());
+        }
+        
+        dto.setAltura(usuario.getAltura());
+        
+        return dto;
     }
 
     @PostMapping("/usuarios")
-    public ResponseEntity<Usuario> crearUsuario(@RequestBody Usuario usuario) {
-        return ResponseEntity.ok(usuario);
+    public ResponseEntity<UsuarioDTO> crearUsuario(@RequestBody UsuarioDTO usuarioDTO) {
+        return ResponseEntity.ok(usuarioDTO);
     }
 
     @PutMapping("/usuarios/{id}")
-    public ResponseEntity<Usuario> actualizarUsuario(@PathVariable Long id, @RequestBody Usuario usuario) {
-        return ResponseEntity.ok(usuario);
+    public ResponseEntity<UsuarioDTO> actualizarUsuario(@PathVariable Long id, @RequestBody UsuarioDTO usuarioDTO) {
+        return ResponseEntity.ok(usuarioDTO);
     }
 
     @DeleteMapping("/usuarios/{id}")
@@ -62,13 +93,13 @@ public class AdminController {
     }
 
     @PostMapping("/desafios")
-    public ResponseEntity<Desafio> crearDesafio(@RequestBody Desafio desafio) {
-        return ResponseEntity.ok(desafio);
+    public ResponseEntity<DesafioDTO> crearDesafio(@RequestBody DesafioDTO desafioDTO) {
+        return ResponseEntity.ok(desafioDTO);
     }
 
     @PutMapping("/desafios/{id}")
-    public ResponseEntity<Desafio> actualizarDesafio(@PathVariable Long id, @RequestBody Desafio desafio) {
-        return ResponseEntity.ok(desafio);
+    public ResponseEntity<DesafioDTO> actualizarDesafio(@PathVariable Long id, @RequestBody DesafioDTO desafioDTO) {
+        return ResponseEntity.ok(desafioDTO);
     }
 
     @DeleteMapping("/desafios/{id}")

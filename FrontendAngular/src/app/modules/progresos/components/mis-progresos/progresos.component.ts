@@ -8,8 +8,8 @@ import { Progreso } from '../../../../shared/models';
   selector: 'app-mis-progresos',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './mis-progresos.component.html',
-  styleUrls: ['./mis-progresos.component.scss']
+  templateUrl: './progresos.component.html',
+  styleUrls: ['./progresos.component.scss']
 })
 
 export class MisProgresosComponent implements OnInit {

@@ -48,7 +48,7 @@ export const routes: Routes = [
         children: [
           {
             path: '',
-            loadComponent: () => import('./modules/progresos/components/mis-progresos/mis-progresos.component').then(m => m.MisProgresosComponent),
+            loadComponent: () => import('./modules/progresos/components/mis-progresos/progresos.component').then(m => m.MisProgresosComponent),
             canActivate: [AuthGuard]
           }
           

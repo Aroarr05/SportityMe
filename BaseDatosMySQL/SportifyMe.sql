@@ -145,3 +145,34 @@ CREATE TABLE desafios_completados (
     FOREIGN KEY (desafio_id) REFERENCES desafios(id) ON DELETE CASCADE,
     UNIQUE KEY (usuario_id, desafio_id)
 );
+
+-- Para ranking global
+SELECT 
+    u.id as usuarioId,
+    u.nombre,
+    u.avatar_url as avatarUrl,
+    COUNT(DISTINCT p.desafio_id) as totalDesafios,
+    COALESCE(AVG(p.valor_actual / d.objetivo * 100), 0) as porcentajeCompletado
+FROM usuarios u
+LEFT JOIN progresos p ON u.id = p.usuario_id
+LEFT JOIN desafios d ON p.desafio_id = d.id AND d.estado = 'ACTIVO'
+WHERE u.activo = TRUE
+GROUP BY u.id, u.nombre, u.avatar_url
+ORDER BY porcentajeCompletado DESC, totalDesafios DESC
+LIMIT 100;
+
+
+/* Para ranking por desafío
+SELECT 
+    u.id as usuarioId,
+    u.nombre,
+    u.avatar_url as avatarUrl,
+    MAX(p.valor_actual) as valorActual,
+    (MAX(p.valor_actual) / d.objetivo * 100) as porcentajeCompletado
+FROM progresos p
+JOIN usuarios u ON p.usuario_id = u.id
+JOIN desafios d ON p.desafio_id = d.id
+WHERE d.id = ? AND d.estado = 'ACTIVO'
+GROUP BY u.id, u.nombre, u.avatar_url, d.objetivo
+ORDER BY porcentajeCompletado DESC, valorActual DESC
+LIMIT 100;*/
