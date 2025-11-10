@@ -1,10 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { RankingService } from '../../services/rankings.service';
 import { Ranking } from '../../../../shared/models';
-
 
 @Component({
   selector: 'app-ranking',
@@ -16,11 +15,11 @@ import { Ranking } from '../../../../shared/models';
 
 export class RankingComponent implements OnInit {
   rankingData: Ranking[] = [];
-  loading: boolean = false;
+  loading: boolean = true;
   errorMessage: string = '';
   
   desafioIdSeleccionado: number | null = null;
-  limitSeleccionado: number = 100;
+  limitSeleccionado: number = 10;
 
   desafios = [
     { id: 1, nombre: 'Desafío Running', tipo: 'correr', icono: 'fa-running' },
@@ -34,7 +33,10 @@ export class RankingComponent implements OnInit {
   topUsuarios: Ranking[] = [];
   rankingCompleto: Ranking[] = [];
 
-  constructor(private rankingService: RankingService) { }
+  constructor(
+    private rankingService: RankingService,
+    private cdRef: ChangeDetectorRef
+  ) { }
 
   ngOnInit(): void {
     this.cargarRanking();
@@ -82,13 +84,14 @@ export class RankingComponent implements OnInit {
   }
 
   procesarDatosRanking(data: Ranking[]): void {
-    this.rankingData = data.map((item, index) => ({
+    this.rankingData = [...data.map((item, index) => ({
       ...item,
       posicion: index + 1
-    }));
+    }))];
 
-    this.topUsuarios = this.rankingData.slice(0, 3);
-    this.rankingCompleto = this.rankingData;
+    this.topUsuarios = [...this.rankingData.slice(0, Math.min(3, this.rankingData.length))];
+    this.rankingCompleto = [...this.rankingData];
+    this.cdRef.detectChanges();
   }
 
   getValorDisplay(item: Ranking): number {
@@ -117,5 +120,9 @@ export class RankingComponent implements OnInit {
     return this.desafioIdSeleccionado 
       ? 'Progreso en este desafío específico'
       : 'Progreso promedio en todos los desafíos';
+  }
+
+  mostrarPodio(): boolean {
+    return this.topUsuarios.length > 0 && !this.loading;
   }
 }
