@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { Progreso, CrearProgresoDto } from '../../../shared/models/progreso.model';
 import { AuthService } from '../../../auth/services/auth.service';
@@ -28,63 +28,27 @@ export class ProgresosService {
 
   obtenerMiHistorial(): Observable<Progreso[]> {
     const token = this.authService.getToken();
-    const user = this.authService.getCurrentUser();
-    
-    console.log('🔍 DEBUG obtenerMiHistorial:');
-    console.log('🔑 Token:', token ? 'PRESENTE' : 'AUSENTE');
-    console.log('👤 Usuario actual:', user);
-    console.log('📡 URL:', `${this.apiUrl}/usuario`);
     
     if (!token) {
-      console.error('❌ ERROR: No hay token disponible');
       return throwError(() => new Error('No hay token de autenticación'));
     }
 
     const headers = this.getAuthHeaders();
-    console.log('📨 Headers enviados:', headers.keys());
 
     return this.http.get<Progreso[]>(`${this.apiUrl}/usuario`, {
       headers: headers
     }).pipe(
-      tap(response => {
-        console.log('✅ Respuesta exitosa:', response);
-      }),
       catchError((error: HttpErrorResponse) => {
-        console.error('❌ Error en HTTP request:', error);
-        console.error('🔍 Error details:', {
-          status: error.status,
-          statusText: error.statusText,
-          url: error.url,
-          headers: error.headers
-        });
-        
         if (error.status === 403) {
-          console.warn('⚠️ Error 403 - Verificando estado de autenticación...');
           const currentUser = this.authService.getCurrentUser();
           const hasToken = !!this.authService.getToken();
-          console.log('🔐 Estado actual - Usuario:', currentUser, 'Token:', hasToken);
-   
           if (hasToken && !currentUser) {
-            console.warn('🔄 Token presente pero usuario no cargado - Forzando logout');
             this.authService.logout();
           }
         }
-        
         return throwError(() => error);
       })
     );
-  }
-
-  obtenerResumenProgresos(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/usuario`, { 
-      headers: this.getAuthHeaders()
-    });
-  }
-
-  obtenerProgresosPorDesafio(): Observable<Progreso[]> {
-    return this.http.get<Progreso[]>(`${this.apiUrl}/usuario`, { 
-      headers: this.getAuthHeaders()
-    });
   }
 
   registrarProgreso(progresoDto: CrearProgresoDto): Observable<Progreso> {

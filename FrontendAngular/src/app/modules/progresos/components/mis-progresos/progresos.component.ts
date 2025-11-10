@@ -11,7 +11,6 @@ import { Progreso } from '../../../../shared/models';
   templateUrl: './progresos.component.html',
   styleUrls: ['./progresos.component.scss']
 })
-
 export class MisProgresosComponent implements OnInit {
   progresos: Progreso[] = [];
   cargando: boolean = false;
@@ -39,16 +38,11 @@ export class MisProgresosComponent implements OnInit {
 
     this.progresosService.obtenerMiHistorial().subscribe({
       next: (data) => {
-        console.log('✅ Datos recibidos:', data); 
         this.progresos = data;
         this.calcularEstadisticas();
         this.cargando = false;
       },
       error: (error) => {
-        console.error('❌ Error completo:', error);
-        console.error('❌ Status:', error.status);
-        console.error('❌ Mensaje:', error.message);
-        
         this.error = 'Error al cargar los progresos';
         if (error.status === 403) {
           this.error += ' - No tienes permisos';
@@ -63,12 +57,12 @@ export class MisProgresosComponent implements OnInit {
   calcularEstadisticas() {
     this.estadisticas.totalRegistros = this.progresos.length;
     
-  
-    const desafiosUnicos = new Set(this.progresos.map(p => p.desafio_id));
+    const desafiosConId = this.progresos.filter(p => p.desafio_id != null);
+    const desafiosUnicos = new Set(desafiosConId.map(p => p.desafio_id));
     this.estadisticas.desafiosActivos = desafiosUnicos.size;
 
     if (this.progresos.length > 0) {
-      const sumaProgresos = this.progresos.reduce((sum, p) => sum + (p.porcentaje_completado || 0), 0);
+      const sumaProgresos = this.progresos.reduce((sum, p) => sum + this.calcularPorcentajeReal(p), 0);
       this.estadisticas.progresoPromedio = Math.round(sumaProgresos / this.progresos.length);
     }
 
@@ -100,8 +94,9 @@ export class MisProgresosComponent implements OnInit {
     if (progreso.desafio) {
       return progreso.desafio.titulo;
     }
-    return `Desafío ${progreso.desafio_id}`;
+    return `Desafío ${progreso.desafio_id || 'N/A'}`;
   }
+
   obtenerObjetivoDesafio(progreso: Progreso): string {
     if (progreso.desafio) {
       return `${progreso.desafio.objetivo} ${progreso.desafio.unidad_objetivo}`;
@@ -113,12 +108,13 @@ export class MisProgresosComponent implements OnInit {
     const agrupados: { [key: string]: Progreso[] } = {};
     
     this.progresos.forEach(progreso => {
-
-      const clave = progreso.desafio_id.toString();
-      if (!agrupados[clave]) {
-        agrupados[clave] = [];
+      if (progreso.desafio_id !== undefined && progreso.desafio_id !== null) {
+        const clave = progreso.desafio_id.toString();
+        if (!agrupados[clave]) {
+          agrupados[clave] = [];
+        }
+        agrupados[clave].push(progreso);
       }
-      agrupados[clave].push(progreso);
     });
     
     return agrupados;
@@ -127,21 +123,39 @@ export class MisProgresosComponent implements OnInit {
   get desafiosUnicos(): Progreso[] {
     const ultimosProgresos: Progreso[] = [];
     Object.values(this.progresosAgrupados).forEach(progresos => {
-      const ultimo = progresos.sort((a, b) => 
-        new Date(b.fecha_registro).getTime() - new Date(a.fecha_registro).getTime()
-      )[0];
-      ultimosProgresos.push(ultimo);
+      if (progresos.length > 0) {
+        const ultimo = progresos.sort((a, b) => 
+          new Date(b.fecha_registro).getTime() - new Date(a.fecha_registro).getTime()
+        )[0];
+        ultimosProgresos.push(ultimo);
+      }
     });
     
     return ultimosProgresos;
   }
 
+
   obtenerPorcentaje(progreso: Progreso): number {
+    return this.calcularPorcentajeReal(progreso);
+  }
+
+  calcularPorcentajeReal(progreso: Progreso): number {
+    if (progreso.completado) {
+      return 100;
+    }
+
+    if (progreso.desafio && progreso.desafio.objetivo) {
+      const objetivo = progreso.desafio.objetivo;
+      const valorActual = progreso.valor_actual || 0;
+      
+      const porcentaje = Math.min((valorActual / objetivo) * 100, 100);
+      return Math.round(porcentaje);
+    }
 
     return progreso.porcentaje_completado || 0;
   }
 
   estaCompletado(progreso: Progreso): boolean {
-    return progreso.completado || false;
+    return progreso.completado || this.calcularPorcentajeReal(progreso) >= 100;
   }
 }
