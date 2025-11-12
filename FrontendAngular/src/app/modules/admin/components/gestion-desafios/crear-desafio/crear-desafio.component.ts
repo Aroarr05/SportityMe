@@ -2,7 +2,7 @@ import { Component, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../services/admin.service';
-import { CrearDesafioDto,TipoActividad } from '../../../../../shared/models';
+import { CrearDesafioDto, TipoActividad } from '../../../../../shared/models';
 
 @Component({
   selector: 'app-crear-desafio',
@@ -31,6 +31,8 @@ export class CrearDesafioComponent {
   TipoActividad = TipoActividad;
   tiposActividad = Object.values(TipoActividad);
   dificultades = ['FACIL', 'MEDIO', 'DIFICIL'];
+  mensajeError = '';
+  guardando = false;
 
   constructor(private adminService: AdminService) {}
 
@@ -39,28 +41,33 @@ export class CrearDesafioComponent {
       return;
     }
 
+    this.guardando = true;
+    this.mensajeError = '';
+
     this.adminService.crearDesafio(this.desafio).subscribe({
       next: () => {
         this.creado.emit();
+        this.guardando = false;
       },
       error: (error) => {
         console.error('Error creando desafío:', error);
-        alert('Error al crear el desafío');
+        this.mensajeError = 'Error al crear el desafío';
+        this.guardando = false;
       }
     });
   }
 
   private validarDesafio(): boolean {
     if (!this.desafio.titulo?.trim()) {
-      alert('El título es requerido');
+      this.mensajeError = 'El título es requerido';
       return false;
     }
     if (!this.desafio.descripcion?.trim()) {
-      alert('La descripción es requerida');
+      this.mensajeError = 'La descripción es requerida';
       return false;
     }
     if ((this.desafio.objetivo ?? 0) <= 0) {
-      alert('El objetivo debe ser mayor a 0');
+      this.mensajeError = 'El objetivo debe ser mayor a 0';
       return false;
     }
     return true;

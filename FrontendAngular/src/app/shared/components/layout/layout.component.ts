@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
@@ -14,16 +14,18 @@ import { AuthService } from '../../../auth/services/auth.service';
     RouterModule
   ]
 })
-
 export class LayoutComponent implements OnInit {
   tituloPagina = 'SportifyMe';
   isLoggedIn = false;
   isAdmin = false;
   isAdminMenuOpen = false;
+  
+  currentUser: any = null;
 
   constructor(
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private cdRef: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -33,23 +35,49 @@ export class LayoutComponent implements OnInit {
         this.actualizarTitulo();
       });
 
-    this.authService.isLoggedIn$.subscribe(loggedIn => {
-      this.isLoggedIn = loggedIn;
-      this.checkAdminStatus();
+    this.authService.currentUser$.subscribe(user => {
+      if (user) {
+        this.currentUser = user;
+        this.isLoggedIn = true;
+        this.isAdmin = this.authService.isAdmin();
+      } else {
+        this.currentUser = null;
+        this.isLoggedIn = false;
+        this.isAdmin = false;
+      }
+      
+      this.cdRef.detectChanges();
     });
 
-    this.authService.currentUser$.subscribe(user => {
-      this.checkAdminStatus();
-    });
-    
-    this.checkAdminStatus();
     this.actualizarTitulo();
   }
 
-  private checkAdminStatus(): void {
-    this.isAdmin = this.authService.isAdmin()
+  getUserInitials(): string {
+    if (!this.currentUser?.nombre) return 'U';
     
-    const user = this.authService.getCurrentUser();
+    const names = this.currentUser.nombre.split(' ');
+    if (names.length === 1) {
+      return names[0].charAt(0).toUpperCase();
+    } else {
+      return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
+    }
+  }
+
+  hasAvatar(): boolean {
+    return !!(this.currentUser?.avatarUrl || this.currentUser?.avatar_url);
+  }
+
+  getAvatarUrl(): string {
+    return this.currentUser?.avatarUrl || this.currentUser?.avatar_url || '';
+  }
+
+  handleImageError(event: any): void {
+    event.target.style.display = 'none';
+    const avatarContainer = event.target.parentElement;
+    const initialsElement = avatarContainer.querySelector('.avatar-initials');
+    if (initialsElement) {
+      initialsElement.style.display = 'flex';
+    }
   }
 
   toggleAdminMenu(): void {
@@ -62,7 +90,6 @@ export class LayoutComponent implements OnInit {
 
   private actualizarTitulo(): void {
     const rutaActual = this.router.url;
-
     const titulos: { [key: string]: string } = {
       '/desafios': 'Desafíos',
       '/desafios/crear': 'Crear Desafío',

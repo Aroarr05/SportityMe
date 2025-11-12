@@ -28,7 +28,7 @@ export class ListaDesafiosComponent implements OnInit {
 
   filtroActividad: string = 'todos';
   tiposActividad = [
-    { valor: 'todos', label: 'Todos los desafíos', icono: 'fa-list' },
+    { valor: 'todos', label: 'Todos', icono: 'fa-list' },
     { valor: 'correr', label: 'Correr', icono: 'fa-running' },
     { valor: 'ciclismo', label: 'Ciclismo', icono: 'fa-bicycle' },
     { valor: 'natacion', label: 'Natación', icono: 'fa-swimmer' },
@@ -81,7 +81,7 @@ export class ListaDesafiosComponent implements OnInit {
     }
   }
 
-  // Método para cambiar filtro - EN EL COMPONENTE
+
   cambiarFiltro(nuevoFiltro: string): void {
     this.filtroActividad = nuevoFiltro;
     this.aplicarFiltro();

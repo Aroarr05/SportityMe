@@ -16,7 +16,8 @@
       </div>
     </div>
 
-    <div class="rounded-2xl border border-gray-200 p-6 mb-12 shadow-sm">
+    <!-- Sección de filtros con fondo blanco -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-12 shadow-sm bg-white">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
         <div>
           <label class="block text-sm font-semibold text-gray-800 mb-2">
@@ -61,7 +62,7 @@
 
     <div *ngIf="loading" class="text-center py-12">
       <div
-        class="inline-flex flex-col items-center justify-center rounded-xl border border-gray-200 px-8 py-10 shadow-sm">
+        class="inline-flex flex-col items-center justify-center rounded-xl border border-gray-200 px-8 py-10 shadow-sm bg-white">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mb-4"></div>
         <span class="text-lg font-semibold text-gray-800 mb-1">Cargando ranking...</span>
         <p class="text-gray-600 text-sm">Obteniendo los últimos datos de los participantes</p>
@@ -69,7 +70,7 @@
     </div>
 
     <div *ngIf="!loading && !errorMessage && rankingCompleto.length === 0"
-      class="text-center py-16 rounded-2xl border border-gray-200 shadow-sm">
+      class="text-center py-16 rounded-2xl border border-gray-200 shadow-sm bg-white">
       <div class="max-w-md mx-auto">
         <div
           class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-50 to-indigo-100 rounded-2xl mb-6">
@@ -157,7 +158,7 @@
         </div>
       </div>
 
-      <div class="rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+      <div class="rounded-2xl border border-gray-200 overflow-hidden shadow-sm bg-white">
         <div class="bg-gradient-to-r from-purple-600 to-indigo-600 p-6">
           <div class="flex items-center justify-between">
             <div class="flex items-center">
@@ -176,7 +177,7 @@
 
         <div class="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
           <div *ngFor="let item of rankingCompleto"
-            class="p-6 hover:bg-purple-50 transition-all duration-200 group border-b border-gray-100 last:border-b-0">
+            class="p-6 hover:bg-purple-50 transition-all duration-200 group border-b border-gray-100 last:border-b-0 bg-white">
             <div class="flex items-center space-x-4">
               <div class="flex-shrink-0">
                 <div [class]="'w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-sm ' + 

@@ -1,45 +1,32 @@
 <div class="container mx-auto p-6">
   <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold text-gray-900">Gestión de Desafíos</h1>
-    
-    <button 
-      *ngIf="vistaActual === 'lista'"
-      (click)="mostrarCrear()"
-      class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-    >
-      Crear Desafío
+    <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+      Gestión de Desafíos
+    </h1>
+
+    <button *ngIf="vistaActual === 'lista'" (click)="mostrarCrear()"
+      class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-8 py-3 rounded-xl shadow-lg hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 font-semibold inline-flex items-center space-x-2">
+      <i class="fas fa-plus-circle"></i>
+      <span>Crear Desafío</span>
     </button>
 
-    <button 
-      *ngIf="vistaActual !== 'lista'"
-      (click)="mostrarLista()"
-      class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors"
-    >
-      Volver a la Lista
+    <button *ngIf="vistaActual !== 'lista'" (click)="mostrarLista()"
+      class="bg-white text-purple-600 border border-purple-600 px-6 py-3 rounded-xl hover:bg-purple-50 transition-all duration-300 transform hover:scale-105 font-semibold flex items-center space-x-2 group mt-4 sm:mt-0">
+      <i class="fas fa-arrow-left group-hover:-translate-x-1 transition-transform duration-300"></i>
+      <span>Volver a la lista</span>
     </button>
+
   </div>
 
-  <app-lista-desafios
-    *ngIf="vistaActual === 'lista'"
-    [desafios]="desafios"
-    [cargando]="cargando"
-    (editar)="mostrarEditar($event)"
-    (ver)="mostrarDetalle($event)"
-    (eliminar)="eliminarDesafio($event)"
-  ></app-lista-desafios>
+  <app-lista-desafios *ngIf="vistaActual === 'lista'" [desafios]="desafios" [cargando]="cargando"
+    (editar)="mostrarEditar($event)" (ver)="mostrarDetalle($event)"
+    (eliminar)="eliminarDesafio($event)"></app-lista-desafios>
 
-  <app-crear-desafio
-    *ngIf="vistaActual === 'crear'"
-    (creado)="onDesafioCreado()"
-    (cancelar)="onCancelar()"
-  ></app-crear-desafio>
+  <app-crear-desafio *ngIf="vistaActual === 'crear'" (creado)="onDesafioCreado()"
+    (cancelar)="onCancelar()"></app-crear-desafio>
 
-  <app-editar-desafio
-    *ngIf="vistaActual === 'editar' && desafioSeleccionado"
-    [desafio]="desafioSeleccionado"
-    (actualizado)="onDesafioActualizado()"
-    (cancelar)="onCancelar()"
-  ></app-editar-desafio>
+  <app-editar-desafio *ngIf="vistaActual === 'editar' && desafioSeleccionado" [desafio]="desafioSeleccionado"
+    (actualizado)="onDesafioActualizado()" (cancelar)="onCancelar()"></app-editar-desafio>
 
   <!-- Vista de Detalle 
   /*<app-detalle-desafio

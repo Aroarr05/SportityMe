@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../services/admin.service';
 import { Usuario } from '../../../../../shared/models';
+
 @Component({
   selector: 'app-crear-usuario',
   standalone: true,
@@ -73,7 +74,7 @@ export class CrearUsuarioComponent {
       return false;
     }
 
-    if (!this.usuario.contraseña) {
+    if (!this.usuario['contraseña']) {
       this.mensajeError = 'La contraseña es requerida';
       return false;
     }

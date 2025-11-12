@@ -22,13 +22,6 @@
     </div>
 
     <div class="mb-8">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h3 class="text-lg font-semibold text-gray-800">Filtrar por actividad:</h3>
-        <div class="text-sm text-gray-600">
-          Mostrando {{desafiosFiltrados.length}} de {{desafios.length}} desafíos
-        </div>
-      </div>
-      
       <div class="flex flex-wrap gap-3">
         <button
           *ngFor="let tipo of tiposActividad"
@@ -36,14 +29,14 @@
           [class]="getBotonFiltroClase(tipo.valor)"
           class="flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-105">
           <i [class]="['fas', tipo.icono]"></i>
-          <span>{{ tipo.label }}</span>
-          <span class="bg-white bg-opacity-20 px-2 py-1 rounded-full text-xs font-semibold">
+          <span class="text-black">{{ tipo.label }}</span>
+          <span class="bg-white bg-opacity-20 px-2 py-1 rounded-full text-xs font-semibold text-black">
             {{ contarDesafiosPorTipo(tipo.valor) }}
           </span>
         </button>
       </div>
     </div>
-
+<br><br>
     <div *ngIf="!loading && !error" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       <div *ngFor="let desafio of desafiosFiltrados"
         class="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 p-5 flex flex-col border border-gray-100 group relative h-full">

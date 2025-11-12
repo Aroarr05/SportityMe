@@ -19,14 +19,34 @@
 
       <ng-template #usuarioLogueado>
         <div class="flex items-center space-x-3 sm:space-x-4">
-          <div class="text-right hidden sm:block">
-            <p class="text-sm font-medium text-gray-800">Bienvenido</p>
-            <p class="text-xs text-gray-600" *ngIf="isAdmin">Administrador</p>
+          <div class="flex items-center space-x-3">
+            <div class="relative group">
+              <div class="w-14 h-14 rounded-xl border-2 border-white overflow-hidden group-hover:scale-110 transition-transform duration-200 relative shadow-sm">
+                <div class="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl opacity-0 group-hover:opacity-100 blur transition-opacity duration-300"></div>
+                
+                <img 
+                  *ngIf="hasAvatar()"
+                  [src]="getAvatarUrl()" 
+                  [alt]="currentUser?.nombre"
+                  class="w-full h-full object-cover relative z-10"
+                  (error)="handleImageError($event)"
+                >
+                
+                <div 
+                  class="avatar-initials w-full h-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg relative z-10"
+                  [style.display]="!hasAvatar() ? 'flex' : 'none'"
+                >
+                  {{getUserInitials()}}
+                </div>
+              </div>
+            </div>
+            
           </div>
+          
           <button (click)="cerrarSesion()"
             class="bg-gradient-to-r from-red-500 to-pink-600 text-white px-4 py-2 sm:px-6 sm:py-2.5 rounded-lg hover:from-red-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 font-medium shadow-md hover:shadow-lg flex items-center space-x-2 text-sm sm:text-base">
             <i class="fas fa-sign-out-alt"></i>
-            <span class="hidden sm:inline">Cerrar Sesión</span>
+            <span class="hidden sm:inline">Salir</span>
           </button>
         </div>
       </ng-template>
@@ -34,48 +54,36 @@
   </header>
 
   <div class="flex-1 flex min-h-0">
-
-    <aside
-      class="w-16 sm:w-64 bg-white shadow-inner border-r border-purple-100 flex-shrink-0 overflow-y-auto py-4 sm:py-6 transition-all duration-300">
+    <aside class="w-16 sm:w-64 bg-white shadow-inner border-r border-purple-100 flex-shrink-0 overflow-y-auto py-4 sm:py-6 transition-all duration-300">
       <nav>
         <ul class="space-y-1 sm:space-y-2 px-2 sm:px-4">
-
           <li>
-            <a routerLink="/desafios"
-              routerLinkActive="bg-purple-50 text-purple-600 sm:border-r-2 border-purple-600 shadow-sm"
+            <a routerLink="/desafios" routerLinkActive="bg-purple-50 text-purple-600 sm:border-r-2 border-purple-600 shadow-sm"
               class="flex items-center justify-center sm:justify-start px-2 py-2 sm:px-4 sm:py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-all duration-200 no-underline rounded-lg group">
-              <div
-                class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center sm:mr-3 group-hover:bg-purple-100 transition-colors">
+              <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center sm:mr-3 group-hover:bg-purple-100 transition-colors">
                 <i class="fas fa-trophy text-gray-500 group-hover:text-purple-600 text-sm"></i>
               </div>
               <span class="font-medium hidden sm:block">Desafíos</span>
             </a>
           </li>
-
           <li>
-            <a routerLink="/rankings"
-              routerLinkActive="bg-purple-50 text-purple-600 sm:border-r-2 border-purple-600 shadow-sm"
+            <a routerLink="/rankings" routerLinkActive="bg-purple-50 text-purple-600 sm:border-r-2 border-purple-600 shadow-sm"
               class="flex items-center justify-center sm:justify-start px-2 py-2 sm:px-4 sm:py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-all duration-200 no-underline rounded-lg group">
-              <div
-                class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center sm:mr-3 group-hover:bg-purple-100 transition-colors">
+              <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center sm:mr-3 group-hover:bg-purple-100 transition-colors">
                 <i class="fas fa-chart-line text-gray-500 group-hover:text-purple-600 text-sm"></i>
               </div>
               <span class="font-medium hidden sm:block">Ranking</span>
             </a>
           </li>
-
           <li *ngIf="isLoggedIn && !isAdmin">
-            <a routerLink="/progresos"
-              routerLinkActive="bg-purple-50 text-purple-600 sm:border-r-2 border-purple-600 shadow-sm"
+            <a routerLink="/progresos" routerLinkActive="bg-purple-50 text-purple-600 sm:border-r-2 border-purple-600 shadow-sm"
               class="flex items-center justify-center sm:justify-start px-2 py-2 sm:px-4 sm:py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-all duration-200 no-underline rounded-lg group">
-              <div
-                class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center sm:mr-3 group-hover:bg-purple-100 transition-colors">
+              <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center sm:mr-3 group-hover:bg-purple-100 transition-colors">
                 <i class="fas fa-chart-bar text-gray-500 group-hover:text-purple-600 text-sm"></i>
               </div>
               <span class="font-medium hidden sm:block">Mi Progreso</span>
             </a>
           </li>
-
           <li *ngIf="isAdmin" class="relative">
             <div (click)="toggleAdminMenu()" [class.bg-purple-50]="isAdminMenuOpen"
               [class.text-purple-600]="isAdminMenuOpen" [class.shadow-sm]="isAdminMenuOpen"
@@ -90,48 +98,40 @@
               <i class="fas fa-chevron-down text-xs transition-transform duration-200 ml-2 text-gray-400 group-hover:text-purple-500 hidden sm:block"
                 [class.rotate-180]="isAdminMenuOpen" [class.text-purple-500]="isAdminMenuOpen"></i>
             </div>
-
-            <div *ngIf="isAdminMenuOpen" class="mt-2 bg-white border border-purple-200 rounded-lg shadow-md overflow-hidden mx-1 sm:mx-2 
-                     absolute left-full ml-2 sm:left-0 sm:relative z-50 w-48 sm:w-auto">
-              <ul class="py-2">
-                <li>
-                  <a (click)="irAGestionUsuarios()"
-                    class="flex items-center py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-all duration-200 cursor-pointer group no-underline pl-3 sm:pl-3">
-                    <div
-                      class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mr-3 group-hover:bg-purple-100 transition-colors">
-                      <i class="fas fa-users text-gray-500 group-hover:text-purple-600 text-sm"></i>
-                    </div>
-                    <span class="font-medium text-sm sm:text-base">Gestión de Usuarios</span>
-                  </a>
-                </li>
-                <li>
-                  <a (click)="irAGestionDesafios()"
-                    class="flex items-center py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-all duration-200 cursor-pointer group no-underline border-t border-gray-100 pl-3 sm:pl-3">
-                    <div
-                      class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mr-3 group-hover:bg-purple-100 transition-colors">
-                      <i class="fas fa-tasks text-gray-500 group-hover:text-purple-600 text-sm"></i>
-                    </div>
-                    <span class="font-medium text-sm sm:text-base">Gestión de Desafíos</span>
-                  </a>
-                </li>
-              </ul>
+            
+            <!-- MENÚ DESPLEGABLE SIN SOMBRA -->
+            <div *ngIf="isAdminMenuOpen" class="mt-1 bg-white border border-purple-200 rounded-lg overflow-hidden absolute left-0 right-0 z-50">
+              <div class="py-1">
+                <a (click)="irAGestionUsuarios()"
+                  class="flex items-center py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-all duration-200 cursor-pointer group no-underline">
+                  <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center ml-3 mr-3 group-hover:bg-purple-100 transition-colors">
+                    <i class="fas fa-users text-gray-500 group-hover:text-purple-600 text-sm"></i>
+                  </div>
+                  <span class="font-medium text-sm">Gestión de Usuarios</span>
+                </a>
+                
+                <div class="border-t border-gray-100 mx-3"></div>
+                
+                <a (click)="irAGestionDesafios()"
+                  class="flex items-center py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-all duration-200 cursor-pointer group no-underline">
+                  <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center ml-3 mr-3 group-hover:bg-purple-100 transition-colors">
+                    <i class="fas fa-tasks text-gray-500 group-hover:text-purple-600 text-sm"></i>
+                  </div>
+                  <span class="font-medium text-sm">Gestión de Desafíos</span>
+                </a>
+              </div>
             </div>
           </li>
-
           <li *ngIf="isLoggedIn && !isAdmin">
-            <a routerLink="/perfil"
-              routerLinkActive="bg-purple-50 text-purple-600 sm:border-r-2 border-purple-600 shadow-sm"
+            <a routerLink="/perfil" routerLinkActive="bg-purple-50 text-purple-600 sm:border-r-2 border-purple-600 shadow-sm"
               class="flex items-center justify-center sm:justify-start px-2 py-2 sm:px-4 sm:py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-all duration-200 no-underline rounded-lg group">
-              <div
-                class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center sm:mr-3 group-hover:bg-purple-100 transition-colors">
+              <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center sm:mr-3 group-hover:bg-purple-100 transition-colors">
                 <i class="fas fa-user text-gray-500 group-hover:text-purple-600 text-sm"></i>
               </div>
               <span class="font-medium hidden sm:block">Mi Perfil</span>
             </a>
           </li>
         </ul>
-
-
       </nav>
     </aside>
 

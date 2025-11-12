@@ -42,9 +42,9 @@ export class ListaDesafiosComponent {
   getDificultadBadgeClass(dificultad?: string): string {
     const dificultadValor = dificultad ?? 'MEDIO';
     switch (dificultadValor) {
-      case 'FACIL': return 'bg-green-100 text-green-800';
-      case 'MEDIO': return 'bg-yellow-100 text-yellow-800';
-      case 'DIFICIL': return 'bg-red-100 text-red-800';
+      case 'PRINCIPIANTE': return 'bg-green-100 text-green-800';
+      case 'INTERMEDIO': return 'bg-yellow-100 text-yellow-800';
+      case 'AVANZADO': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   }

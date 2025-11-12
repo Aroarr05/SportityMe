@@ -17,9 +17,6 @@
           Dificultad
         </th>
         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-          Estado
-        </th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
           Fechas
         </th>
         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -31,7 +28,6 @@
       <tr *ngFor="let desafio of desafios" class="hover:bg-gray-50">
         <td class="px-6 py-4 whitespace-nowrap">
           <div class="text-sm font-medium text-gray-900">{{ desafio.titulo }}</div>
-          <div class="text-sm text-gray-500">{{ desafio.descripcion }}</div>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
           <span [class]="'px-2 inline-flex text-xs leading-5 font-semibold rounded-full ' + getTipoBadgeClass(desafio.tipo_actividad)">
@@ -43,37 +39,34 @@
             {{ desafio.dificultad }}
           </span>
         </td>
-        <td class="px-6 py-4 whitespace-nowrap">
-          <span [class]="'px-2 inline-flex text-xs leading-5 font-semibold rounded-full ' + getEstadoBadgeClass(desafio.estado)">
-            {{ desafio.estado || 'ACTIVO' }}
-          </span>
-        </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
           <div>Inicio: {{ desafio.fecha_inicio | date:'shortDate' }}</div>
           <div>Fin: {{ desafio.fecha_fin | date:'shortDate' }}</div>
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-          <button 
-            (click)="ver.emit(desafio)"
-            class="text-blue-600 hover:text-blue-900 mr-3"
-            title="Ver detalles"
-          >
-            Ver
-          </button>
-          <button 
-            (click)="editar.emit(desafio)"
-            class="text-indigo-600 hover:text-indigo-900 mr-3"
-            title="Editar"
-          >
-            Editar
-          </button>
-          <button 
-            (click)="onEliminarDesafio(desafio.id)"
-            class="text-red-600 hover:text-red-900"
-            title="Eliminar"
-          >
-            Eliminar
-          </button>
+          <div class="flex space-x-2">
+            <button 
+              (click)="ver.emit(desafio)"
+              class="text-blue-600 hover:text-blue-900 p-2 rounded-full hover:bg-blue-50 transition-colors"
+              title="Ver detalles"
+            >
+              <i class="fas fa-eye"></i>
+            </button>
+            <button 
+              (click)="editar.emit(desafio)"
+              class="text-yellow-600 hover:text-yellow-900 p-2 rounded-full hover:bg-yellow-50 transition-colors"
+              title="Editar desafío"
+            >
+              <i class="fas fa-edit"></i>
+            </button>
+            <button 
+              (click)="onEliminarDesafio(desafio.id)"
+              class="text-red-600 hover:text-red-900 p-2 rounded-full hover:bg-red-50 transition-colors"
+              title="Eliminar desafío"
+            >
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
         </td>
       </tr>
     </tbody>
