@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, tap, map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../auth/services/auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
+
 export class AdminService {
   private apiUrl = `${environment.apiUrl}/admin`;
 
@@ -18,12 +19,6 @@ export class AdminService {
 
   private getAuthHeaders(): HttpHeaders {
     const token = this.authService.getToken();
-    console.log('🔐 Token enviado a admin:', token ? 'Presente' : 'Ausente');
-    
-    if (!token) {
-      console.error('❌ No hay token disponible');
-    }
-
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
@@ -31,11 +26,10 @@ export class AdminService {
   }
 
   getDesafios(): Observable<any[]> {
-    console.log('📋 Obteniendo desafíos desde admin...');
     return this.http.get<any[]>(`${this.apiUrl}/desafios`, { 
       headers: this.getAuthHeaders() 
     }).pipe(
-      catchError(this.handleError)
+      catchError(this.handleError.bind(this))
     );
   }
 
@@ -43,7 +37,7 @@ export class AdminService {
     return this.http.post<any>(`${this.apiUrl}/desafios`, desafio, { 
       headers: this.getAuthHeaders() 
     }).pipe(
-      catchError(this.handleError)
+      catchError(this.handleError.bind(this))
     );
   }
 
@@ -51,7 +45,7 @@ export class AdminService {
     return this.http.put<any>(`${this.apiUrl}/desafios/${id}`, desafio, { 
       headers: this.getAuthHeaders() 
     }).pipe(
-      catchError(this.handleError)
+      catchError(this.handleError.bind(this))
     );
   }
 
@@ -59,24 +53,32 @@ export class AdminService {
     return this.http.delete<any>(`${this.apiUrl}/desafios/${id}`, { 
       headers: this.getAuthHeaders() 
     }).pipe(
-      catchError(this.handleError)
+      catchError(this.handleError.bind(this))
     );
   }
 
   getUsuarios(): Observable<any[]> {
-    console.log('👥 Obteniendo usuarios desde admin...');
     return this.http.get<any[]>(`${this.apiUrl}/usuarios`, { 
       headers: this.getAuthHeaders() 
     }).pipe(
-      catchError(this.handleError)
+      catchError(this.handleError.bind(this))
     );
   }
 
   crearUsuario(usuario: any): Observable<any> {
+    console.log('URL completa:', `${this.apiUrl}/usuarios`);
+    console.log('Datos enviados:', usuario);
+    
     return this.http.post<any>(`${this.apiUrl}/usuarios`, usuario, { 
       headers: this.getAuthHeaders() 
     }).pipe(
-      catchError(this.handleError)
+      tap((response) => {
+        console.log('Respuesta del servidor:', response);
+      }),
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error en crearUsuario:', error);
+        return this.handleError(error);
+      })
     );
   }
 
@@ -84,7 +86,7 @@ export class AdminService {
     return this.http.put<any>(`${this.apiUrl}/usuarios/${id}`, usuario, { 
       headers: this.getAuthHeaders() 
     }).pipe(
-      catchError(this.handleError)
+      catchError(this.handleError.bind(this))
     );
   }
 
@@ -92,27 +94,30 @@ export class AdminService {
     return this.http.delete<any>(`${this.apiUrl}/usuarios/${id}`, { 
       headers: this.getAuthHeaders() 
     }).pipe(
-      catchError(this.handleError)
+      catchError(this.handleError.bind(this))
     );
   }
 
   private handleError(error: HttpErrorResponse) {
-    console.error('❌ Error en AdminService:', error);
+    console.error('Error en AdminService:', error);
     
     let errorMessage = 'Error desconocido';
+    
     if (error.error instanceof ErrorEvent) {
-
       errorMessage = `Error: ${error.error.message}`;
     } else {
-
-      errorMessage = `Código: ${error.status}\nMensaje: ${error.message}`;
-      
-      if (error.status === 403) {
-        errorMessage = 'No tienes permisos de administrador para acceder a esta función';
+      if (error.error && error.error.error) {
+        errorMessage = error.error.error;
+      } else if (error.status === 400) {
+        errorMessage = 'Error en los datos enviados';
+      } else if (error.status === 403) {
+        errorMessage = 'No tienes permisos de administrador';
       } else if (error.status === 401) {
-        errorMessage = 'No estás autenticado. Por favor, inicia sesión nuevamente';
+        errorMessage = 'No estás autenticado';
       } else if (error.status === 404) {
-        errorMessage = 'Recurso no encontrado';
+        errorMessage = 'Endpoint no encontrado';
+      } else {
+        errorMessage = `Error ${error.status}: ${error.message}`;
       }
     }
     

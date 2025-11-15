@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ListaDesafiosComponent } from './lista-desafios/lista-desafios.component';
 import { CrearDesafioComponent } from './crear-desafio/crear-desafio.component';
 import { EditarDesafioComponent } from './editar-desafio/editar-desafio.component';
-import { DetalleDesafioComponent } from '../../../desafios/components/detalle-desafio/detalle-desafio.component';
+import { DetalleDesafioComponent } from './detalle-desafio/detalle-desafio.component';
 import { AdminService } from '../../services/admin.service';
 import { Desafio } from '../../../../shared/models';
 
@@ -13,6 +13,7 @@ import { Desafio } from '../../../../shared/models';
   imports: [
     CommonModule, 
     ListaDesafiosComponent,
+    DetalleDesafioComponent,
     CrearDesafioComponent,
     EditarDesafioComponent
   ],

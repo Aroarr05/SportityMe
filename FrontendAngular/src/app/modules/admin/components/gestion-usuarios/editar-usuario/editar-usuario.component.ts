@@ -19,6 +19,7 @@ export class EditarUsuarioComponent implements OnInit {
   usuarioEditado: Partial<Usuario> = {};
   guardando = false;
   mensajeError = '';
+  nuevaContrasena: string = '';
 
   roles = [
     { id: 1, nombre: 'ADMIN' },
@@ -40,7 +41,13 @@ export class EditarUsuarioComponent implements OnInit {
 
   cargarDatosUsuario(): void {
     this.usuarioEditado = { ...this.usuario };
-    delete this.usuarioEditado.contraseña;
+   
+    if (this.usuarioEditado.fecha_nacimiento) {
+      const fecha = new Date(this.usuarioEditado.fecha_nacimiento);
+      if (!isNaN(fecha.getTime())) {
+        this.usuarioEditado.fecha_nacimiento = fecha.toISOString().split('T')[0];
+      }
+    }
   }
 
   guardar(): void {
@@ -51,7 +58,13 @@ export class EditarUsuarioComponent implements OnInit {
     this.guardando = true;
     this.mensajeError = '';
 
-    this.adminService.actualizarUsuario(this.usuario.id, this.usuarioEditado).subscribe({
+    const datosParaEnviar = { ...this.usuarioEditado };
+
+    if (this.nuevaContrasena.trim()) {
+      (datosParaEnviar as any).password = this.nuevaContrasena;
+    }
+
+    this.adminService.actualizarUsuario(this.usuario.id, datosParaEnviar).subscribe({
       next: () => {
         this.actualizado.emit();
         this.guardando = false;
@@ -82,5 +95,44 @@ export class EditarUsuarioComponent implements OnInit {
     }
 
     return true;
+  }
+
+  getGeneroTexto(): string {
+    const genero = this.generos.find(g => g.valor === this.usuarioEditado.genero);
+    return genero ? genero.texto : 'No especificado';
+  }
+
+  getRolNombre(): string {
+    const rol = this.roles.find(r => r.id === this.usuarioEditado.rol_id);
+    return rol ? rol.nombre : 'USUARIO';
+  }
+
+  getEstadoTexto(): string {
+    return this.usuarioEditado.activo ? 'Activo' : 'Inactivo';
+  }
+
+  getEstadoBadgeClass(): string {
+    return this.usuarioEditado.activo 
+      ? 'bg-green-100 text-green-800' 
+      : 'bg-red-100 text-red-800';
+  }
+
+  formatearFecha(fecha: string | Date): string {
+    if (!fecha) return 'No especificada';
+    return new Date(fecha).toLocaleDateString('es-ES');
+  }
+
+  handleImageError(event: any): void {
+    event.target.style.display = 'none';
+  }
+
+  getInitials(): string {
+    return this.usuarioEditado.nombre 
+      ? this.usuarioEditado.nombre.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
+      : 'US';
+  }
+
+  getAvatarUrl(): string {
+    return this.usuarioEditado.avatar_url || '';
   }
 }

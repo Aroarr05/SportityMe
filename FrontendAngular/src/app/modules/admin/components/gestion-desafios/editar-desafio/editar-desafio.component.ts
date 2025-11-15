@@ -18,6 +18,8 @@ export class EditarDesafioComponent implements OnInit {
 
   desafioEditado: Partial<CrearDesafioDto> = {};
   estadoDesafio: string = 'ACTIVO'; 
+  errors: any = {};
+  errorMessage: string = '';
   
   TipoActividad = TipoActividad;
   tiposActividad = Object.values(TipoActividad);
@@ -48,7 +50,9 @@ export class EditarDesafioComponent implements OnInit {
   }
 
   guardar(): void {
-    if (!this.validarDesafio()) {
+    this.validarDesafio();
+    
+    if (this.hasErrors()) {
       return;
     }
 
@@ -72,25 +76,46 @@ export class EditarDesafioComponent implements OnInit {
         this.actualizado.emit();
       },
       error: (error) => {
-        console.error('Error actualizando desafío:', error);
-        alert('Error al actualizar el desafío');
+        this.errorMessage = 'Error al actualizar el desafío. Por favor, inténtalo de nuevo.';
       }
     });
   }
 
-  private validarDesafio(): boolean {
+  private validarDesafio(): void {
+    this.errors = {};
+
     if (!this.desafioEditado.titulo?.trim()) {
-      alert('El título es requerido');
-      return false;
+      this.errors.titulo = 'El título es requerido';
     }
+
     if (!this.desafioEditado.descripcion?.trim()) {
-      alert('La descripción es requerida');
-      return false;
+      this.errors.descripcion = 'La descripción es requerida';
     }
+
     if ((this.desafioEditado.objetivo ?? 0) <= 0) {
-      alert('El objetivo debe ser mayor a 0');
-      return false;
+      this.errors.objetivo = 'El objetivo debe ser mayor a 0';
     }
-    return true;
+  }
+
+  hasErrors(): boolean {
+    return Object.keys(this.errors).length > 0;
+  }
+
+  getErrorMessages(): string[] {
+    return Object.values(this.errors);
+  }
+
+  formatearFecha(fecha: string): string {
+    if (!fecha) return 'Fecha no disponible';
+    
+    try {
+      return new Date(fecha).toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (error) {
+      return 'Fecha inválida';
+    }
   }
 }

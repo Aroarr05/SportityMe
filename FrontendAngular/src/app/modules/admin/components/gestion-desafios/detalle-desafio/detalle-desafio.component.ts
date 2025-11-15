@@ -64,4 +64,17 @@ export class DetalleDesafioComponent {
       day: 'numeric'
     });
   }
+  
+  getIconoClase(): string {
+
+  const icono = this.desafio.icono || 'fa-star';
+  
+ 
+  if (icono.includes('fa-')) {
+    return icono;
+  }
+  
+  
+  return `fa-solid ${icono}`;
+}
 }

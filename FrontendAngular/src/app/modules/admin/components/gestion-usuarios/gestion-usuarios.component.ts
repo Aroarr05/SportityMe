@@ -9,7 +9,6 @@ import { CrearUsuarioComponent } from './crear-usuario/crear-usuario.component';
 import { EditarUsuarioComponent } from './editar-usuario/editar-usuario.component';
 import { DetalleUsuarioComponent } from './detalle-usuario/detalle-usuario.component';
 
-
 @Component({
   selector: 'app-gestion-usuarios',
   standalone: true,
@@ -32,7 +31,7 @@ export class GestionUsuariosComponent implements OnInit {
   constructor(
     private adminService: AdminService,
     private authService: AuthService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.cargarUsuarios();
@@ -41,7 +40,7 @@ export class GestionUsuariosComponent implements OnInit {
   cargarUsuarios(): void {
     this.cargando = true;
     this.mensajeError = '';
-    
+
     this.adminService.getUsuarios().subscribe({
       next: (usuarios) => {
         this.usuarios = usuarios;
@@ -75,12 +74,10 @@ export class GestionUsuariosComponent implements OnInit {
   }
 
   onUsuarioCreado(): void {
-    this.cargarUsuarios();
     this.mostrarLista();
   }
 
   onUsuarioActualizado(): void {
-    this.cargarUsuarios();
     this.mostrarLista();
   }
 
@@ -89,17 +86,14 @@ export class GestionUsuariosComponent implements OnInit {
   }
 
   eliminarUsuario(id: number): void {
-    const usuario = this.usuarios.find(u => u.id === id);
-    if (usuario && confirm(`¿Estás seguro de que quieres eliminar al usuario "${usuario.nombre}"?`)) {
-      this.adminService.eliminarUsuario(id).subscribe({
-        next: () => {
-          this.cargarUsuarios();
-        },
-        error: (error) => {
-          console.error('Error eliminando usuario:', error);
-          this.mensajeError = 'Error al eliminar el usuario';
-        }
-      });
-    }
+    this.adminService.eliminarUsuario(id).subscribe({
+      next: () => {
+        this.usuarios = this.usuarios.filter(usuario => usuario.id !== id);
+      },
+      error: (error) => {
+        console.error('Error eliminando usuario:', error);
+        this.mensajeError = 'Error al eliminar el usuario';
+      }
+    });
   }
 }

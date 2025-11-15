@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Usuario } from '../../../../../shared/models';
+
 @Component({
   selector: 'app-detalle-usuario',
   standalone: true,
@@ -8,31 +9,46 @@ import { Usuario } from '../../../../../shared/models';
   templateUrl: './detalle-usuario.component.html'
 })
 export class DetalleUsuarioComponent {
-  @Input() usuario!: Usuario;
+  @Input() usuario!: any;
   @Output() editar = new EventEmitter<void>();
 
-  roles = [
-    { id: 1, nombre: 'ADMIN' },
-    { id: 2, nombre: 'USUARIO' }
-  ];
+  getInitials(): string {
+    if (!this.usuario?.nombre) return 'U';
+    
+    const names = this.usuario.nombre.split(' ');
+    if (names.length === 1) {
+      return names[0].charAt(0).toUpperCase();
+    } else {
+      return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
+    }
+  }
 
-  getRolNombre(rolId: number): string {
-    const rol = this.roles.find(r => r.id === rolId);
-    return rol ? rol.nombre : 'Desconocido';
+  handleImageError(event: any): void {
+    event.target.style.display = 'none';
+  }
+
+  getRolNombre(): string {
+    return this.usuario.rol || 'USUARIO';
   }
 
   getEstadoBadgeClass(): string {
-    return this.usuario.activo 
-      ? 'bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium'
-      : 'bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium';
+    return true 
+      ? 'bg-gradient-to-r from-green-100 to-green-50 text-green-800 border border-green-200'
+      : 'bg-gradient-to-r from-red-100 to-red-50 text-red-800 border border-red-200';
   }
 
   getEstadoTexto(): string {
-    return this.usuario.activo ? 'ACTIVO' : 'INACTIVO';
+    return 'ACTIVO';
   }
 
-  formatearFecha(fecha: string): string {
-    return new Date(fecha).toLocaleDateString('es-ES', {
+  formatearFecha(fecha: any): string {
+    if (!fecha) return 'No especificada';
+    
+    const fechaObj = new Date(fecha);
+    if (isNaN(fechaObj.getTime())) {
+      return 'Fecha inválida';
+    }
+    return fechaObj.toLocaleDateString('es-ES', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -40,11 +56,14 @@ export class DetalleUsuarioComponent {
   }
 
   getGeneroTexto(): string {
-    switch (this.usuario.genero) {
-      case 'MASCULINO': return 'Masculino';
-      case 'FEMENINO': return 'Femenino';
-      case 'OTRO': return 'Otro';
-      case 'NO_ESPECIFICADO': return 'No especificado';
+    if (!this.usuario.genero) return 'No especificado';
+    
+    const genero = this.usuario.genero.toLowerCase();
+    switch (genero) {
+      case 'masculino': return 'Masculino';
+      case 'femenino': return 'Femenino';
+      case 'otro': return 'Otro';
+      case 'no_especificado': return 'No especificado';
       default: return 'No especificado';
     }
   }
