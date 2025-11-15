@@ -65,7 +65,7 @@
               class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 appearance-none bg-white"
             >
               <option *ngFor="let tipo of tiposActividad" [value]="tipo">
-                {{ tipo }}
+                {{ tipo | titlecase }}
               </option>
             </select>
             <i class="fas fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
@@ -84,7 +84,7 @@
               class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 appearance-none bg-white"
             >
               <option *ngFor="let dificultad of dificultades" [value]="dificultad">
-                {{ dificultad }}
+                {{ dificultad | titlecase }}
               </option>
             </select>
             <i class="fas fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
@@ -194,9 +194,10 @@
         </button>
         <button
           type="submit"
-          class="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 rounded-xl transition-all duration-300 transform hover:scale-105 font-semibold shadow-lg"
+          [disabled]="guardando"
+          class="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 rounded-xl transition-all duration-300 transform hover:scale-105 font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Crear Desafío
+          {{ guardando ? 'Creando...' : 'Crear Desafío' }}
         </button>
       </div>
     </form>

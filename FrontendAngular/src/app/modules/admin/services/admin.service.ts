@@ -1,14 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, tap, map } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../auth/services/auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
-
 export class AdminService {
   private apiUrl = `${environment.apiUrl}/admin`;
 
@@ -34,10 +33,26 @@ export class AdminService {
   }
 
   crearDesafio(desafio: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/desafios`, desafio, { 
+    const desafioData = {
+      ...desafio,
+      objetivo: Number(desafio.objetivo),
+      max_participantes: Number(desafio.max_participantes),
+      fecha_inicio: this.formatDateForBackend(desafio.fecha_inicio),
+      fecha_fin: this.formatDateForBackend(desafio.fecha_fin)
+    };
+
+    console.log('Enviando datos del desafío:', desafioData);
+    
+    return this.http.post<any>(`${this.apiUrl}/desafios`, desafioData, { 
       headers: this.getAuthHeaders() 
     }).pipe(
-      catchError(this.handleError.bind(this))
+      tap((response) => {
+        console.log('Desafío creado exitosamente:', response);
+      }),
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error en crearDesafio:', error);
+        return this.handleError(error);
+      })
     );
   }
 
@@ -96,6 +111,16 @@ export class AdminService {
     }).pipe(
       catchError(this.handleError.bind(this))
     );
+  }
+
+  private formatDateForBackend(dateString: string): string {
+    if (!dateString) return dateString;
+    
+    if (dateString.includes('T')) {
+      return dateString;
+    }
+    
+    return `${dateString}T00:00:00`;
   }
 
   private handleError(error: HttpErrorResponse) {

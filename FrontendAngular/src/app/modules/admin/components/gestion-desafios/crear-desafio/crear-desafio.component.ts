@@ -10,7 +10,6 @@ import { CrearDesafioDto, TipoActividad } from '../../../../../shared/models';
   imports: [CommonModule, FormsModule],
   templateUrl: './crear-desafio.component.html'
 })
-
 export class CrearDesafioComponent {
   @Output() creado = new EventEmitter<void>();
   @Output() cancelar = new EventEmitter<void>();
@@ -24,13 +23,13 @@ export class CrearDesafioComponent {
     fecha_inicio: new Date().toISOString().split('T')[0],
     fecha_fin: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     es_publico: true,
-    dificultad: 'MEDIO',
+    dificultad: 'medio',
     max_participantes: 100
   };
 
   TipoActividad = TipoActividad;
   tiposActividad = Object.values(TipoActividad);
-  dificultades = ['FACIL', 'MEDIO', 'DIFICIL'];
+  dificultades = ['facil', 'medio', 'dificil'];
   mensajeError = '';
   guardando = false;
 
@@ -44,14 +43,26 @@ export class CrearDesafioComponent {
     this.guardando = true;
     this.mensajeError = '';
 
-    this.adminService.crearDesafio(this.desafio).subscribe({
+    const desafioParaEnviar = {
+      ...this.desafio,
+      objetivo: Number(this.desafio.objetivo),
+      max_participantes: Number(this.desafio.max_participantes),
+      fecha_inicio: this.formatFecha(this.desafio.fecha_inicio),
+      fecha_fin: this.formatFecha(this.desafio.fecha_fin),
+      tipo_actividad: this.desafio.tipo_actividad.toLowerCase(),
+      dificultad: this.desafio.dificultad.toLowerCase()
+    };
+
+    console.log('Enviando desafío:', desafioParaEnviar);
+
+    this.adminService.crearDesafio(desafioParaEnviar).subscribe({
       next: () => {
         this.creado.emit();
         this.guardando = false;
       },
       error: (error) => {
         console.error('Error creando desafío:', error);
-        this.mensajeError = 'Error al crear el desafío';
+        this.mensajeError = 'Error al crear el desafío: ' + error.message;
         this.guardando = false;
       }
     });
@@ -71,5 +82,15 @@ export class CrearDesafioComponent {
       return false;
     }
     return true;
+  }
+
+  private formatFecha(fecha: string): string {
+    if (!fecha) return fecha;
+    
+    if (fecha.length === 10) {
+      return `${fecha}T00:00:00`;
+    }
+    
+    return fecha;
   }
 }
