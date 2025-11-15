@@ -92,7 +92,6 @@ export class GestionUsuariosComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error eliminando usuario:', error);
-        this.mensajeError = 'Error al eliminar el usuario';
       }
     });
   }

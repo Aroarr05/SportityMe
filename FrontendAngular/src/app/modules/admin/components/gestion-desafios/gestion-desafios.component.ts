@@ -66,12 +66,10 @@ export class GestionDesafiosComponent implements OnInit {
   }
 
   onDesafioCreado(): void {
-    this.cargarDesafios();
     this.mostrarLista();
   }
 
   onDesafioActualizado(): void {
-    this.cargarDesafios();
     this.mostrarLista();
   }
 
@@ -80,16 +78,13 @@ export class GestionDesafiosComponent implements OnInit {
   }
 
   eliminarDesafio(id: number): void {
-    if (confirm('¿Estás seguro de que quieres eliminar este desafío?')) {
-      this.adminService.eliminarDesafio(id).subscribe({
-        next: () => {
-          this.cargarDesafios();
-        },
-        error: (error) => {
-          console.error('Error eliminando desafío:', error);
-          alert('Error al eliminar el desafío');
-        }
-      });
-    }
+    this.adminService.eliminarDesafio(id).subscribe({
+      next: () => {
+        this.desafios = this.desafios.filter(desafio => desafio.id !== id);
+      },
+      error: (error) => {
+        console.error('Error eliminando desafío:', error);
+      }
+    });
   }
 }
