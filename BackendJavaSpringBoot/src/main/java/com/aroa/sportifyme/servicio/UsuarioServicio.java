@@ -44,8 +44,6 @@ public class UsuarioServicio implements UserDetailsService {
                 .build();
     }
 
-    // ==================== MÉTODOS PARA EL ADMIN CONTROLLER ====================
-
     @Transactional(readOnly = true)
     public Optional<Usuario> obtenerUsuarioPorId(Long id) {
         return usuarioRepository.findById(id);
@@ -63,7 +61,7 @@ public class UsuarioServicio implements UserDetailsService {
 
     @Transactional
     public Usuario actualizarUsuario(Usuario usuario) {
-        logger.info(" Actualizando usuario ID: {}", usuario.getId());
+        logger.info("Actualizando usuario ID: {}", usuario.getId());
         
         if (!usuarioRepository.existsById(usuario.getId())) {
             throw new UsuarioNoEncontradoException("Usuario con ID " + usuario.getId() + " no encontrado");
@@ -92,13 +90,13 @@ public class UsuarioServicio implements UserDetailsService {
         Usuario usuarioActualizado = usuarioRepository.save(usuario);
         usuarioRepository.flush();
         
-        logger.info("✅ Usuario actualizado exitosamente ID: {}", usuarioActualizado.getId());
+        logger.info("Usuario actualizado exitosamente ID: {}", usuarioActualizado.getId());
         return usuarioActualizado;
     }
 
     @Transactional
     public void eliminarUsuario(Long id) {
-        logger.info(" Eliminando usuario ID: {}", id);
+        logger.info("Eliminando usuario ID: {}", id);
         
         if (!usuarioRepository.existsById(id)) {
             throw new UsuarioNoEncontradoException("Usuario con ID " + id + " no encontrado");
@@ -108,8 +106,6 @@ public class UsuarioServicio implements UserDetailsService {
         
         logger.info("Usuario eliminado exitosamente ID: {}", id);
     }
-
-    // ==================== MÉTODOS EXISTENTES ====================
 
     public boolean verificarPassword(String email, String passwordPlana) {
         Optional<Usuario> usuarioOpt = buscarPorEmail(email);
@@ -122,7 +118,7 @@ public class UsuarioServicio implements UserDetailsService {
 
     @Transactional
     public Usuario registrarUsuario(Usuario usuario) {
-        logger.info("🔄 Registrando nuevo usuario: {}", usuario.getEmail());
+        logger.info("Registrando nuevo usuario: {}", usuario.getEmail());
         
         if (existePorEmail(usuario.getEmail())) {
             throw new EmailYaRegistradoException(usuario.getEmail());
@@ -130,23 +126,19 @@ public class UsuarioServicio implements UserDetailsService {
 
         validarUsuario(usuario);
         
-        // ✅ Codificar contraseña
         usuario.setContraseña(passwordEncoder.encode(usuario.getContraseña()));
-        logger.info("🔐 Contraseña codificada");
+        logger.info("Contraseña codificada");
 
-        // ✅ VERIFICAR Y ASIGNAR ROL DESDE LA BASE DE DATOS
         if (usuario.getRol() == null || usuario.getRol().getId() == null) {
-            // Asignar rol por defecto (USUARIO)
             Rol rolPorDefecto = rolRepository.findById(2L)
                 .orElseThrow(() -> new RuntimeException("Rol por defecto (ID: 2) no encontrado"));
             usuario.setRol(rolPorDefecto);
-            logger.info("👤 Rol por defecto asignado: {}", rolPorDefecto.getNombre());
+            logger.info("Rol por defecto asignado: {}", rolPorDefecto.getNombre());
         } else {
-            
             Rol rolPersistido = rolRepository.findById(usuario.getRol().getId())
                 .orElseThrow(() -> new RuntimeException("Rol no encontrado con ID: " + usuario.getRol().getId()));
             usuario.setRol(rolPersistido);
-            logger.info("👤 Rol específico asignado: {}", rolPersistido.getNombre());
+            logger.info("Rol específico asignado: {}", rolPersistido.getNombre());
         }
 
         Usuario usuarioGuardado = usuarioRepository.save(usuario);
@@ -180,8 +172,6 @@ public class UsuarioServicio implements UserDetailsService {
     public List<Usuario> obtenerTodosUsuarios() {
         return usuarioRepository.findAll();
     }
-
-    // ==================== MÉTODOS DE VALIDACIÓN ====================
 
     private void validarUsuario(Usuario usuario) {
         if (usuario.getEmail() == null || usuario.getEmail().trim().isEmpty()) {

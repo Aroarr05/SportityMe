@@ -140,7 +140,7 @@ export class AuthService {
       }
     }
 
-    this.http.get<Usuario>(`${this.apiUrl}/me`, {
+    this.http.get<Usuario>(`${this.apiUrl}/perfil`, {
       headers: this.getAuthHeaders()
     }).subscribe({
       next: (user) => {
@@ -155,7 +155,7 @@ export class AuthService {
   }
 
   getProfile(): Observable<Usuario> {
-    return this.http.get<Usuario>(`${this.apiUrl}/me`, {
+    return this.http.get<Usuario>(`${this.apiUrl}/perfil`, {
       headers: this.getAuthHeaders()
     }).pipe(
       tap(user => {
@@ -167,7 +167,7 @@ export class AuthService {
   }
 
   updateProfile(userData: Partial<Usuario>): Observable<Usuario> {
-    return this.http.put<Usuario>(`${this.apiUrl}/profile`, userData, {
+    return this.http.put<Usuario>(`${this.apiUrl}/perfil`, userData, {
       headers: this.getAuthHeaders()
     }).pipe(
       tap(user => {
@@ -308,7 +308,6 @@ export class AuthService {
     console.log('Password:', loginData.password);
     console.log('Tipo de password:', typeof loginData.password);
     console.log('Longitud password:', loginData.password?.length);
-
 
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, loginData).pipe(
       tap((response: AuthResponse) => {

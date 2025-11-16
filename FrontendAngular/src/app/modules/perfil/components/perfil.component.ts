@@ -16,36 +16,16 @@ import { Usuario, Genero } from '../../../shared/models';
 export class PerfilComponent implements OnInit {
   usuario: Usuario | null = null;
   editando: boolean = false;
-  usuarioEditado: Usuario;
+  usuarioEditado: Partial<Usuario> = {};
   cargando: boolean = true;
   error: string = '';
 
   generos = Object.values(Genero);
 
-  private usuarioVacio: Usuario = {
-    id: 0,
-    nombre: '',
-    email: '',
-    contraseña: '',
-    rol_id: 2,
-    avatar_url: '',
-    biografia: '',
-    ubicacion: '',
-    fecha_nacimiento: '',
-    genero: undefined,
-    peso: 0,
-    altura: 0,
-    fecha_registro: new Date().toISOString(),
-    ultimo_login: '',
-    activo: false
-  };
-
   constructor(
     private usuarioService: UsuarioService,
     private authService: AuthService
-  ) {
-    this.usuarioEditado = { ...this.usuarioVacio };
-  }
+  ) {}
 
   ngOnInit(): void {
     this.cargarUsuario();
@@ -53,13 +33,15 @@ export class PerfilComponent implements OnInit {
 
   cargarUsuario(): void {
     this.cargando = true;
+    this.error = '';
     
     this.authService.getProfile().subscribe({
-      next: (usuario) => {
-        this.usuario = usuario;
-        this.usuarioEditado = { ...usuario };
+      next: (usuarioData: any) => {
+        console.log('Perfil cargado desde backend:', usuarioData);
+        this.usuario = this.mapearUsuarioDesdeBackend(usuarioData);
+        this.usuarioEditado = { ...this.usuario };
         this.cargando = false;
-        console.log('Perfil cargado desde AuthService:', usuario);
+        console.log('Usuario mapeado:', this.usuario);
       },
       error: (error) => {
         console.error('Error al cargar perfil:', error);
@@ -68,13 +50,62 @@ export class PerfilComponent implements OnInit {
     });
   }
 
+  private mapearUsuarioDesdeBackend(usuarioBackend: any): Usuario {
+    console.log('Mapeando usuario desde backend:', usuarioBackend);
+    console.log('Campos disponibles en backend:', Object.keys(usuarioBackend));
+    
+    const usuario: Usuario = {
+      id: usuarioBackend.id,
+      nombre: usuarioBackend.nombre,
+      email: usuarioBackend.email,
+      contraseña: '',
+      rol_id: usuarioBackend.rol_id || 2,
+      
+      avatar_url: usuarioBackend.avatar_url || usuarioBackend.avatarUrl || undefined,
+      biografia: usuarioBackend.biografia || undefined,
+      ubicacion: usuarioBackend.ubicacion || undefined,
+      fecha_nacimiento: usuarioBackend.fecha_nacimiento || undefined,
+      genero: usuarioBackend.genero as 'MASCULINO' | 'FEMENINO' | 'OTRO' | 'NO_ESPECIFICADO' || undefined,
+      peso: usuarioBackend.peso !== undefined && usuarioBackend.peso !== null ? Number(usuarioBackend.peso) : undefined,
+      altura: usuarioBackend.altura !== undefined && usuarioBackend.altura !== null ? Number(usuarioBackend.altura) : undefined,
+      fecha_registro: usuarioBackend.fecha_registro || usuarioBackend.fechaRegistro,
+      ultimo_login: usuarioBackend.ultimo_login || undefined,
+      activo: usuarioBackend.activo !== undefined ? usuarioBackend.activo : true
+    };
+
+    console.log('Usuario después del mapeo:', usuario);
+    return usuario;
+  }
+
+  private mapearUsuarioParaBackend(usuarioFrontend: Partial<Usuario>): any {
+    const payload: any = {
+      id: usuarioFrontend.id,
+      nombre: usuarioFrontend.nombre,
+      email: usuarioFrontend.email,
+      biografia: usuarioFrontend.biografia,
+      ubicacion: usuarioFrontend.ubicacion,
+      fecha_nacimiento: usuarioFrontend.fecha_nacimiento,
+      genero: usuarioFrontend.genero,
+      avatar_url: usuarioFrontend.avatar_url
+    };
+
+    if (usuarioFrontend.peso !== undefined) {
+      payload.peso = Number(usuarioFrontend.peso);
+    }
+    if (usuarioFrontend.altura !== undefined) {
+      payload.altura = Number(usuarioFrontend.altura);
+    }
+
+    console.log('Payload para backend:', payload);
+    return payload;
+  }
+
   private cargarUsuarioDesdeAuth(): void {
     const usuarioAuth = this.authService.getCurrentUser();
     if (usuarioAuth) {
-      this.usuario = usuarioAuth;
-      this.usuarioEditado = { ...usuarioAuth };
+      this.usuario = this.mapearUsuarioDesdeBackend(usuarioAuth);
+      this.usuarioEditado = { ...this.usuario };
       this.cargando = false;
-      console.log('Perfil cargado desde usuario actual:', usuarioAuth);
     } else {
       this.error = 'No se pudo cargar el perfil del usuario';
       this.cargando = false;
@@ -83,31 +114,35 @@ export class PerfilComponent implements OnInit {
 
   toggleEdicion(): void {
     if (this.editando) {
-      this.usuarioEditado = this.usuario ? { ...this.usuario } : { ...this.usuarioVacio };
+      this.usuarioEditado = this.usuario ? { ...this.usuario } : {};
+    } else {
+      this.usuarioEditado = this.usuario ? { ...this.usuario } : {};
     }
     this.editando = !this.editando;
   }
 
   guardarCambios(): void {
-    if (!this.usuarioEditado.id) {
+    if (!this.usuarioEditado?.id) {
       this.error = 'No se puede guardar: datos incompletos';
       return;
     }
 
     this.cargando = true;
     
-    this.authService.updateProfile(this.usuarioEditado).subscribe({
-      next: (usuarioActualizado) => {
-        this.usuario = usuarioActualizado;
-        this.usuarioEditado = { ...usuarioActualizado };
+    const usuarioParaBackend = this.mapearUsuarioParaBackend(this.usuarioEditado);
+    console.log('Enviando datos al backend:', usuarioParaBackend);
+    
+    this.authService.updateProfile(usuarioParaBackend).subscribe({
+      next: (usuarioActualizado: any) => {
+        console.log('Perfil actualizado desde backend:', usuarioActualizado);
+        this.usuario = this.mapearUsuarioDesdeBackend(usuarioActualizado);
+        this.usuarioEditado = { ...this.usuario };
         this.editando = false;
         this.cargando = false;
         this.error = '';
-        
-        console.log('Perfil actualizado correctamente:', usuarioActualizado);
       },
       error: (error) => {
-        this.error = 'Error al actualizar el perfil';
+        this.error = 'Error al actualizar el perfil: ' + (error.error?.message || error.message);
         this.cargando = false;
         console.error('Error al actualizar:', error);
       }
@@ -117,21 +152,29 @@ export class PerfilComponent implements OnInit {
   calcularEdad(fechaNacimiento: string | undefined): number {
     if (!fechaNacimiento) return 0;
     
-    const hoy = new Date();
-    const nacimiento = new Date(fechaNacimiento);
-    let edad = hoy.getFullYear() - nacimiento.getFullYear();
-    const mes = hoy.getMonth() - nacimiento.getMonth();
-    
-    if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
-      edad--;
+    try {
+      const hoy = new Date();
+      const nacimiento = new Date(fechaNacimiento);
+      let edad = hoy.getFullYear() - nacimiento.getFullYear();
+      const mes = hoy.getMonth() - nacimiento.getMonth();
+      
+      if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+        edad--;
+      }
+      
+      return edad;
+    } catch (e) {
+      return 0;
     }
-    
-    return edad;
   }
 
   formatearFecha(fecha: string | undefined): string {
     if (!fecha) return 'No especificada';
-    return new Date(fecha).toLocaleDateString('es-ES');
+    try {
+      return new Date(fecha).toLocaleDateString('es-ES');
+    } catch (e) {
+      return 'Fecha inválida';
+    }
   }
 
   onFileSelected(event: any): void {
@@ -139,7 +182,7 @@ export class PerfilComponent implements OnInit {
     if (file) {
       const reader = new FileReader();
       reader.onload = (e: any) => {
-        this.usuarioEditado.avatar_url = e.target.result;
+        this.usuarioEditado.avatar_url = e.target.result as string;
       };
       reader.readAsDataURL(file);
     }
@@ -147,7 +190,31 @@ export class PerfilComponent implements OnInit {
 
   getFechaNacimientoDisplay(): string {
     if (!this.usuario?.fecha_nacimiento) return 'No especificada';
-    return `${this.formatearFecha(this.usuario.fecha_nacimiento)} (${this.calcularEdad(this.usuario.fecha_nacimiento)} años)`;
+    const edad = this.calcularEdad(this.usuario.fecha_nacimiento);
+    return `${this.formatearFecha(this.usuario.fecha_nacimiento)} (${edad} años)`;
+  }
+
+  getGeneroDisplay(): string {
+    const genero = this.usuario?.genero;
+    if (!genero) return 'No especificado';
+    
+    switch (genero) {
+      case 'MASCULINO': return 'Masculino';
+      case 'FEMENINO': return 'Femenino';
+      case 'OTRO': return 'Otro';
+      case 'NO_ESPECIFICADO': return 'No especificado';
+      default: return genero;
+    }
+  }
+
+  getPesoDisplay(): string {
+    const peso = this.usuario?.peso;
+    return peso !== undefined ? `${peso} kg` : 'No especificado';
+  }
+
+  getAlturaDisplay(): string {
+    const altura = this.usuario?.altura;
+    return altura !== undefined ? `${altura} cm` : 'No especificado';
   }
 
   getNombre(): string {
@@ -164,18 +231,6 @@ export class PerfilComponent implements OnInit {
 
   getUbicacion(): string {
     return this.usuario?.ubicacion || 'No especificada';
-  }
-
-  getGenero(): string {
-    return this.usuario?.genero || 'No especificado';
-  }
-
-  getPeso(): string | number {
-    return this.usuario?.peso || 'No especificado';
-  }
-
-  getAltura(): string | number {
-    return this.usuario?.altura || 'No especificado';
   }
 
   getAvatarUrl(): string {
@@ -195,6 +250,6 @@ export class PerfilComponent implements OnInit {
   }
 
   getActivo(): boolean {
-    return this.usuario?.activo || false;
+    return this.usuario?.activo !== undefined ? this.usuario.activo : true;
   }
 }
