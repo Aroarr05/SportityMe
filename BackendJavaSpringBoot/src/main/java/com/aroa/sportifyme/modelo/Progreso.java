@@ -2,9 +2,10 @@ package com.aroa.sportifyme.modelo;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
 
 @Entity
 @Table(name = "progresos")
@@ -32,6 +33,7 @@ public class Progreso {
     private String unidad;
     
     @Column(name = "fecha_registro")
+    @CreationTimestamp
     private LocalDateTime fechaRegistro;
     
     @Column(name = "comentario")

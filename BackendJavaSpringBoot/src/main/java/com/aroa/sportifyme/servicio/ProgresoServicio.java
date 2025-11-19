@@ -20,11 +20,11 @@ public class ProgresoServicio {
     private final DesafioServicio desafioServicio;
 
     @Transactional
-    public Progreso registrarProgreso(Long usuarioId, Long desafioId, BigDecimal valorActual, 
-                                     String unidad, String comentario, String dispositivo) {
+    public Progreso registrarProgreso(Long usuarioId, Long desafioId, BigDecimal valorActual,
+            String unidad, String comentario, String dispositivo) {
         Usuario usuario = usuarioServicio.buscarPorId(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        
+
         Desafio desafio = desafioServicio.buscarPorId(desafioId);
 
         if (!desafioServicio.esParticipante(desafioId, usuarioId)) {
@@ -57,5 +57,36 @@ public class ProgresoServicio {
     public BigDecimal obtenerProgresoTotalPorDesafio(Long usuarioId, Long desafioId) {
         return progresoRepository.findTotalProgresoByUsuarioAndDesafio(usuarioId, desafioId)
                 .orElse(BigDecimal.ZERO);
+    }
+
+ 
+    @Transactional
+    public Progreso actualizarProgreso(Long progresoId, Long usuarioId, BigDecimal valorActual,
+            String unidad, String comentario, String dispositivo) {
+        Progreso progreso = progresoRepository.findById(progresoId)
+                .orElseThrow(() -> new RuntimeException("Progreso no encontrado"));
+
+        if (!progreso.getUsuario().getId().equals(usuarioId)) {
+            throw new RuntimeException("No tienes permisos para editar este progreso");
+        }
+
+        progreso.setValorActual(valorActual);
+        progreso.setUnidad(unidad);
+        progreso.setComentario(comentario);
+        progreso.setDispositivo(dispositivo);
+
+        return progresoRepository.save(progreso);
+    }
+
+    @Transactional
+    public void eliminarProgreso(Long progresoId, Long usuarioId) {
+        Progreso progreso = progresoRepository.findById(progresoId)
+                .orElseThrow(() -> new RuntimeException("Progreso no encontrado"));
+
+        if (!progreso.getUsuario().getId().equals(usuarioId)) {
+            throw new RuntimeException("No tienes permisos para eliminar este progreso");
+        }
+
+        progresoRepository.delete(progreso);
     }
 }

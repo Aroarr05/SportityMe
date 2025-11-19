@@ -1,20 +1,24 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ProgresosService } from '../../services/progresos.service';
-import { Progreso } from '../../../../shared/models';
 
 @Component({
   selector: 'app-mis-progresos',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './progresos.component.html',
   styleUrls: ['./progresos.component.scss']
 })
 export class MisProgresosComponent implements OnInit {
-  progresos: Progreso[] = [];
+  progresos: any[] = [];
   cargando: boolean = false;
   error: string = '';
+  mostrarModalEdicion: boolean = false;
+  progresoEditando: any = null;
+  guardando: boolean = false;
+  formularioEdicion: FormGroup;
 
   estadisticas = {
     totalRegistros: 0,
@@ -25,8 +29,16 @@ export class MisProgresosComponent implements OnInit {
 
   constructor(
     private progresosService: ProgresosService,
-    private router: Router
-  ) {}
+    private router: Router,
+    private fb: FormBuilder
+  ) {
+    this.formularioEdicion = this.fb.group({
+      valorActual: ['', [Validators.required, Validators.min(0)]],
+      unidad: ['', Validators.required],
+      comentario: [''],
+      dispositivo: ['']
+    });
+  }
 
   ngOnInit() {
     this.cargarProgresos();
@@ -37,7 +49,7 @@ export class MisProgresosComponent implements OnInit {
     this.error = '';
 
     this.progresosService.obtenerMiHistorial().subscribe({
-      next: (data) => {
+      next: (data: any) => {
         this.progresos = data;
         this.calcularEstadisticas();
         this.cargando = false;
@@ -50,6 +62,7 @@ export class MisProgresosComponent implements OnInit {
           this.error += ' - Sesión expirada';
         }
         this.cargando = false;
+        console.error('Error detallado:', error);
       }
     });
   }
@@ -57,8 +70,7 @@ export class MisProgresosComponent implements OnInit {
   calcularEstadisticas() {
     this.estadisticas.totalRegistros = this.progresos.length;
     
-    const desafiosConId = this.progresos.filter(p => p.desafio_id != null);
-    const desafiosUnicos = new Set(desafiosConId.map(p => p.desafio_id));
+    const desafiosUnicos = new Set(this.progresos.map(p => p.desafioId));
     this.estadisticas.desafiosActivos = desafiosUnicos.size;
 
     if (this.progresos.length > 0) {
@@ -68,8 +80,34 @@ export class MisProgresosComponent implements OnInit {
 
     if (this.progresos.length > 0) {
       const ultimo = this.progresos[0];
-      this.estadisticas.ultimoRegistro = this.formatearFecha(ultimo.fecha_registro);
+      this.estadisticas.ultimoRegistro = this.formatearFecha(ultimo.fechaRegistro);
     }
+  }
+
+  get desafiosUnicos(): any[] {
+    const agrupados: { [key: string]: any } = {};
+    
+    this.progresos.forEach(progreso => {
+      if (progreso.desafioId) {
+        const clave = progreso.desafioId.toString();
+        if (!agrupados[clave]) {
+          agrupados[clave] = [];
+        }
+        agrupados[clave].push(progreso);
+      }
+    });
+    
+    const ultimosProgresos: any[] = [];
+    Object.values(agrupados).forEach((progresos: any[]) => {
+      if (progresos.length > 0) {
+        const ultimo = progresos.sort((a, b) => 
+          new Date(b.fechaRegistro).getTime() - new Date(a.fechaRegistro).getTime()
+        )[0];
+        ultimosProgresos.push(ultimo);
+      }
+    });
+    
+    return ultimosProgresos;
   }
 
   navegarARegistrar() {
@@ -90,72 +128,95 @@ export class MisProgresosComponent implements OnInit {
     });
   }
 
-  obtenerNombreDesafio(progreso: Progreso): string {
+  obtenerNombreDesafio(progreso: any): string {
     if (progreso.desafio) {
       return progreso.desafio.titulo;
     }
-    return `Desafío ${progreso.desafio_id || 'N/A'}`;
+    return `Desafío ${progreso.desafioId || 'N/A'}`;
   }
 
-  obtenerObjetivoDesafio(progreso: Progreso): string {
+  obtenerObjetivoDesafio(progreso: any): string {
     if (progreso.desafio) {
-      return `${progreso.desafio.objetivo} ${progreso.desafio.unidad_objetivo}`;
+      return `${progreso.desafio.objetivo} ${progreso.desafio.unidadObjetivo}`;
     }
     return 'Objetivo no disponible';
   }
 
-  get progresosAgrupados(): { [key: string]: Progreso[] } {
-    const agrupados: { [key: string]: Progreso[] } = {};
-    
-    this.progresos.forEach(progreso => {
-      if (progreso.desafio_id !== undefined && progreso.desafio_id !== null) {
-        const clave = progreso.desafio_id.toString();
-        if (!agrupados[clave]) {
-          agrupados[clave] = [];
-        }
-        agrupados[clave].push(progreso);
-      }
-    });
-    
-    return agrupados;
-  }
-
-  get desafiosUnicos(): Progreso[] {
-    const ultimosProgresos: Progreso[] = [];
-    Object.values(this.progresosAgrupados).forEach(progresos => {
-      if (progresos.length > 0) {
-        const ultimo = progresos.sort((a, b) => 
-          new Date(b.fecha_registro).getTime() - new Date(a.fecha_registro).getTime()
-        )[0];
-        ultimosProgresos.push(ultimo);
-      }
-    });
-    
-    return ultimosProgresos;
-  }
-
-
-  obtenerPorcentaje(progreso: Progreso): number {
-    return this.calcularPorcentajeReal(progreso);
-  }
-
-  calcularPorcentajeReal(progreso: Progreso): number {
+  calcularPorcentajeReal(progreso: any): number {
     if (progreso.completado) {
       return 100;
     }
 
-    if (progreso.desafio && progreso.desafio.objetivo) {
-      const objetivo = progreso.desafio.objetivo;
-      const valorActual = progreso.valor_actual || 0;
-      
-      const porcentaje = Math.min((valorActual / objetivo) * 100, 100);
-      return Math.round(porcentaje);
+    if (progreso.porcentajeCompletado) {
+      return Math.min(progreso.porcentajeCompletado, 100);
     }
 
-    return progreso.porcentaje_completado || 0;
+    if (progreso.desafio && progreso.desafio.objetivo) {
+      const objetivo = Number(progreso.desafio.objetivo);
+      const valorActual = Number(progreso.valorActual) || 0;
+      
+      if (objetivo > 0) {
+        const porcentaje = Math.min((valorActual / objetivo) * 100, 100);
+        return Math.round(porcentaje);
+      }
+    }
+
+    return 0;
   }
 
-  estaCompletado(progreso: Progreso): boolean {
-    return progreso.completado || this.calcularPorcentajeReal(progreso) >= 100;
+  editarProgreso(progreso: any) {
+    this.progresoEditando = progreso;
+    this.formularioEdicion.patchValue({
+      valorActual: progreso.valorActual,
+      unidad: progreso.unidad,
+      comentario: progreso.comentario || '',
+      dispositivo: progreso.dispositivo || ''
+    });
+    this.mostrarModalEdicion = true;
+  }
+
+  guardarEdicion() {
+    if (this.formularioEdicion.valid && this.progresoEditando) {
+      this.guardando = true;
+      
+      this.progresosService.actualizarProgreso(
+        this.progresoEditando.id,
+        this.formularioEdicion.value
+      ).subscribe({
+        next: (progresoActualizado) => {
+          const index = this.progresos.findIndex(p => p.id === this.progresoEditando.id);
+          if (index !== -1) {
+            this.progresos[index] = progresoActualizado;
+          }
+          this.cerrarModal();
+          this.calcularEstadisticas();
+          this.guardando = false;
+        },
+        error: (error) => {
+          console.error('Error al actualizar progreso:', error);
+          this.guardando = false;
+        }
+      });
+    }
+  }
+
+  eliminarProgreso(progresoId: number) {
+    if (confirm('¿Estás seguro de que quieres eliminar este progreso?')) {
+      this.progresosService.eliminarProgreso(progresoId).subscribe({
+        next: () => {
+          this.progresos = this.progresos.filter(p => p.id !== progresoId);
+          this.calcularEstadisticas();
+        },
+        error: (error) => {
+          console.error('Error al eliminar progreso:', error);
+        }
+      });
+    }
+  }
+
+  cerrarModal() {
+    this.mostrarModalEdicion = false;
+    this.progresoEditando = null;
+    this.formularioEdicion.reset();
   }
 }

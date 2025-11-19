@@ -17,7 +17,7 @@ export class RankingComponent implements OnInit {
   rankingData: Ranking[] = [];
   loading: boolean = true;
   errorMessage: string = '';
-  
+
   desafioIdSeleccionado: number | null = null;
   limitSeleccionado: number = 10;
 
@@ -26,8 +26,7 @@ export class RankingComponent implements OnInit {
     { id: 2, nombre: 'Desafío Natación', tipo: 'natacion', icono: 'fa-swimmer' },
     { id: 3, nombre: 'Desafío Ciclismo', tipo: 'ciclismo', icono: 'fa-bicycle' },
     { id: 4, nombre: 'Desafío Gimnasio', tipo: 'gimnasio', icono: 'fa-dumbbell' },
-    { id: 5, nombre: 'Desafío Senderismo', tipo: 'otros', icono: 'fa-hiking' },
-    { id: 6, nombre: 'Desafío Yoga', tipo: 'otros', icono: 'fa-spa' }
+    { id: 5, nombre: 'Desafío Otros', tipo: 'otros', icono: 'fa-running' }
   ];
 
   topUsuarios: Ranking[] = [];
