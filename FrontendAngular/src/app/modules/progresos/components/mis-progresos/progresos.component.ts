@@ -11,6 +11,7 @@ import { ProgresosService } from '../../services/progresos.service';
   templateUrl: './progresos.component.html',
   styleUrls: ['./progresos.component.scss']
 })
+
 export class MisProgresosComponent implements OnInit {
   progresos: any[] = [];
   cargando: boolean = false;
@@ -18,6 +19,7 @@ export class MisProgresosComponent implements OnInit {
   mostrarModalEdicion: boolean = false;
   progresoEditando: any = null;
   guardando: boolean = false;
+  menuAbierto: number | null = null;
   formularioEdicion: FormGroup;
 
   estadisticas = {
@@ -33,10 +35,8 @@ export class MisProgresosComponent implements OnInit {
     private fb: FormBuilder
   ) {
     this.formularioEdicion = this.fb.group({
-      valorActual: ['', [Validators.required, Validators.min(0)]],
-      unidad: ['', Validators.required],
-      comentario: [''],
-      dispositivo: ['']
+      porcentaje: ['', [Validators.required, Validators.min(0), Validators.max(100)]],
+      comentario: ['']
     });
   }
 
@@ -56,20 +56,14 @@ export class MisProgresosComponent implements OnInit {
       },
       error: (error) => {
         this.error = 'Error al cargar los progresos';
-        if (error.status === 403) {
-          this.error += ' - No tienes permisos';
-        } else if (error.status === 401) {
-          this.error += ' - Sesión expirada';
-        }
         this.cargando = false;
-        console.error('Error detallado:', error);
       }
     });
   }
 
   calcularEstadisticas() {
     this.estadisticas.totalRegistros = this.progresos.length;
-    
+
     const desafiosUnicos = new Set(this.progresos.map(p => p.desafioId));
     this.estadisticas.desafiosActivos = desafiosUnicos.size;
 
@@ -86,7 +80,7 @@ export class MisProgresosComponent implements OnInit {
 
   get desafiosUnicos(): any[] {
     const agrupados: { [key: string]: any } = {};
-    
+
     this.progresos.forEach(progreso => {
       if (progreso.desafioId) {
         const clave = progreso.desafioId.toString();
@@ -96,17 +90,17 @@ export class MisProgresosComponent implements OnInit {
         agrupados[clave].push(progreso);
       }
     });
-    
+
     const ultimosProgresos: any[] = [];
     Object.values(agrupados).forEach((progresos: any[]) => {
       if (progresos.length > 0) {
-        const ultimo = progresos.sort((a, b) => 
+        const ultimo = progresos.sort((a, b) =>
           new Date(b.fechaRegistro).getTime() - new Date(a.fechaRegistro).getTime()
         )[0];
         ultimosProgresos.push(ultimo);
       }
     });
-    
+
     return ultimosProgresos;
   }
 
@@ -154,7 +148,7 @@ export class MisProgresosComponent implements OnInit {
     if (progreso.desafio && progreso.desafio.objetivo) {
       const objetivo = Number(progreso.desafio.objetivo);
       const valorActual = Number(progreso.valorActual) || 0;
-      
+
       if (objetivo > 0) {
         const porcentaje = Math.min((valorActual / objetivo) * 100, 100);
         return Math.round(porcentaje);
@@ -164,24 +158,41 @@ export class MisProgresosComponent implements OnInit {
     return 0;
   }
 
-  editarProgreso(progreso: any) {
-    this.progresoEditando = progreso;
-    this.formularioEdicion.patchValue({
-      valorActual: progreso.valorActual,
-      unidad: progreso.unidad,
-      comentario: progreso.comentario || '',
-      dispositivo: progreso.dispositivo || ''
-    });
-    this.mostrarModalEdicion = true;
+  toggleMenu(progresoId: number) {
+    this.menuAbierto = this.menuAbierto === progresoId ? null : progresoId;
   }
 
-  guardarEdicion() {
+  editarPorcentaje(progreso: any) {
+    this.progresoEditando = progreso;
+    const porcentajeActual = this.calcularPorcentajeReal(progreso);
+    this.formularioEdicion.patchValue({
+      porcentaje: porcentajeActual,
+      comentario: progreso.comentario || ''
+    });
+    this.mostrarModalEdicion = true;
+    this.menuAbierto = null;
+  }
+
+  guardarPorcentaje() {
     if (this.formularioEdicion.valid && this.progresoEditando) {
       this.guardando = true;
-      
+
+      const porcentaje = this.formularioEdicion.value.porcentaje;
+      const valorActual = this.calcularValorDesdePorcentaje(porcentaje);
+      const comentario = this.formularioEdicion.value.comentario;
+
+      const datosActualizacion = {
+        valorActual: valorActual,
+        unidad: this.progresoEditando.unidad,
+        comentario: comentario,
+        dispositivo: this.progresoEditando.dispositivo || ''
+      };
+
+      const progresoId = Number(this.progresoEditando.id);
+
       this.progresosService.actualizarProgreso(
-        this.progresoEditando.id,
-        this.formularioEdicion.value
+        progresoId,
+        datosActualizacion
       ).subscribe({
         next: (progresoActualizado) => {
           const index = this.progresos.findIndex(p => p.id === this.progresoEditando.id);
@@ -195,23 +206,32 @@ export class MisProgresosComponent implements OnInit {
         error: (error) => {
           console.error('Error al actualizar progreso:', error);
           this.guardando = false;
+          this.error = 'Error al actualizar el progreso';
         }
       });
     }
   }
 
-  eliminarProgreso(progresoId: number) {
-    if (confirm('¿Estás seguro de que quieres eliminar este progreso?')) {
-      this.progresosService.eliminarProgreso(progresoId).subscribe({
-        next: () => {
-          this.progresos = this.progresos.filter(p => p.id !== progresoId);
-          this.calcularEstadisticas();
-        },
-        error: (error) => {
-          console.error('Error al eliminar progreso:', error);
-        }
-      });
+  calcularValorDesdePorcentaje(porcentaje: number): number {
+    if (this.progresoEditando.desafio && this.progresoEditando.desafio.objetivo) {
+      const objetivo = Number(this.progresoEditando.desafio.objetivo);
+      const valorCalculado = (porcentaje / 100) * objetivo;
+      return Math.round(valorCalculado * 100) / 100;
     }
+    return this.progresoEditando.valorActual || 0;
+  }
+
+  eliminarProgreso(progresoId: number) {
+    this.progresosService.eliminarProgreso(progresoId).subscribe({
+      next: () => {
+        this.progresos = this.progresos.filter(p => p.id !== progresoId);
+        this.calcularEstadisticas();
+        this.menuAbierto = null;
+      },
+      error: (error) => {
+        console.error('Error al eliminar progreso:', error);
+      }
+    });
   }
 
   cerrarModal() {
