@@ -75,7 +75,7 @@ CREATE TABLE progresos (
     FOREIGN KEY (desafio_id) REFERENCES desafios(id) ON DELETE CASCADE
 );
 
-CREATE TABLE comentarios (
+/*CREATE TABLE comentarios (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     usuario_id BIGINT NOT NULL,
     desafio_id BIGINT NOT NULL,
@@ -85,7 +85,7 @@ CREATE TABLE comentarios (
     fecha_edicion DATETIME,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
     FOREIGN KEY (desafio_id) REFERENCES desafios(id) ON DELETE CASCADE
-);
+);*/
 
 CREATE TABLE logros (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,

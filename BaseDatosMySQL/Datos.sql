@@ -193,7 +193,7 @@ INSERT INTO progresos (usuario_id, desafio_id, valor_actual, unidad, fecha_regis
 (2, 50, 6.0, 'sesiones', '2024-10-15 17:20:00', 'Tai Chi muy relajante y beneficioso', 'Tai Chi App');
 
 -- Insertar comentarios (50 comentarios)
-INSERT INTO comentarios (usuario_id, desafio_id, contenido, fecha_creacion, editado) VALUES
+/*INSERT INTO comentarios (usuario_id, desafio_id, contenido, fecha_creacion, editado) VALUES
 (2, 1, '¡Excelente desafío! Justo lo que necesitaba para motivarme con el maratón de primavera.', '2024-03-05 11:35:00', FALSE),
 (3, 1, 'Alguien quiere hacer entrenamientos juntos para preparar el maratón?', '2024-03-05 13:20:00', FALSE),
 (4, 2, 'Perfecto para principiantes, las explicaciones son muy claras y el progreso gradual.', '2024-01-20 10:05:00', FALSE),
@@ -245,7 +245,7 @@ INSERT INTO comentarios (usuario_id, desafio_id, contenido, fecha_creacion, edit
 (50, 48, 'El TRX utiliza el peso corporal de forma muy inteligente.', '2024-08-15 12:35:00', FALSE),
 (1, 49, 'El parkour desarrolla agilidad y confianza en el movimiento.', '2024-09-15 15:00:00', FALSE),
 (2, 50, 'El Tai Chi es meditación en movimiento, muy beneficioso para mente y cuerpo.', '2024-10-15 17:25:00', FALSE);
-
+*/
 -- Insertar logros (20 logros)
 INSERT INTO logros (nombre, descripcion, icono_url, criterio, valor_requerido, categoria) VALUES
 ('Primeros Pasos', 'Completa tu primer desafío', 'https://example.com/icons/first_steps.png', 'DESAFIOS_COMPLETADOS', 1, 'PROGRESO'),

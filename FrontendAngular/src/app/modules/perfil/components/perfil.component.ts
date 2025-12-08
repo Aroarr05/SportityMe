@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { UsuarioService } from '../services/usuario.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { Usuario, Genero } from '../../../shared/models';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-perfil',
@@ -12,15 +13,23 @@ import { Usuario, Genero } from '../../../shared/models';
   standalone: true,
   imports: [CommonModule, FormsModule]
 })
-
 export class PerfilComponent implements OnInit {
   usuario: Usuario | null = null;
   editando: boolean = false;
   usuarioEditado: Partial<Usuario> = {};
   cargando: boolean = true;
+  subiendoImagen: boolean = false;
   error: string = '';
+  mensajeExito: string = '';
+  archivoSeleccionado: File | null = null;
+  previewImagen: string | null = null;
 
-  generos = Object.values(Genero);
+  generos = [
+    { value: 'MASCULINO', label: 'Masculino' },
+    { value: 'FEMENINO', label: 'Femenino' },
+    { value: 'OTRO', label: 'Otro' },
+    { value: 'NO_ESPECIFICADO', label: 'No especificado' }
+  ];
 
   constructor(
     private usuarioService: UsuarioService,
@@ -34,25 +43,22 @@ export class PerfilComponent implements OnInit {
   cargarUsuario(): void {
     this.cargando = true;
     this.error = '';
+    this.mensajeExito = '';
     
     this.authService.getProfile().subscribe({
       next: (usuarioData: any) => {
-        console.log('Perfil cargado desde backend:', usuarioData);
         this.usuario = this.mapearUsuarioDesdeBackend(usuarioData);
         this.usuarioEditado = { ...this.usuario };
         this.cargando = false;
-        console.log('Usuario mapeado:', this.usuario);
       },
       error: (error) => {
-        console.error('Error al cargar perfil:', error);
         this.cargarUsuarioDesdeAuth();
       }
     });
   }
 
   private mapearUsuarioDesdeBackend(usuarioBackend: any): Usuario {
-    console.log('Mapeando usuario desde backend:', usuarioBackend);
-    console.log('Campos disponibles en backend:', Object.keys(usuarioBackend));
+    let avatarPath = usuarioBackend.avatar_url;
     
     const usuario: Usuario = {
       id: usuarioBackend.id,
@@ -60,20 +66,18 @@ export class PerfilComponent implements OnInit {
       email: usuarioBackend.email,
       contraseña: '',
       rol_id: usuarioBackend.rol_id || 2,
-      
-      avatar_url: usuarioBackend.avatar_url || usuarioBackend.avatarUrl || undefined,
-      biografia: usuarioBackend.biografia || undefined,
-      ubicacion: usuarioBackend.ubicacion || undefined,
-      fecha_nacimiento: usuarioBackend.fecha_nacimiento || undefined,
-      genero: usuarioBackend.genero as 'MASCULINO' | 'FEMENINO' | 'OTRO' | 'NO_ESPECIFICADO' || undefined,
+      avatar_url: avatarPath,
+      biografia: usuarioBackend.biografia || '',
+      ubicacion: usuarioBackend.ubicacion || '',
+      fecha_nacimiento: usuarioBackend.fecha_nacimiento || '',
+      genero: (usuarioBackend.genero as Genero) || undefined,
       peso: usuarioBackend.peso !== undefined && usuarioBackend.peso !== null ? Number(usuarioBackend.peso) : undefined,
       altura: usuarioBackend.altura !== undefined && usuarioBackend.altura !== null ? Number(usuarioBackend.altura) : undefined,
-      fecha_registro: usuarioBackend.fecha_registro || usuarioBackend.fechaRegistro,
-      ultimo_login: usuarioBackend.ultimo_login || undefined,
+      fecha_registro: usuarioBackend.fecha_registro || usuarioBackend.fechaRegistro || '',
+      ultimo_login: usuarioBackend.ultimo_login || '',
       activo: usuarioBackend.activo !== undefined ? usuarioBackend.activo : true
     };
 
-    console.log('Usuario después del mapeo:', usuario);
     return usuario;
   }
 
@@ -89,14 +93,20 @@ export class PerfilComponent implements OnInit {
       avatar_url: usuarioFrontend.avatar_url
     };
 
-    if (usuarioFrontend.peso !== undefined) {
-      payload.peso = Number(usuarioFrontend.peso);
-    }
-    if (usuarioFrontend.altura !== undefined) {
-      payload.altura = Number(usuarioFrontend.altura);
+    if (usuarioFrontend.peso !== undefined && usuarioFrontend.peso !== null) {
+      const pesoNum = Number(usuarioFrontend.peso);
+      if (!isNaN(pesoNum)) {
+        payload.peso = pesoNum;
+      }
     }
 
-    console.log('Payload para backend:', payload);
+    if (usuarioFrontend.altura !== undefined && usuarioFrontend.altura !== null) {
+      const alturaNum = Number(usuarioFrontend.altura);
+      if (!isNaN(alturaNum)) {
+        payload.altura = alturaNum;
+      }
+    }
+
     return payload;
   }
 
@@ -114,11 +124,11 @@ export class PerfilComponent implements OnInit {
 
   toggleEdicion(): void {
     if (this.editando) {
-      this.usuarioEditado = this.usuario ? { ...this.usuario } : {};
+      this.cancelarEdicion();
     } else {
+      this.editando = true;
       this.usuarioEditado = this.usuario ? { ...this.usuario } : {};
     }
-    this.editando = !this.editando;
   }
 
   guardarCambios(): void {
@@ -128,25 +138,121 @@ export class PerfilComponent implements OnInit {
     }
 
     this.cargando = true;
+    this.error = '';
+    this.mensajeExito = '';
+
+    if (this.archivoSeleccionado && this.usuario) {
+      this.subiendoImagen = true;
+      
+      const validacion = this.usuarioService.validateImageFile(this.archivoSeleccionado);
+      if (!validacion.valid) {
+        this.error = validacion.error || 'Archivo inválido';
+        this.cargando = false;
+        this.subiendoImagen = false;
+        return;
+      }
+
+      this.guardarImagenYActualizarPerfil();
+    } else {
+      this.guardarDatosUsuario();
+    }
+  }
+
+  private guardarImagenYActualizarPerfil(): void {
+    if (!this.archivoSeleccionado || !this.usuario) return;
+
+    const timestamp = new Date().getTime();
+    const extension = this.archivoSeleccionado.name.split('.').pop() || 'jpg';
+    const nombreArchivo = `avatar_${this.usuario.id}_${timestamp}.${extension}`;
+    const rutaLocal = `/assets/avatars/${nombreArchivo}`;
     
+    this.guardarImagenLocalmente(nombreArchivo).then(() => {
+      this.usuarioEditado.avatar_url = rutaLocal;
+      this.guardarDatosUsuario();
+    }).catch(error => {
+      this.error = 'Error al guardar la imagen: ' + error;
+      this.cargando = false;
+      this.subiendoImagen = false;
+    });
+  }
+
+  private guardarImagenLocalmente(nombreArchivo: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this.archivoSeleccionado) {
+        reject('No hay archivo seleccionado');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        const base64Data = e.target.result.split(',')[1];
+        
+        try {
+          localStorage.setItem(`avatar_${nombreArchivo}`, base64Data);
+          resolve();
+        } catch (error) {
+          reject('Error al guardar en localStorage: ' + error);
+        }
+      };
+      
+      reader.onerror = () => {
+        reject('Error al leer el archivo');
+      };
+      
+      reader.readAsDataURL(this.archivoSeleccionado);
+    });
+  }
+
+  private guardarDatosUsuario(): void {
     const usuarioParaBackend = this.mapearUsuarioParaBackend(this.usuarioEditado);
-    console.log('Enviando datos al backend:', usuarioParaBackend);
     
-    this.authService.updateProfile(usuarioParaBackend).subscribe({
+    this.authService.updateProfile(usuarioParaBackend).pipe(
+      finalize(() => {
+        this.cargando = false;
+        this.subiendoImagen = false;
+      })
+    ).subscribe({
       next: (usuarioActualizado: any) => {
-        console.log('Perfil actualizado desde backend:', usuarioActualizado);
         this.usuario = this.mapearUsuarioDesdeBackend(usuarioActualizado);
         this.usuarioEditado = { ...this.usuario };
         this.editando = false;
-        this.cargando = false;
-        this.error = '';
+        this.archivoSeleccionado = null;
+        this.previewImagen = null;
+        this.mensajeExito = 'Perfil actualizado correctamente';
+        
+        this.authService.setCurrentUser(usuarioActualizado);
+        
+        setTimeout(() => {
+          this.mensajeExito = '';
+        }, 5000);
       },
       error: (error) => {
         this.error = 'Error al actualizar el perfil: ' + (error.error?.message || error.message);
-        this.cargando = false;
-        console.error('Error al actualizar:', error);
       }
     });
+  }
+
+  onFileSelected(event: any): void {
+    const file: File = event.target.files[0];
+    if (file) {
+      const validacion = this.usuarioService.validateImageFile(file);
+      if (!validacion.valid) {
+        this.error = validacion.error || 'Archivo inválido';
+        return;
+      }
+
+      this.archivoSeleccionado = file;
+      
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.previewImagen = e.target.result;
+        this.error = '';
+      };
+      reader.onerror = () => {
+        this.error = 'Error al leer el archivo de imagen';
+      };
+      reader.readAsDataURL(file);
+    }
   }
 
   calcularEdad(fechaNacimiento: string | undefined): number {
@@ -171,20 +277,13 @@ export class PerfilComponent implements OnInit {
   formatearFecha(fecha: string | undefined): string {
     if (!fecha) return 'No especificada';
     try {
-      return new Date(fecha).toLocaleDateString('es-ES');
+      return new Date(fecha).toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
     } catch (e) {
       return 'Fecha inválida';
-    }
-  }
-
-  onFileSelected(event: any): void {
-    const file: File = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.usuarioEditado.avatar_url = e.target.result as string;
-      };
-      reader.readAsDataURL(file);
     }
   }
 
@@ -198,23 +297,18 @@ export class PerfilComponent implements OnInit {
     const genero = this.usuario?.genero;
     if (!genero) return 'No especificado';
     
-    switch (genero) {
-      case 'MASCULINO': return 'Masculino';
-      case 'FEMENINO': return 'Femenino';
-      case 'OTRO': return 'Otro';
-      case 'NO_ESPECIFICADO': return 'No especificado';
-      default: return genero;
-    }
+    const generoObj = this.generos.find(g => g.value === genero);
+    return generoObj ? generoObj.label : genero;
   }
 
   getPesoDisplay(): string {
     const peso = this.usuario?.peso;
-    return peso !== undefined ? `${peso} kg` : 'No especificado';
+    return peso !== undefined && peso !== null ? `${peso} kg` : 'No especificado';
   }
 
   getAlturaDisplay(): string {
     const altura = this.usuario?.altura;
-    return altura !== undefined ? `${altura} cm` : 'No especificado';
+    return altura !== undefined && altura !== null ? `${altura} cm` : 'No especificado';
   }
 
   getNombre(): string {
@@ -234,7 +328,29 @@ export class PerfilComponent implements OnInit {
   }
 
   getAvatarUrl(): string {
-    return this.usuario?.avatar_url || 'https://via.placeholder.com/150';
+    if (this.previewImagen && this.editando) {
+      return this.previewImagen;
+    }
+    
+    if (this.usuario?.avatar_url) {
+      const url = this.usuario.avatar_url;
+      
+      if (url.startsWith('http')) {
+        return url;
+      } else if (url.startsWith('/assets/avatars/')) {
+        const nombreArchivo = url.split('/').pop();
+        if (nombreArchivo) {
+          const base64Data = localStorage.getItem(`avatar_${nombreArchivo}`);
+          if (base64Data) {
+            return `data:image/jpeg;base64,${base64Data}`;
+          }
+        }
+      }
+      
+      return url;
+    }
+    
+    return 'https://i.pinimg.com/736x/89/57/54/895754e9e4800f85b6dd9aa931b9c3ec.jpg';
   }
 
   getRolId(): number {
@@ -251,5 +367,14 @@ export class PerfilComponent implements OnInit {
 
   getActivo(): boolean {
     return this.usuario?.activo !== undefined ? this.usuario.activo : true;
+  }
+
+  cancelarEdicion(): void {
+    this.editando = false;
+    this.usuarioEditado = this.usuario ? { ...this.usuario } : {};
+    this.archivoSeleccionado = null;
+    this.previewImagen = null;
+    this.error = '';
+    this.mensajeExito = '';
   }
 }

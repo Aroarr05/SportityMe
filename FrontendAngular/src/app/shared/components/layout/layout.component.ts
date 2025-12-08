@@ -64,11 +64,29 @@ export class LayoutComponent implements OnInit {
   }
 
   hasAvatar(): boolean {
-    return !!(this.currentUser?.avatarUrl || this.currentUser?.avatar_url);
+    return !!(this.currentUser?.avatar_url);
   }
 
   getAvatarUrl(): string {
-    return this.currentUser?.avatarUrl || this.currentUser?.avatar_url || '';
+    if (this.currentUser?.avatar_url) {
+      const url = this.currentUser.avatar_url;
+      
+      if (url.startsWith('http')) {
+        return url;
+      } else if (url.startsWith('/assets/avatars/')) {
+        const nombreArchivo = url.split('/').pop();
+        if (nombreArchivo) {
+          const base64Data = localStorage.getItem(`avatar_${nombreArchivo}`);
+          if (base64Data) {
+            return `data:image/jpeg;base64,${base64Data}`;
+          }
+        }
+      }
+      
+      return url;
+    }
+    
+    return '';
   }
 
   handleImageError(event: any): void {

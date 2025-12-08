@@ -7,7 +7,7 @@ import { Usuario, Rol } from '../../shared/models/usuario.model';
 
 export interface LoginCredentials {
   email: string;
-  password: string; 
+  password: string;
 }
 
 export interface RegisterData {
@@ -136,7 +136,6 @@ export class AuthService {
         this.currentUserSubject.next(user);
         this.isLoggedInSubject.next(true);
       } catch (e) {
-        // Silently handle parse error
       }
     }
 
@@ -166,16 +165,31 @@ export class AuthService {
     );
   }
 
+  // En AuthService - método updateProfile
   updateProfile(userData: Partial<Usuario>): Observable<Usuario> {
     return this.http.put<Usuario>(`${this.apiUrl}/perfil`, userData, {
       headers: this.getAuthHeaders()
     }).pipe(
-      tap(user => {
-        this.currentUserSubject.next(user);
-        localStorage.setItem('userData', JSON.stringify(user));
+      tap((updatedUser: any) => {
+        // Forzar la actualización inmediata del usuario
+        this.currentUserSubject.next(updatedUser);
+        localStorage.setItem('userData', JSON.stringify(updatedUser));
+        console.log('Usuario actualizado en AuthService:', updatedUser);
       }),
       catchError(this.handleError)
     );
+  }
+
+
+  refreshCurrentUser(): void {
+    this.getProfile().subscribe({
+      next: (user) => {
+        this.currentUserSubject.next(user);
+      },
+      error: () => {
+       
+      }
+    });
   }
 
   logout(): Observable<any> {
@@ -235,9 +249,13 @@ export class AuthService {
     return user;
   }
 
-  updateCurrentUser(user: Usuario): void {
+  setCurrentUser(user: Usuario): void {
     this.currentUserSubject.next(user);
     localStorage.setItem('userData', JSON.stringify(user));
+  }
+
+  updateCurrentUser(user: Usuario): void {
+    this.setCurrentUser(user);
   }
 
   hasRole(role: Rol | string): boolean {
@@ -300,26 +318,15 @@ export class AuthService {
 
     const loginData = {
       email: credentials.email,
-      password: credentials.password 
+      password: credentials.password
     };
-
-    console.log('Credenciales enviadas al backend:', loginData);
-    console.log('Email:', loginData.email);
-    console.log('Password:', loginData.password);
-    console.log('Tipo de password:', typeof loginData.password);
-    console.log('Longitud password:', loginData.password?.length);
 
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, loginData).pipe(
       tap((response: AuthResponse) => {
-        console.log('Respuesta del login:', response);
         this.handleAuthentication(response);
         this.loadingSubject.next(false);
       }),
       catchError(error => {
-        console.error('Error completo del login:', error);
-        console.error('Status:', error.status);
-        console.error('Mensaje:', error.message);
-        console.error('Error body:', error.error);
         this.loadingSubject.next(false);
         return this.handleError(error);
       })
@@ -496,5 +503,27 @@ export class AuthService {
     }).pipe(
       catchError(this.handleError)
     );
+  }
+
+  getAvatarUrl(avatar_url: string): string {
+    if (!avatar_url) {
+      return 'https://i.pinimg.com/736x/89/57/54/895754e9e4800f85b6dd9aa931b9c3ec.jpg';
+    }
+
+    if (avatar_url.startsWith('http')) {
+      return avatar_url;
+    }
+
+    if (avatar_url.startsWith('/assets/avatars/')) {
+      const nombreArchivo = avatar_url.split('/').pop();
+      if (nombreArchivo) {
+        const base64Data = localStorage.getItem(`avatar_${nombreArchivo}`);
+        if (base64Data) {
+          return `data:image/jpeg;base64,${base64Data}`;
+        }
+      }
+    }
+
+    return avatar_url;
   }
 }
