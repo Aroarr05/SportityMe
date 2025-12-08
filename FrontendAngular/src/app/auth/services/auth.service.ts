@@ -313,25 +313,30 @@ export class AuthService {
     }
   }
 
-  login(credentials: LoginCredentials): Observable<AuthResponse> {
-    this.loadingSubject.next(true);
+ login(credentials: LoginCredentials): Observable<AuthResponse> {
+  this.loadingSubject.next(true);
 
-    const loginData = {
-      email: credentials.email,
-      password: credentials.password
-    };
+  const loginData = {
+    email: credentials.email,
+    password: credentials.password
+  };
 
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, loginData).pipe(
-      tap((response: AuthResponse) => {
-        this.handleAuthentication(response);
-        this.loadingSubject.next(false);
-      }),
-      catchError(error => {
-        this.loadingSubject.next(false);
-        return this.handleError(error);
-      })
-    );
-  }
+  return this.http.post<AuthResponse>(`${this.apiUrl}/login`, loginData).pipe(
+    tap((response: AuthResponse) => {
+      this.handleAuthentication(response);
+      this.loadingSubject.next(false);
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
+    }),
+    catchError(error => {
+      this.loadingSubject.next(false);
+      return this.handleError(error);
+    })
+  );
+}
+
 
   private handleError(error: any): Observable<never> {
     let errorMessage = 'Error de autenticación';
