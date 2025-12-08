@@ -34,7 +34,7 @@ export class PerfilComponent implements OnInit {
   constructor(
     private usuarioService: UsuarioService,
     private authService: AuthService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.cargarUsuario();
@@ -44,7 +44,7 @@ export class PerfilComponent implements OnInit {
     this.cargando = true;
     this.error = '';
     this.mensajeExito = '';
-    
+
     this.authService.getProfile().subscribe({
       next: (usuarioData: any) => {
         this.usuario = this.mapearUsuarioDesdeBackend(usuarioData);
@@ -59,7 +59,7 @@ export class PerfilComponent implements OnInit {
 
   private mapearUsuarioDesdeBackend(usuarioBackend: any): Usuario {
     let avatarPath = usuarioBackend.avatar_url;
-    
+
     const usuario: Usuario = {
       id: usuarioBackend.id,
       nombre: usuarioBackend.nombre,
@@ -143,7 +143,7 @@ export class PerfilComponent implements OnInit {
 
     if (this.archivoSeleccionado && this.usuario) {
       this.subiendoImagen = true;
-      
+
       const validacion = this.usuarioService.validateImageFile(this.archivoSeleccionado);
       if (!validacion.valid) {
         this.error = validacion.error || 'Archivo inválido';
@@ -165,7 +165,7 @@ export class PerfilComponent implements OnInit {
     const extension = this.archivoSeleccionado.name.split('.').pop() || 'jpg';
     const nombreArchivo = `avatar_${this.usuario.id}_${timestamp}.${extension}`;
     const rutaLocal = `/assets/avatars/${nombreArchivo}`;
-    
+
     this.guardarImagenLocalmente(nombreArchivo).then(() => {
       this.usuarioEditado.avatar_url = rutaLocal;
       this.guardarDatosUsuario();
@@ -186,7 +186,7 @@ export class PerfilComponent implements OnInit {
       const reader = new FileReader();
       reader.onload = (e: any) => {
         const base64Data = e.target.result.split(',')[1];
-        
+
         try {
           localStorage.setItem(`avatar_${nombreArchivo}`, base64Data);
           resolve();
@@ -194,18 +194,18 @@ export class PerfilComponent implements OnInit {
           reject('Error al guardar en localStorage: ' + error);
         }
       };
-      
+
       reader.onerror = () => {
         reject('Error al leer el archivo');
       };
-      
+
       reader.readAsDataURL(this.archivoSeleccionado);
     });
   }
 
   private guardarDatosUsuario(): void {
     const usuarioParaBackend = this.mapearUsuarioParaBackend(this.usuarioEditado);
-    
+
     this.authService.updateProfile(usuarioParaBackend).pipe(
       finalize(() => {
         this.cargando = false;
@@ -219,9 +219,9 @@ export class PerfilComponent implements OnInit {
         this.archivoSeleccionado = null;
         this.previewImagen = null;
         this.mensajeExito = 'Perfil actualizado correctamente';
-        
+
         this.authService.setCurrentUser(usuarioActualizado);
-        
+
         setTimeout(() => {
           this.mensajeExito = '';
         }, 5000);
@@ -242,7 +242,7 @@ export class PerfilComponent implements OnInit {
       }
 
       this.archivoSeleccionado = file;
-      
+
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.previewImagen = e.target.result;
@@ -257,17 +257,17 @@ export class PerfilComponent implements OnInit {
 
   calcularEdad(fechaNacimiento: string | undefined): number {
     if (!fechaNacimiento) return 0;
-    
+
     try {
       const hoy = new Date();
       const nacimiento = new Date(fechaNacimiento);
       let edad = hoy.getFullYear() - nacimiento.getFullYear();
       const mes = hoy.getMonth() - nacimiento.getMonth();
-      
+
       if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
         edad--;
       }
-      
+
       return edad;
     } catch (e) {
       return 0;
@@ -296,7 +296,7 @@ export class PerfilComponent implements OnInit {
   getGeneroDisplay(): string {
     const genero = this.usuario?.genero;
     if (!genero) return 'No especificado';
-    
+
     const generoObj = this.generos.find(g => g.value === genero);
     return generoObj ? generoObj.label : genero;
   }
@@ -327,14 +327,14 @@ export class PerfilComponent implements OnInit {
     return this.usuario?.ubicacion || 'No especificada';
   }
 
-  getAvatarUrl(): string {
+  getAvatarUrl(): string | null {
     if (this.previewImagen && this.editando) {
       return this.previewImagen;
     }
-    
+
     if (this.usuario?.avatar_url) {
       const url = this.usuario.avatar_url;
-      
+
       if (url.startsWith('http')) {
         return url;
       } else if (url.startsWith('/assets/avatars/')) {
@@ -346,12 +346,13 @@ export class PerfilComponent implements OnInit {
           }
         }
       }
-      
+
       return url;
     }
-    
-    return 'https://i.pinimg.com/736x/89/57/54/895754e9e4800f85b6dd9aa931b9c3ec.jpg';
+
+    return null;
   }
+
 
   getRolId(): number {
     return this.usuario?.rol_id || 2;
@@ -377,4 +378,14 @@ export class PerfilComponent implements OnInit {
     this.error = '';
     this.mensajeExito = '';
   }
+
+  getIniciales(nombre: string | undefined): string {
+    if (!nombre) return 'U';
+    const partes = nombre.trim().split(' ');
+    if (partes.length === 1) {
+      return partes[0].charAt(0).toUpperCase();
+    }
+    return (partes[0].charAt(0) + partes[1].charAt(0)).toUpperCase();
+  }
+
 }
