@@ -12,39 +12,40 @@ import { Router } from '@angular/router';
   templateUrl: './registro.component.html',
   styleUrls: ['./registro.component.scss']
 })
+
 export class RegistroComponent implements OnInit {
   registroForm!: FormGroup;
-  loading: boolean = false; 
-  error: string = ''; 
+  loading: boolean = false;
+  error: string = '';
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router
-  ) {}
-  
+  ) { }
+
   ngOnInit(): void {
     this.registroForm = this.fb.group({
       nombre: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
-      contraseña: ['', [Validators.required, Validators.minLength(6)]], 
+      contraseña: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', Validators.required]
     }, {
       validators: this.passwordMatchValidator
     });
   }
-  
+
   passwordMatchValidator(control: AbstractControl) {
-    const contraseña = control.get('contraseña')?.value; 
+    const contraseña = control.get('contraseña')?.value;
     const confirmPassword = control.get('confirmPassword')?.value;
-    
+
     if (contraseña !== confirmPassword) {
       control.get('confirmPassword')?.setErrors({ passwordMismatch: true });
       return { passwordMismatch: true };
     }
     return null;
   }
-  
+
   onSubmit() {
     if (this.registroForm.valid) {
       this.loading = true;
@@ -55,7 +56,7 @@ export class RegistroComponent implements OnInit {
         email: this.registroForm.get('email')?.value || '',
         contraseña: this.registroForm.get('contraseña')?.value || ''
       };
-      
+
       this.authService.register(userData).subscribe({
         next: () => {
           this.loading = false;
@@ -73,5 +74,8 @@ export class RegistroComponent implements OnInit {
         control?.markAsTouched();
       });
     }
+  }
+  goBack() {
+    this.router.navigate(['/']);
   }
 }
