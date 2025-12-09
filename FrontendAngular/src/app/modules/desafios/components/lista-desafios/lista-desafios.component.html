@@ -23,9 +23,7 @@
 
     <div class="mb-8">
       <div class="flex flex-wrap gap-3">
-        <button
-          *ngFor="let tipo of tiposActividad"
-          (click)="cambiarFiltro(tipo.valor)"
+        <button *ngFor="let tipo of tiposActividad" (click)="cambiarFiltro(tipo.valor)"
           [class]="getBotonFiltroClase(tipo.valor)"
           class="flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-105">
           <i [class]="['fas', tipo.icono]"></i>
@@ -36,11 +34,11 @@
         </button>
       </div>
     </div>
-<br><br>
+    <br><br>
     <div *ngIf="!loading && !error" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       <div *ngFor="let desafio of desafiosFiltrados"
         class="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 p-5 flex flex-col border border-gray-100 group relative h-full">
-      
+
 
         <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
           <div
@@ -56,10 +54,10 @@
             class="text-base font-bold text-gray-800 text-center leading-tight group-hover:text-purple-700 transition-colors duration-200 line-clamp-3 mb-4 flex-grow">
             {{ desafio.titulo }}
           </h6>
-          
+
 
           <div class="mt-auto pt-2">
-            <a [routerLink]="['/desafios', desafio.id]"
+            <a *ngIf="!isAdmin" [routerLink]="['/desafios', desafio.id]"
               class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2 rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 font-semibold text-center block shadow-sm hover:shadow-md group/btn text-sm">
               <span class="flex items-center justify-center space-x-2">
                 <span>Ver Detalles</span>
@@ -70,8 +68,8 @@
       </div>
     </div>
 
-    <div *ngIf="!loading && !error && desafiosFiltrados.length === 0 && desafios.length > 0" 
-         class="text-center py-16 bg-gray-50 rounded-2xl">
+    <div *ngIf="!loading && !error && desafiosFiltrados.length === 0 && desafios.length > 0"
+      class="text-center py-16 bg-gray-50 rounded-2xl">
       <div
         class="w-24 h-24 bg-gradient-to-r from-purple-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
         <i class="fas fa-search text-3xl text-purple-400"></i>
