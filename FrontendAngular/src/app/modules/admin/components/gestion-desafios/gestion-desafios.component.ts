@@ -11,7 +11,7 @@ import { Desafio } from '../../../../shared/models';
   selector: 'app-gestion-desafios',
   standalone: true,
   imports: [
-    CommonModule, 
+    CommonModule,
     ListaDesafiosComponent,
     DetalleDesafioComponent,
     CrearDesafioComponent,
@@ -26,7 +26,7 @@ export class GestionDesafiosComponent implements OnInit {
   desafioSeleccionado: Desafio | null = null;
   cargando = true;
 
-  constructor(private adminService: AdminService) {}
+  constructor(private adminService: AdminService) { }
 
   ngOnInit(): void {
     this.cargarDesafios();

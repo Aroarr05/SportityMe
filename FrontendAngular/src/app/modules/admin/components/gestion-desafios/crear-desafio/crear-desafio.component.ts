@@ -10,6 +10,7 @@ import { CrearDesafioDto, TipoActividad } from '../../../../../shared/models';
   imports: [CommonModule, FormsModule],
   templateUrl: './crear-desafio.component.html'
 })
+
 export class CrearDesafioComponent {
   @Output() creado = new EventEmitter<void>();
   @Output() cancelar = new EventEmitter<void>();
@@ -23,22 +24,20 @@ export class CrearDesafioComponent {
     fecha_inicio: new Date().toISOString().split('T')[0],
     fecha_fin: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     es_publico: true,
-    dificultad: 'medio',
+    dificultad: 'MEDIO',
     max_participantes: 100
   };
 
   TipoActividad = TipoActividad;
   tiposActividad = Object.values(TipoActividad);
-  dificultades = ['facil', 'medio', 'dificil'];
+  dificultades = ['FACIL', 'MEDIO', 'DIFICIL'];
   mensajeError = '';
   guardando = false;
 
   constructor(private adminService: AdminService) {}
 
   guardar(): void {
-    if (!this.validarDesafio()) {
-      return;
-    }
+    if (!this.validarDesafio()) return;
 
     this.guardando = true;
     this.mensajeError = '';
@@ -49,11 +48,9 @@ export class CrearDesafioComponent {
       max_participantes: Number(this.desafio.max_participantes),
       fecha_inicio: this.formatFecha(this.desafio.fecha_inicio),
       fecha_fin: this.formatFecha(this.desafio.fecha_fin),
-      tipo_actividad: this.desafio.tipo_actividad.toLowerCase(),
-      dificultad: this.desafio.dificultad.toLowerCase()
+      tipo_actividad: this.desafio.tipo_actividad,
+      dificultad: this.desafio.dificultad
     };
-
-    console.log('Enviando desafío:', desafioParaEnviar);
 
     this.adminService.crearDesafio(desafioParaEnviar).subscribe({
       next: () => {
@@ -61,7 +58,6 @@ export class CrearDesafioComponent {
         this.guardando = false;
       },
       error: (error) => {
-        console.error('Error creando desafío:', error);
         this.mensajeError = 'Error al crear el desafío: ' + error.message;
         this.guardando = false;
       }
@@ -86,11 +82,11 @@ export class CrearDesafioComponent {
 
   private formatFecha(fecha: string): string {
     if (!fecha) return fecha;
-    
+
     if (fecha.length === 10) {
       return `${fecha}T00:00:00`;
     }
-    
+
     return fecha;
   }
 }

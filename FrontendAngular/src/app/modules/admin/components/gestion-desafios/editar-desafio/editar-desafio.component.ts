@@ -17,10 +17,10 @@ export class EditarDesafioComponent implements OnInit {
   @Output() cancelar = new EventEmitter<void>();
 
   desafioEditado: Partial<CrearDesafioDto> = {};
-  estadoDesafio: string = 'ACTIVO'; 
+  estadoDesafio: string = 'ACTIVO';
   errors: any = {};
   errorMessage: string = '';
-  
+
   TipoActividad = TipoActividad;
   tiposActividad = Object.values(TipoActividad);
   dificultades = ['FACIL', 'MEDIO', 'DIFICIL'];
@@ -33,7 +33,7 @@ export class EditarDesafioComponent implements OnInit {
   }
 
   cargarDatosDesafio(): void {
-    this.desafioEditado = { 
+    this.desafioEditado = {
       titulo: this.desafio.titulo,
       descripcion: this.desafio.descripcion,
       tipo_actividad: this.desafio.tipo_actividad,
@@ -46,15 +46,12 @@ export class EditarDesafioComponent implements OnInit {
       max_participantes: this.desafio.max_participantes ?? 100,
       icono: this.desafio.icono
     };
-    this.estadoDesafio = this.desafio.estado || 'ACTIVO'; 
+    this.estadoDesafio = this.desafio.estado || 'ACTIVO';
   }
 
   guardar(): void {
     this.validarDesafio();
-    
-    if (this.hasErrors()) {
-      return;
-    }
+    if (this.hasErrors()) return;
 
     const desafioData = {
       titulo: this.desafioEditado.titulo ?? '',
@@ -68,14 +65,14 @@ export class EditarDesafioComponent implements OnInit {
       dificultad: this.desafioEditado.dificultad ?? 'MEDIO',
       max_participantes: this.desafioEditado.max_participantes ?? 100,
       icono: this.desafioEditado.icono,
-      estado: this.estadoDesafio 
+      estado: this.estadoDesafio
     };
 
     this.adminService.actualizarDesafio(this.desafio.id, desafioData).subscribe({
       next: () => {
         this.actualizado.emit();
       },
-      error: (error) => {
+      error: () => {
         this.errorMessage = 'Error al actualizar el desafío. Por favor, inténtalo de nuevo.';
       }
     });
@@ -107,14 +104,14 @@ export class EditarDesafioComponent implements OnInit {
 
   formatearFecha(fecha: string): string {
     if (!fecha) return 'Fecha no disponible';
-    
+
     try {
       return new Date(fecha).toLocaleDateString('es-ES', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
       });
-    } catch (error) {
+    } catch {
       return 'Fecha inválida';
     }
   }

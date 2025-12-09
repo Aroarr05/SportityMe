@@ -39,9 +39,7 @@ export class ListaUsuariosComponent {
     return new Date(fecha).toLocaleDateString('es-ES');
   }
 
-  onEliminarUsuario(id: number, nombre: string): void {
-    if (confirm(`¿Estás seguro de que quieres eliminar al usuario "${nombre}"?`)) {
-      this.eliminar.emit(id);
-    }
+  onEliminarUsuario(id: number): void {
+    this.eliminar.emit(id);
   }
 }

@@ -50,8 +50,6 @@ export class ListaDesafiosComponent {
   }
 
   onEliminarDesafio(id: number): void {
-    if (confirm('¿Estás seguro de que quieres eliminar este desafío?')) {
-      this.eliminar.emit(id);
-    }
+    this.eliminar.emit(id);
   }
 }
