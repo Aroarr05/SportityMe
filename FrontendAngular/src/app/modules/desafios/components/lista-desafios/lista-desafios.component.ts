@@ -24,7 +24,7 @@ export class ListaDesafiosComponent implements OnInit {
   error: string | null = null;
   isLoggedIn = false;
   isAdmin = false;
-  
+
 
   filtroActividad: string = 'todos';
   tiposActividad = [
@@ -37,9 +37,9 @@ export class ListaDesafiosComponent implements OnInit {
   ];
 
   constructor(
-    private desafiosService: DesafiosService, 
+    private desafiosService: DesafiosService,
     private authService: AuthService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.checkAuthentication();
@@ -48,7 +48,7 @@ export class ListaDesafiosComponent implements OnInit {
 
   private checkAuthentication(): void {
     this.isLoggedIn = this.authService.isLoggedIn();
-    this.isAdmin = this.authService.isAdmin(); 
+    this.isAdmin = this.authService.isAdmin();
   }
 
   cargarDesafios(): void {
@@ -59,7 +59,7 @@ export class ListaDesafiosComponent implements OnInit {
       next: (desafios) => {
         console.log('Datos recibidos:', desafios);
         this.desafios = this.normalizarDatosDesafios(desafios);
-        this.aplicarFiltro(); 
+        this.aplicarFiltro();
         this.loading = false;
       },
       error: (err) => {
@@ -70,12 +70,12 @@ export class ListaDesafiosComponent implements OnInit {
     });
   }
 
-  
+
   aplicarFiltro(): void {
     if (this.filtroActividad === 'todos') {
       this.desafiosFiltrados = [...this.desafios];
     } else {
-      this.desafiosFiltrados = this.desafios.filter(desafio => 
+      this.desafiosFiltrados = this.desafios.filter(desafio =>
         desafio.tipo_actividad === this.filtroActividad
       );
     }
@@ -87,7 +87,7 @@ export class ListaDesafiosComponent implements OnInit {
     this.aplicarFiltro();
   }
 
- 
+
   contarDesafiosPorTipo(tipo: string): number {
     if (tipo === 'todos') {
       return this.desafios.length;
@@ -95,10 +95,10 @@ export class ListaDesafiosComponent implements OnInit {
     return this.desafios.filter(desafio => desafio.tipo_actividad === tipo).length;
   }
 
-  
+
   getBotonFiltroClase(tipo: string): string {
     const baseClases = 'flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-105';
-    
+
     if (this.filtroActividad === tipo) {
       return `${baseClases} bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg`;
     } else {
@@ -135,7 +135,7 @@ export class ListaDesafiosComponent implements OnInit {
   }
 
   private getIconoFromTipoActividad(tipoActividad: string): string {
-    const iconos: {[key: string]: string} = {
+    const iconos: { [key: string]: string } = {
       'correr': 'fa-running',
       'ciclismo': 'fa-bicycle',
       'natacion': 'fa-swimmer',
@@ -144,4 +144,24 @@ export class ListaDesafiosComponent implements OnInit {
     };
     return iconos[tipoActividad] || 'fa-star';
   }
+
+  filtroTexto: string = '';
+
+  aplicarTextoFiltro(): void {
+    let filtrados = [...this.desafios];
+
+    // Filtrar por tipo de actividad
+    if (this.filtroActividad !== 'todos') {
+      filtrados = filtrados.filter(desafio => desafio.tipo_actividad === this.filtroActividad);
+    }
+
+    // Filtrar por texto en el título
+    if (this.filtroTexto.trim() !== '') {
+      const texto = this.filtroTexto.toLowerCase();
+      filtrados = filtrados.filter(desafio => desafio.titulo.toLowerCase().includes(texto));
+    }
+
+    this.desafiosFiltrados = filtrados;
+  }
+
 }
