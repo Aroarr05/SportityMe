@@ -1,9 +1,10 @@
 <div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
   <div class="max-w-4xl mx-auto">
-    
+
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-12 gap-4">
       <div class="flex items-center space-x-4">
-        <div class="h-12 w-12 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+        <div
+          class="h-12 w-12 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
           <i class="fas fa-plus-circle text-white text-xl"></i>
         </div>
         <div>
@@ -22,34 +23,25 @@
       </div>
     </div>
 
-    <form (ngSubmit)="guardar()" class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 border border-gray-100">
-      
+    <form (ngSubmit)="guardar()"
+      class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 border border-gray-100">
+
       <div class="mb-6">
         <label class="block text-sm font-semibold text-gray-800 mb-3">
           Título *
         </label>
-        <input
-          type="text"
-          [(ngModel)]="desafio.titulo"
-          name="titulo"
-          required
+        <input type="text" [(ngModel)]="desafio.titulo" name="titulo" required
           class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300"
-          placeholder="Ej: Maratón de 30 días"
-        >
+          placeholder="Ej: Maratón de 30 días">
       </div>
 
       <div class="mb-6">
         <label class="block text-sm font-semibold text-gray-800 mb-3">
           Descripción *
         </label>
-        <textarea
-          [(ngModel)]="desafio.descripcion"
-          name="descripcion"
-          required
-          rows="3"
+        <textarea [(ngModel)]="desafio.descripcion" name="descripcion" required rows="3"
           class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 resize-y min-h-[100px]"
-          placeholder="Describe el desafío, objetivos, reglas, etc."
-        ></textarea>
+          placeholder="Describe el desafío, objetivos, reglas, etc."></textarea>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -58,17 +50,14 @@
             Tipo de Actividad *
           </label>
           <div class="relative">
-            <select
-              [(ngModel)]="desafio.tipo_actividad"
-              name="tipo_actividad"
-              required
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 appearance-none bg-white"
-            >
+            <select [(ngModel)]="desafio.tipo_actividad" name="tipo_actividad" required
+              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 appearance-none bg-white">
               <option *ngFor="let tipo of tiposActividad" [value]="tipo">
                 {{ tipo | titlecase }}
               </option>
             </select>
-            <i class="fas fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+            <i
+              class="fas fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
           </div>
         </div>
 
@@ -77,17 +66,14 @@
             Dificultad *
           </label>
           <div class="relative">
-            <select
-              [(ngModel)]="desafio.dificultad"
-              name="dificultad"
-              required
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 appearance-none bg-white"
-            >
+            <select [(ngModel)]="desafio.dificultad" name="dificultad" required
+              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 appearance-none bg-white">
               <option *ngFor="let dificultad of dificultades" [value]="dificultad">
                 {{ dificultad | titlecase }}
               </option>
             </select>
-            <i class="fas fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+            <i
+              class="fas fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
           </div>
         </div>
       </div>
@@ -97,44 +83,26 @@
           <label class="block text-sm font-semibold text-gray-800 mb-3">
             Objetivo *
           </label>
-          <input
-            type="number"
-            [(ngModel)]="desafio.objetivo"
-            name="objetivo"
-            step="0.1"
-            min="0.1"
-            required
+          <input type="number" [(ngModel)]="desafio.objetivo" name="objetivo" step="0.1" min="0.1" required
             class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300"
-            placeholder="0.0"
-          >
+            placeholder="0.0">
         </div>
 
         <div>
           <label class="block text-sm font-semibold text-gray-800 mb-3">
             Unidad *
           </label>
-          <input
-            type="text"
-            [(ngModel)]="desafio.unidad_objetivo"
-            name="unidad_objetivo"
-            required
+          <input type="text" [(ngModel)]="desafio.unidad_objetivo" name="unidad_objetivo" required
             class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300"
-            placeholder="km, min, reps"
-          >
+            placeholder="km, min, reps">
         </div>
 
         <div>
           <label class="block text-sm font-semibold text-gray-800 mb-3">
             Máx. Participantes *
           </label>
-          <input
-            type="number"
-            [(ngModel)]="desafio.max_participantes"
-            name="max_participantes"
-            min="1"
-            required
-            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300"
-          >
+          <input type="number" [(ngModel)]="desafio.max_participantes" name="max_participantes" min="1" required
+            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300">
         </div>
       </div>
 
@@ -144,14 +112,10 @@
             Fecha de Inicio *
           </label>
           <div class="relative">
-            <input
-              type="date"
-              [(ngModel)]="desafio.fecha_inicio"
-              name="fecha_inicio"
-              required
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 bg-white custom-datepicker"
-            >
-            <i class="fas fa-calendar-alt absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+            <input type="date" [(ngModel)]="desafio.fecha_inicio" name="fecha_inicio" required
+              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 bg-white custom-datepicker">
+            <i
+              class="fas fa-calendar-alt absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
           </div>
         </div>
 
@@ -160,43 +124,29 @@
             Fecha de Fin *
           </label>
           <div class="relative">
-            <input
-              type="date"
-              [(ngModel)]="desafio.fecha_fin"
-              name="fecha_fin"
-              required
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 bg-white custom-datepicker"
-            >
-            <i class="fas fa-flag-checkered absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+            <input type="date" [(ngModel)]="desafio.fecha_fin" name="fecha_fin" required
+              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 bg-white custom-datepicker">
+            <i
+              class="fas fa-flag-checkered absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
           </div>
         </div>
       </div>
 
       <div class="flex items-center mb-6">
         <label class="flex items-center space-x-3">
-          <input
-            type="checkbox"
-            [(ngModel)]="desafio.es_publico"
-            name="es_publico"
-            class="rounded border-gray-300 text-purple-600 focus:ring-purple-500 h-5 w-5 transition-all duration-300"
-          >
+          <input type="checkbox" [(ngModel)]="desafio.es_publico" name="es_publico"
+            class="rounded border-gray-300 text-purple-600 focus:ring-purple-500 h-5 w-5 transition-all duration-300">
           <span class="text-sm font-semibold text-gray-800">Desafío público</span>
         </label>
       </div>
 
       <div class="flex justify-end space-x-3 pt-8 border-t border-gray-200">
-        <button
-          type="button"
-          (click)="cancelar.emit()"
-          class="px-6 py-3 text-sm font-medium text-purple-600 bg-white border border-purple-600 hover:bg-purple-50 rounded-xl transition-all duration-300 transform hover:scale-105 font-semibold"
-        >
+        <button type="button" (click)="cancelar.emit()"
+          class="px-6 py-3 text-sm font-medium text-purple-600 bg-white border border-purple-600 hover:bg-purple-50 rounded-xl transition-all duration-300 transform hover:scale-105 font-semibold">
           Cancelar
         </button>
-        <button
-          type="submit"
-          [disabled]="guardando"
-          class="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 rounded-xl transition-all duration-300 transform hover:scale-105 font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-        >
+        <button type="submit" [disabled]="guardando"
+          class="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 rounded-xl transition-all duration-300 transform hover:scale-105 font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
           {{ guardando ? 'Creando...' : 'Crear Desafío' }}
         </button>
       </div>

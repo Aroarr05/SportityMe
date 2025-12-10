@@ -73,11 +73,18 @@ export class GestionUsuariosComponent implements OnInit {
     this.vistaActual = 'detalle';
   }
 
-  onUsuarioCreado(): void {
+  onUsuarioCreado(nuevoUsuario: Usuario): void {
+    this.usuarios.push(nuevoUsuario);
+    this.cargando = false;
     this.mostrarLista();
   }
 
-  onUsuarioActualizado(): void {
+  onUsuarioActualizado(usuarioActualizado: Usuario): void {
+    const index = this.usuarios.findIndex(u => u.id === usuarioActualizado.id);
+    if (index !== -1) {
+      this.usuarios[index] = usuarioActualizado;
+    }
+    this.cargando = false;
     this.mostrarLista();
   }
 

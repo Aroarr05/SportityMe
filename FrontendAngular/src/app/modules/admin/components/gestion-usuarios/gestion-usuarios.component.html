@@ -26,11 +26,11 @@
     (editar)="mostrarEditar($event)" (ver)="mostrarDetalle($event)"
     (eliminar)="eliminarUsuario($event)"></app-lista-usuarios>
 
-  <app-crear-usuario *ngIf="vistaActual === 'crear'" (creado)="onUsuarioCreado()"
+  <app-crear-usuario *ngIf="vistaActual === 'crear'" (creado)="onUsuarioCreado($event)"
     (cancelar)="onCancelar()"></app-crear-usuario>
 
   <app-editar-usuario *ngIf="vistaActual === 'editar' && usuarioSeleccionado" [usuario]="usuarioSeleccionado"
-    (actualizado)="onUsuarioActualizado()" (cancelar)="onCancelar()"></app-editar-usuario>
+    (actualizado)="onUsuarioActualizado($event)" (cancelar)="onCancelar()"></app-editar-usuario>
 
   <app-detalle-usuario *ngIf="vistaActual === 'detalle' && usuarioSeleccionado" [usuario]="usuarioSeleccionado"
     (editar)="mostrarEditar(usuarioSeleccionado!)"></app-detalle-usuario>

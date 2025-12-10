@@ -8,6 +8,7 @@ import { Usuario } from '../../../../../shared/models';
   imports: [CommonModule],
   templateUrl: './detalle-usuario.component.html'
 })
+
 export class DetalleUsuarioComponent {
   @Input() usuario!: any;
   @Output() editar = new EventEmitter<void>();

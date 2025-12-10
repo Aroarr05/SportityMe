@@ -2,7 +2,7 @@ import { Component, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../services/admin.service';
-import { CrearDesafioDto, TipoActividad } from '../../../../../shared/models';
+import { CrearDesafioDto, TipoActividad, Desafio } from '../../../../../shared/models';
 
 @Component({
   selector: 'app-crear-desafio',
@@ -12,21 +12,22 @@ import { CrearDesafioDto, TipoActividad } from '../../../../../shared/models';
 })
 
 export class CrearDesafioComponent {
-  @Output() creado = new EventEmitter<void>();
+  @Output() creado = new EventEmitter<Desafio>();
   @Output() cancelar = new EventEmitter<void>();
 
   desafio: CrearDesafioDto = {
     titulo: '',
     descripcion: '',
-    tipo_actividad: TipoActividad.CORRER,
-    objetivo: 1,
-    unidad_objetivo: 'km',
-    fecha_inicio: new Date().toISOString().split('T')[0],
-    fecha_fin: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    es_publico: true,
-    dificultad: 'MEDIO',
-    max_participantes: 100
+    tipo_actividad: '' as any,
+    objetivo: null as any,
+    unidad_objetivo: '',
+    fecha_inicio: '',
+    fecha_fin: '',
+    es_publico: false,
+    dificultad: '' as any,
+    max_participantes: null as any
   };
+
 
   TipoActividad = TipoActividad;
   tiposActividad = Object.values(TipoActividad);
@@ -34,7 +35,7 @@ export class CrearDesafioComponent {
   mensajeError = '';
   guardando = false;
 
-  constructor(private adminService: AdminService) {}
+  constructor(private adminService: AdminService) { }
 
   guardar(): void {
     if (!this.validarDesafio()) return;
@@ -53,8 +54,8 @@ export class CrearDesafioComponent {
     };
 
     this.adminService.crearDesafio(desafioParaEnviar).subscribe({
-      next: () => {
-        this.creado.emit();
+      next: (nuevoDesafio) => {
+        this.creado.emit(nuevoDesafio);
         this.guardando = false;
       },
       error: (error) => {

@@ -13,7 +13,7 @@ import { Usuario } from '../../../../../shared/models';
 
 export class EditarUsuarioComponent implements OnInit {
   @Input() usuario!: Usuario;
-  @Output() actualizado = new EventEmitter<void>();
+  @Output() actualizado = new EventEmitter<Usuario>();
   @Output() cancelar = new EventEmitter<void>();
 
   usuarioEditado: Partial<Usuario> = {};
@@ -33,7 +33,7 @@ export class EditarUsuarioComponent implements OnInit {
     { valor: 'NO_ESPECIFICADO', texto: 'No especificado' }
   ];
 
-  constructor(private adminService: AdminService) {}
+  constructor(private adminService: AdminService) { }
 
   ngOnInit(): void {
     this.cargarDatosUsuario();
@@ -41,7 +41,7 @@ export class EditarUsuarioComponent implements OnInit {
 
   cargarDatosUsuario(): void {
     this.usuarioEditado = { ...this.usuario };
-   
+
     if (this.usuarioEditado.fecha_nacimiento) {
       const fecha = new Date(this.usuarioEditado.fecha_nacimiento);
       if (!isNaN(fecha.getTime())) {
@@ -65,9 +65,8 @@ export class EditarUsuarioComponent implements OnInit {
     }
 
     this.adminService.actualizarUsuario(this.usuario.id, datosParaEnviar).subscribe({
-      next: () => {
-        this.actualizado.emit();
-        this.guardando = false;
+      next: (response) => {
+        this.actualizado.emit(response);
       },
       error: (error) => {
         console.error('Error actualizando usuario:', error);
@@ -112,8 +111,8 @@ export class EditarUsuarioComponent implements OnInit {
   }
 
   getEstadoBadgeClass(): string {
-    return this.usuarioEditado.activo 
-      ? 'bg-green-100 text-green-800' 
+    return this.usuarioEditado.activo
+      ? 'bg-green-100 text-green-800'
       : 'bg-red-100 text-red-800';
   }
 
@@ -127,7 +126,7 @@ export class EditarUsuarioComponent implements OnInit {
   }
 
   getInitials(): string {
-    return this.usuarioEditado.nombre 
+    return this.usuarioEditado.nombre
       ? this.usuarioEditado.nombre.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
       : 'US';
   }

@@ -13,7 +13,7 @@ import { Desafio, CrearDesafioDto, TipoActividad } from '../../../../../shared/m
 
 export class EditarDesafioComponent implements OnInit {
   @Input() desafio!: Desafio;
-  @Output() actualizado = new EventEmitter<void>();
+  @Output() actualizado = new EventEmitter<Desafio>();
   @Output() cancelar = new EventEmitter<void>();
 
   desafioEditado: Partial<CrearDesafioDto> = {};
@@ -69,8 +69,8 @@ export class EditarDesafioComponent implements OnInit {
     };
 
     this.adminService.actualizarDesafio(this.desafio.id, desafioData).subscribe({
-      next: () => {
-        this.actualizado.emit();
+      next: (desafioActualizado) => {
+        this.actualizado.emit(desafioActualizado);
       },
       error: () => {
         this.errorMessage = 'Error al actualizar el desafío. Por favor, inténtalo de nuevo.';

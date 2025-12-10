@@ -46,7 +46,6 @@ export class DetalleDesafioComponent {
     }
   }
 
-
   getInfoParticipantes(): string {
     return `${this.desafio.max_participantes} participantes máximo`;
   }
@@ -64,17 +63,13 @@ export class DetalleDesafioComponent {
       day: 'numeric'
     });
   }
-  
-  getIconoClase(): string {
 
-  const icono = this.desafio.icono || 'fa-star';
-  
- 
-  if (icono.includes('fa-')) {
-    return icono;
+  getIconoClase(): string {
+    const icono = this.desafio.icono || 'fa-star';
+
+    if (icono.includes('fa-')) {
+      return icono;
+    }
+    return `fa-solid ${icono}`;
   }
-  
-  
-  return `fa-solid ${icono}`;
-}
 }

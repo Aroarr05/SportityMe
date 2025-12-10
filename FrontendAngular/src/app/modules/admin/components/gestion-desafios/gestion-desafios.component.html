@@ -17,32 +17,18 @@
     </button>
   </div>
 
-  <app-lista-desafios 
-    *ngIf="vistaActual === 'lista'" 
-    [desafios]="desafios" 
-    [cargando]="cargando"
-    (editar)="mostrarEditar($event)" 
-    (ver)="mostrarDetalle($event)"
-    (eliminar)="eliminarDesafio($event)">
+  <app-lista-desafios *ngIf="vistaActual === 'lista'" [desafios]="desafios" [cargando]="cargando"
+    (editar)="mostrarEditar($event)" (ver)="mostrarDetalle($event)" (eliminar)="eliminarDesafio($event)">
   </app-lista-desafios>
 
-  <app-crear-desafio 
-    *ngIf="vistaActual === 'crear'" 
-    (creado)="onDesafioCreado()"
-    (cancelar)="onCancelar()">
+  <app-crear-desafio *ngIf="vistaActual === 'crear'" (creado)="onDesafioCreado($event)" (cancelar)="onCancelar()">
   </app-crear-desafio>
 
-
-  <app-editar-desafio 
-    *ngIf="vistaActual === 'editar' && desafioSeleccionado" 
-    [desafio]="desafioSeleccionado"
-    (actualizado)="onDesafioActualizado()" 
-    (cancelar)="onCancelar()">
+  <app-editar-desafio *ngIf="vistaActual === 'editar' && desafioSeleccionado" [desafio]="desafioSeleccionado"
+    (actualizado)="onDesafioActualizado($event)" (cancelar)="onCancelar()">
   </app-editar-desafio>
 
-  <app-detalle-desafio
-    *ngIf="vistaActual === 'detalle' && desafioSeleccionado"
-    [desafio]="desafioSeleccionado"
+  <app-detalle-desafio *ngIf="vistaActual === 'detalle' && desafioSeleccionado" [desafio]="desafioSeleccionado"
     (editar)="mostrarEditar(desafioSeleccionado!)">
   </app-detalle-desafio>
 </div>

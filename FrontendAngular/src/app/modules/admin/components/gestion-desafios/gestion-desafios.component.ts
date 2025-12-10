@@ -65,11 +65,18 @@ export class GestionDesafiosComponent implements OnInit {
     this.vistaActual = 'detalle';
   }
 
-  onDesafioCreado(): void {
+  onDesafioCreado(nuevoDesafio: Desafio): void {
+    this.desafios.push(nuevoDesafio);
+    this.cargando = false; 
     this.mostrarLista();
   }
 
-  onDesafioActualizado(): void {
+  onDesafioActualizado(desafioActualizado: Desafio): void {
+    const index = this.desafios.findIndex(d => d.id === desafioActualizado.id);
+    if (index !== -1) {
+      this.desafios[index] = desafioActualizado;
+    }
+    this.cargando = false; 
     this.mostrarLista();
   }
 
