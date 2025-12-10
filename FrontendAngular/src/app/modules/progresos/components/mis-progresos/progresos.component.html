@@ -1,16 +1,17 @@
-<div class="min-h-screen py-6 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen py-1 px-4 sm:px-6 lg:px-8">
   <div class="max-w-6xl mx-auto">
 
     <div class="flex items-center justify-between mb-8">
       <div class="flex items-center space-x-4">
-        <div class="h-14 w-14 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-          <i class="fas fa-chart-line text-white text-xl"></i>
+        <div class="h-10 w-10 sm:h-12 sm:w-12 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg">
+          <i class="fas fa-chart-bar text-white text-lg sm:text-xl"></i>
         </div>
-        <div class="text-center">
-          <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+        <div>
+          <h1
+            class="text-2xl sm:text-2xl lg:text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
             Mi Progreso
           </h1>
-          <p class="text-gray-600 mt-1 text-base">Tu historial de entrenamientos y logros</p>
+          <p class="text-gray-600 mt-2 sm:mt-2 text-base sm:text-lg">Tu historial de entrenamientos y logros</p>
         </div>
       </div>
     </div>
@@ -54,7 +55,8 @@
     </div>
 
     <div *ngIf="cargando" class="text-center py-16">
-      <div class="w-20 h-20 bg-gradient-to-r from-purple-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <div
+        class="w-20 h-20 bg-gradient-to-r from-purple-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
         <i class="fas fa-spinner fa-spin text-3xl text-purple-600"></i>
       </div>
       <h3 class="text-2xl font-bold text-gray-700 mb-2">Cargando tu progreso</h3>
@@ -75,23 +77,27 @@
     </div>
 
     <div *ngIf="!cargando && !error" class="space-y-4">
-      <div *ngIf="progresos.length === 0" class="text-center py-16 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-3xl">
-        <div class="w-32 h-32 bg-gradient-to-r from-purple-200 to-indigo-200 rounded-full flex items-center justify-center mx-auto mb-6">
+      <div *ngIf="progresos.length === 0"
+        class="text-center py-16 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-3xl">
+        <div
+          class="w-32 h-32 bg-gradient-to-r from-purple-200 to-indigo-200 rounded-full flex items-center justify-center mx-auto mb-6">
           <i class="fas fa-running text-5xl text-purple-400"></i>
         </div>
         <h3 class="text-3xl font-bold text-gray-800 mb-3">Aún no hay registros</h3>
-        <p class="text-gray-600 max-w-md mx-auto">Comienza tu journey fitness registrando tu primera sesión de entrenamiento</p>
+        <p class="text-gray-600 max-w-md mx-auto">Comienza tu journey fitness registrando tu primera sesión de
+          entrenamiento</p>
       </div>
 
       <div *ngIf="progresos.length > 0" class="space-y-4">
-        <div *ngFor="let progreso of progresos; let i = index" 
-             class="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 group overflow-hidden">
+        <div *ngFor="let progreso of progresos; let i = index"
+          class="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 group overflow-hidden">
           <div class="p-6">
             <div class="flex items-start justify-between mb-4">
               <div class="flex-1">
                 <div class="flex items-center justify-between mb-3">
                   <div class="flex items-center space-x-3">
-                    <div class="h-10 w-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+                    <div
+                      class="h-10 w-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
                       <i class="fas fa-bullseye text-white"></i>
                     </div>
                     <div>
@@ -105,19 +111,19 @@
                   </div>
                   <div class="relative">
                     <button class="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100"
-                            (click)="toggleMenu(progreso.id)">
+                      (click)="toggleMenu(progreso.id)">
                       <i class="fas fa-ellipsis-h"></i>
                     </button>
-                    
-                    <div *ngIf="menuAbierto === progreso.id" 
-                         class="absolute right-0 top-8 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-10 min-w-[140px]">
+
+                    <div *ngIf="menuAbierto === progreso.id"
+                      class="absolute right-0 top-8 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-10 min-w-[140px]">
                       <button (click)="editarPorcentaje(progreso); menuAbierto = null"
-                              class="w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 flex items-center space-x-2">
+                        class="w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 flex items-center space-x-2">
                         <i class="fas fa-edit text-xs"></i>
                         <span>Editar</span>
                       </button>
                       <button (click)="eliminarProgreso(progreso.id); menuAbierto = null"
-                              class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2">
+                        class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2">
                         <i class="fas fa-trash text-xs"></i>
                         <span>Eliminar</span>
                       </button>
@@ -130,17 +136,15 @@
                     <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
                       <div class="flex justify-between items-center mb-2">
                         <span class="font-semibold text-gray-700">Tu Avance</span>
-                        <span class="font-bold" 
-                              [class.text-green-600]="calcularPorcentajeReal(progreso) >= 100"
-                              [class.text-blue-600]="calcularPorcentajeReal(progreso) < 100">
+                        <span class="font-bold" [class.text-green-600]="calcularPorcentajeReal(progreso) >= 100"
+                          [class.text-blue-600]="calcularPorcentajeReal(progreso) < 100">
                           {{ calcularPorcentajeReal(progreso) }}%
                         </span>
                       </div>
                       <div class="w-full bg-gray-200 rounded-full h-3 cursor-pointer mb-2"
-                           (click)="editarPorcentaje(progreso)"
-                           title="Haz clic para ajustar tu progreso">
+                        (click)="editarPorcentaje(progreso)" title="Haz clic para ajustar tu progreso">
                         <div class="h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-600"
-                             [style.width]="calcularPorcentajeReal(progreso) + '%'">
+                          [style.width]="calcularPorcentajeReal(progreso) + '%'">
                         </div>
                       </div>
                       <div class="flex items-center justify-between bg-blue-50 rounded-lg p-2 border border-blue-200">
@@ -156,7 +160,8 @@
                     </div>
 
                     <div *ngIf="calcularPorcentajeReal(progreso) >= 100" class="flex justify-center">
-                      <span class="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-2 rounded-lg text-sm font-bold flex items-center space-x-2 shadow-lg">
+                      <span
+                        class="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-2 rounded-lg text-sm font-bold flex items-center space-x-2 shadow-lg">
                         <i class="fas fa-check text-xs"></i>
                         <span>¡Completado!</span>
                       </span>
@@ -197,7 +202,8 @@
   </div>
 </div>
 
-<div *ngIf="mostrarModalEdicion" class="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center p-4 z-50">
+<div *ngIf="mostrarModalEdicion"
+  class="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center p-4 z-50">
   <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[85vh] overflow-y-auto">
     <div class="p-6">
       <div class="flex items-center justify-between mb-6">
@@ -206,12 +212,12 @@
           <i class="fas fa-times text-xl"></i>
         </button>
       </div>
-      
+
       <div class="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200">
         <h4 class="font-bold text-blue-800 text-lg mb-2">{{ obtenerNombreDesafio(progresoEditando) }}</h4>
         <p class="text-blue-600 text-sm">Objetivo: {{ obtenerObjetivoDesafio(progresoEditando) }}</p>
       </div>
-      
+
       <form [formGroup]="formularioEdicion" (ngSubmit)="guardarPorcentaje()">
         <div class="space-y-4">
           <div>
@@ -219,8 +225,8 @@
               ¿Cuánto has completado?
             </label>
             <input type="number" min="0" max="100" formControlName="porcentaje"
-                   class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent shadow-sm"
-                   placeholder="0 - 100">
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent shadow-sm"
+              placeholder="0 - 100">
             <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
               <span class="font-medium">0%</span>
               <span class="font-medium">50%</span>
@@ -228,16 +234,17 @@
             </div>
             <div class="w-full bg-gray-200 rounded-full h-2 mt-2 shadow-inner">
               <div class="h-2 rounded-full bg-gradient-to-r from-green-400 via-blue-500 to-purple-600"
-                   [style.width]="(formularioEdicion.get('porcentaje')?.value || 0) + '%'">
+                [style.width]="(formularioEdicion.get('porcentaje')?.value || 0) + '%'">
               </div>
             </div>
             <div class="text-center mt-3">
-              <span class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <span
+                class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 {{ formularioEdicion.get('porcentaje')?.value || 0 }}%
               </span>
             </div>
-            <div *ngIf="formularioEdicion.get('porcentaje')?.invalid && formularioEdicion.get('porcentaje')?.touched" 
-                 class="text-red-500 text-xs mt-2 text-center">
+            <div *ngIf="formularioEdicion.get('porcentaje')?.invalid && formularioEdicion.get('porcentaje')?.touched"
+              class="text-red-500 text-xs mt-2 text-center">
               <span *ngIf="formularioEdicion.get('porcentaje')?.errors?.['required']">Ingresa un porcentaje</span>
               <span *ngIf="formularioEdicion.get('porcentaje')?.errors?.['min']">Mínimo 0%</span>
               <span *ngIf="formularioEdicion.get('porcentaje')?.errors?.['max']">Máximo 100%</span>
@@ -249,19 +256,19 @@
               Notas o Comentarios
             </label>
             <textarea formControlName="comentario" rows="3"
-                      class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent shadow-sm resize-none"
-                      placeholder="Agrega tus observaciones, cómo te sentiste, o cualquier nota importante..."></textarea>
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent shadow-sm resize-none"
+              placeholder="Agrega tus observaciones, cómo te sentiste, o cualquier nota importante..."></textarea>
             <p class="text-xs text-gray-500 mt-1">Opcional: Comparte tu experiencia en esta sesión</p>
           </div>
         </div>
-        
+
         <div class="flex space-x-3 mt-6">
           <button type="button" (click)="cerrarModal()"
-                  class="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-semibold text-base shadow-md">
+            class="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-semibold text-base shadow-md">
             Cancelar
           </button>
           <button type="submit" [disabled]="formularioEdicion.get('porcentaje')?.invalid || guardando"
-                  class="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-semibold text-base shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+            class="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-semibold text-base shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
             <span *ngIf="!guardando" class="flex items-center justify-center space-x-2">
               <i class="fas fa-check"></i>
               <span>Guardar</span>

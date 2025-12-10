@@ -346,13 +346,11 @@ export class PerfilComponent implements OnInit {
           }
         }
       }
-
       return url;
     }
 
     return null;
   }
-
 
   getRolId(): number {
     return this.usuario?.rol_id || 2;

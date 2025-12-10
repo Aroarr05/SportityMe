@@ -93,6 +93,41 @@ export class RankingComponent implements OnInit {
     this.cdRef.detectChanges();
   }
 
+  getAvatarUrl(item: Ranking): string | null {
+    if (!item.avatarUrl || item.avatarUrl.trim() === '') {
+      return null;
+    }
+
+    const url = item.avatarUrl;
+
+    if (url.startsWith('http')) {
+      return url;
+    }
+
+    if (url.startsWith('/assets/avatars/')) {
+      const nombreArchivo = url.split('/').pop();
+      if (nombreArchivo) {
+        const base64Data = localStorage.getItem(`avatar_${nombreArchivo}`);
+        if (base64Data) {
+          return `data:image/jpeg;base64,${base64Data}`;
+        }
+      }
+    }
+    return url;
+  }
+
+  getIniciales(nombre: string | undefined): string {
+    if (!nombre || nombre.trim() === '') return 'U';
+    
+    const partes = nombre.trim().split(' ');
+    if (partes.length === 1) {
+      return partes[0].charAt(0).toUpperCase();
+    }
+    
+    const iniciales = partes[0].charAt(0) + partes[partes.length - 1].charAt(0);
+    return iniciales.toUpperCase();
+  }
+
   getValorDisplay(item: Ranking): number {
     return item.porcentajeCompletado ? Math.round(item.porcentajeCompletado) : 0;
   }

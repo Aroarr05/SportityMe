@@ -1,21 +1,22 @@
-<div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen py-1 px-4 sm:px-6 lg:px-8">
   <div class="max-w-2xl mx-auto">
-    
+
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-12 gap-4">
       <div class="flex items-center space-x-4">
-        <div class="h-12 w-12 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+        <div
+          class="h-12 w-12 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
           <i class="fas fa-plus-circle text-white text-xl"></i>
         </div>
         <div>
-          <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+          <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
             Crear Nuevo Desafío
           </h1>
-          <p class="text-gray-600 mt-1">Completa los detalles de tu desafío deportivo</p>
+          <p class="text-gray-600 mt-2 text-base sm:text-lg">Completa los detalles de tu desafío deportivo</p>
         </div>
       </div>
-      
-      <a [routerLink]="['/desafios']" 
-         class="bg-white text-purple-600 border border-purple-600 px-6 py-3 rounded-xl hover:bg-purple-50 transition-all duration-300 transform hover:scale-105 font-semibold flex items-center space-x-2 group mt-4 sm:mt-0 no-underline">
+
+      <a [routerLink]="['/desafios']"
+        class="bg-white text-purple-600 border border-purple-600 px-6 py-3 rounded-xl hover:bg-purple-50 transition-all duration-300 transform hover:scale-105 font-semibold flex items-center space-x-2 group mt-4 sm:mt-0 no-underline">
         <i class="fas fa-arrow-left group-hover:-translate-x-1 transition-transform duration-300"></i>
         <span>Volver a Desafíos</span>
       </a>
@@ -24,21 +25,18 @@
 
     <app-error-alert *ngIf="error" [message]="error" class="mb-6"></app-error-alert>
 
-    <form [formGroup]="desafioForm" (ngSubmit)="onSubmit()" class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 border border-gray-100">
-      
+    <form [formGroup]="desafioForm" (ngSubmit)="onSubmit()"
+      class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 border border-gray-100">
+
       <div class="mb-6">
         <label for="titulo" class="block text-sm font-semibold text-gray-800 mb-3">
           Título del Desafío *
         </label>
-        <input
-          id="titulo"
-          type="text"
-          formControlName="titulo"
+        <input id="titulo" type="text" formControlName="titulo"
           class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300"
-          placeholder="Ej: Maratón de 30 días"
-        >
-        <div *ngIf="desafioForm.get('titulo')?.invalid && desafioForm.get('titulo')?.touched" 
-             class="text-red-500 text-sm mt-2 flex items-center space-x-1">
+          placeholder="Ej: Maratón de 30 días">
+        <div *ngIf="desafioForm.get('titulo')?.invalid && desafioForm.get('titulo')?.touched"
+          class="text-red-500 text-sm mt-2 flex items-center space-x-1">
           <i class="fas fa-exclamation-circle"></i>
           <span>El título es requerido y máximo 100 caracteres</span>
         </div>
@@ -48,15 +46,11 @@
         <label for="descripcion" class="block text-sm font-semibold text-gray-800 mb-3">
           Descripción *
         </label>
-        <textarea
-          id="descripcion"
-          formControlName="descripcion"
-          rows="3"
+        <textarea id="descripcion" formControlName="descripcion" rows="3"
           class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 resize-y min-h-[100px]"
-          placeholder="Describe el desafío, objetivos, reglas, etc."
-        ></textarea>
-        <div *ngIf="desafioForm.get('descripcion')?.invalid && desafioForm.get('descripcion')?.touched" 
-             class="text-red-500 text-sm mt-2 flex items-center space-x-1">
+          placeholder="Describe el desafío, objetivos, reglas, etc."></textarea>
+        <div *ngIf="desafioForm.get('descripcion')?.invalid && desafioForm.get('descripcion')?.touched"
+          class="text-red-500 text-sm mt-2 flex items-center space-x-1">
           <i class="fas fa-exclamation-circle"></i>
           <span>La descripción es requerida</span>
         </div>
@@ -68,16 +62,14 @@
             Tipo de Actividad *
           </label>
           <div class="relative">
-            <select
-              id="tipoActividad"
-              formControlName="tipoActividad"
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 appearance-none bg-white"
-            >
+            <select id="tipoActividad" formControlName="tipoActividad"
+              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 appearance-none bg-white">
               <option *ngFor="let tipo of tiposActividad" [value]="tipo">
                 {{ tipo }}
               </option>
             </select>
-            <i class="fas fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+            <i
+              class="fas fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
           </div>
         </div>
 
@@ -86,16 +78,14 @@
             Dificultad *
           </label>
           <div class="relative">
-            <select
-              id="dificultad"
-              formControlName="dificultad"
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 appearance-none bg-white"
-            >
+            <select id="dificultad" formControlName="dificultad"
+              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 appearance-none bg-white">
               <option *ngFor="let dificultad of dificultades" [value]="dificultad">
                 {{ dificultad }}
               </option>
             </select>
-            <i class="fas fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+            <i
+              class="fas fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
           </div>
         </div>
       </div>
@@ -105,17 +95,11 @@
           <label for="objetivo" class="block text-sm font-semibold text-gray-800 mb-3">
             Objetivo *
           </label>
-          <input
-            id="objetivo"
-            type="number"
-            formControlName="objetivo"
-            step="0.1"
-            min="0.1"
+          <input id="objetivo" type="number" formControlName="objetivo" step="0.1" min="0.1"
             class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300"
-            placeholder="0.0"
-          >
-          <div *ngIf="desafioForm.get('objetivo')?.invalid && desafioForm.get('objetivo')?.touched" 
-               class="text-red-500 text-sm mt-2 flex items-center space-x-1">
+            placeholder="0.0">
+          <div *ngIf="desafioForm.get('objetivo')?.invalid && desafioForm.get('objetivo')?.touched"
+            class="text-red-500 text-sm mt-2 flex items-center space-x-1">
             <i class="fas fa-exclamation-circle"></i>
             <span>El objetivo debe ser mayor a 0</span>
           </div>
@@ -126,16 +110,14 @@
             Unidad *
           </label>
           <div class="relative">
-            <select
-              id="unidadObjetivo"
-              formControlName="unidadObjetivo"
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 appearance-none bg-white"
-            >
+            <select id="unidadObjetivo" formControlName="unidadObjetivo"
+              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 appearance-none bg-white">
               <option *ngFor="let unidad of unidades" [value]="unidad">
                 {{ unidad }}
               </option>
             </select>
-            <i class="fas fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+            <i
+              class="fas fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
           </div>
         </div>
 
@@ -143,15 +125,10 @@
           <label for="maxParticipantes" class="block text-sm font-semibold text-gray-800 mb-3">
             Máx. Participantes *
           </label>
-          <input
-            id="maxParticipantes"
-            type="number"
-            formControlName="maxParticipantes"
-            min="1"
-            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300"
-          >
-          <div *ngIf="desafioForm.get('maxParticipantes')?.invalid && desafioForm.get('maxParticipantes')?.touched" 
-               class="text-red-500 text-sm mt-2 flex items-center space-x-1">
+          <input id="maxParticipantes" type="number" formControlName="maxParticipantes" min="1"
+            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300">
+          <div *ngIf="desafioForm.get('maxParticipantes')?.invalid && desafioForm.get('maxParticipantes')?.touched"
+            class="text-red-500 text-sm mt-2 flex items-center space-x-1">
             <i class="fas fa-exclamation-circle"></i>
             <span>Mínimo 1 participante</span>
           </div>
@@ -164,13 +141,10 @@
             Fecha de Inicio *
           </label>
           <div class="relative">
-            <input
-              id="fechaInicio"
-              type="datetime-local"
-              formControlName="fechaInicio"
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 bg-white custom-datepicker"
-            >
-            <i class="fas fa-calendar-alt absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+            <input id="fechaInicio" type="datetime-local" formControlName="fechaInicio"
+              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 bg-white custom-datepicker">
+            <i
+              class="fas fa-calendar-alt absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
           </div>
         </div>
 
@@ -179,19 +153,15 @@
             Fecha de Fin *
           </label>
           <div class="relative">
-            <input
-              id="fechaFin"
-              type="datetime-local"
-              formControlName="fechaFin"
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 bg-white custom-datepicker"
-            >
-            <i class="fas fa-flag-checkered absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+            <input id="fechaFin" type="datetime-local" formControlName="fechaFin"
+              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 bg-white custom-datepicker">
+            <i
+              class="fas fa-flag-checkered absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
           </div>
         </div>
       </div>
 
-      <div *ngIf="fechasSonInvalidas" 
-           class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+      <div *ngIf="fechasSonInvalidas" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
         <div class="text-red-700 text-sm flex items-center space-x-2">
           <i class="fas fa-exclamation-triangle"></i>
           <span>La fecha de fin debe ser posterior a la fecha de inicio</span>
@@ -199,11 +169,8 @@
       </div>
 
       <div class="flex justify-center pt-8 border-t border-gray-200">
-        <button
-          type="submit"
-          [disabled]="desafioForm.invalid || loading || !validarFechas()"
-          class="w-full sm:w-64 px-8 py-4 bg-purple-600 text-white rounded-xl hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 font-semibold shadow-lg"
-        >
+        <button type="submit" [disabled]="desafioForm.invalid || loading || !validarFechas()"
+          class="w-full sm:w-64 px-8 py-4 bg-purple-600 text-white rounded-xl hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 font-semibold shadow-lg">
           <span *ngIf="loading">Creando Desafío...</span>
           <span *ngIf="!loading">Crear Desafío</span>
         </button>
