@@ -386,4 +386,29 @@ export class PerfilComponent implements OnInit {
     return (partes[0].charAt(0) + partes[1].charAt(0)).toUpperCase();
   }
 
+  limpiarLocalStorageCompleto(): void {
+    if (confirm('¿Estás seguro de que quieres limpiar todo el localStorage? Esto eliminará todos los avatars guardados.')) {
+      try {
+        const avatarKeys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('avatar_')) {
+            avatarKeys.push(key);
+          }
+        }
+
+        localStorage.clear();
+
+        this.mensajeExito = `Se limpió el localStorage (${avatarKeys.length} avatars eliminados)`;
+
+        setTimeout(() => {
+          location.reload();
+        }, 2000);
+
+      } catch (error) {
+        this.error = 'Error al limpiar localStorage: ' + error;
+      }
+    }
+  }
+
 }
