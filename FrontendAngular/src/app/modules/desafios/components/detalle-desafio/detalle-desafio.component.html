@@ -168,8 +168,7 @@
                 <span class="text-gray-600">Total:</span>
               </div>
               <span class="font-semibold text-gray-800">
-                {{ desafio.participantes_count || 0 }}
-                <span *ngIf="desafio.max_participantes > 0">/ {{ desafio.max_participantes }}</span>
+                <span> {{ desafio.max_participantes }}</span>
               </span>
             </div>
             <div *ngIf="participando"
